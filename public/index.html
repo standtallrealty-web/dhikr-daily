@@ -184,7 +184,8 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     <div class="set"><span>Vibrate on tap</span><input id="vib" type="checkbox"></div>
     <div class="set"><span>Keep screen on</span><input id="wake" type="checkbox"></div>
     <div class="set"><span>Show English letters</span><input id="trtog" type="checkbox"></div>
-    <div class="set"><span>Arabic style</span><select id="afont" style="background:#0c3a2c;color:#f3f1e7;border:1px solid #1c6b52;border-radius:8px;padding:6px"><option value="naskh">Standard (Naskh)</option><option value="indo">Indo-Pak (Nastaliq)</option></select></div>
+    <div class="set"><span>Arabic style</span><select id="afont" style="background:#0c3a2c;color:#f3f1e7;border:1px solid #1c6b52;border-radius:8px;padding:6px"><option value="naskh">Clear Naskh</option><option value="sch">Scheherazade (Quran style)</option><option value="own">My own font file</option></select></div>
+    <div class="set" id="ownfontrow" style="display:none"><span>Font file (.ttf / .otf)</span><button id="ofbtn" style="padding:8px 12px">Choose font</button><input type="file" id="offile" accept=".ttf,.otf,.woff,.woff2,font/*" style="display:none"></div>
     <div class="set"><span>Arabic text size</span><span><button id="afm" style="padding:6px 12px">A−</button> <button id="afp" style="padding:6px 12px">A+</button></span></div>
     <div class="set"><span>Backup your data</span><button id="bkp" style="padding:8px 12px">Save file</button></div>
     <div class="set"><span>Restore backup</span><button id="rst2" style="padding:8px 12px">Choose file</button><input type="file" id="afile" accept="audio/*" style="display:none"><input type="file" id="rfile" accept="application/json,.json" style="display:none"></div>
@@ -293,14 +294,21 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     };r.readAsText(f);
   };
 
+  function gfont(id,href){if(!document.getElementById(id)){var l=document.createElement('link');l.id=id;l.rel='stylesheet';l.href=href;document.head.appendChild(l)}}
+  var OWNLOADED='';
   function applyFont(){
-    var st=S.afont||'indo',r=document.documentElement.style;
-    if(st==='indo'){
-      if(!document.getElementById('gf')){var l=document.createElement('link');l.id='gf';l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500&display=swap';document.head.appendChild(l)}
-      r.setProperty('--arfont','"Noto Nastaliq Urdu","Jameel Noori Nastaleeq","Noto Naskh Arabic","Amiri",serif');r.setProperty('--arlh','2.7');
-    }else{r.removeProperty('--arfont');r.removeProperty('--arlh')}
+    var st=S.afont;if(st!=='sch'&&st!=='own')st='naskh';var r=document.documentElement.style;
+    if(st==='naskh'){gfont('gf1','https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600&display=swap');r.setProperty('--arfont','"Noto Naskh Arabic","Amiri","Traditional Arabic",serif');r.setProperty('--arlh','2.1')}
+    else if(st==='sch'){gfont('gf2','https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;700&display=swap');r.setProperty('--arfont','"Scheherazade New","Noto Naskh Arabic","Amiri",serif');r.setProperty('--arlh','2.1')}
+    else{
+      if(OFF['u_font']&&OWNLOADED!==OFF['u_font']){OWNLOADED=OFF['u_font'];try{var ff=new FontFace('UserArabic','url('+OFF['u_font']+')');ff.load().then(function(f){document.fonts.add(f)}).catch(function(){})}catch(e){}}
+      r.setProperty('--arfont','"UserArabic","Noto Naskh Arabic","Amiri",serif');r.setProperty('--arlh','2.2')
+    }
     if($('afont'))$('afont').value=st;if($('trtog'))$('trtog').checked=!S.trOff;
+    if($('ownfontrow')){$('ownfontrow').style.display=st==='own'?'flex':'none';$('ofbtn').textContent=OFF['u_font']?'Change font ✓':'Choose font'}
   }
+  $('ofbtn').onclick=function(){$('offile').value='';$('offile').click()};
+  $('offile').onchange=function(){var f=this.files&&this.files[0];if(!f)return;idbPut('u_font',f).then(loadOff).then(function(){OWNLOADED='';applyFont()}).catch(function(){alert('Could not save the font.')})};
   $('afont').onchange=function(){S.afont=this.value;save();applyFont()};
   $('trtog').onchange=function(){S.trOff=!this.checked;save();if(tab!=='i')renderAd()};
   function checkDay(){var k=key();if(k!==today){today=k;render()}}
@@ -896,7 +904,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   $('sens').oninput=function(){S.sens=parseInt(this.value,10);$('sensv').textContent=S.sens;save()};
   var _r=render;render=function(){_r();$('sens').value=S.sens||5;$('sensv').textContent=S.sens||5;$('vmode').value=S.vmode||'smart';$('vlang').value=S.vlang||'ar-SA'};
   if('serviceWorker' in navigator&&/^https?:/.test(location.protocol)){try{navigator.serviceWorker.register('/sw.js')}catch(e){}}
-  loadOff().then(function(){if(tab==='h')renderAd()});
+  loadOff().then(function(){applyFont();if(tab==='h')renderAd()});
   load();window.__ex=1;render();setWake();showTab('h');
 })();
 </script>
