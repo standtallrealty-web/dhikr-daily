@@ -142,10 +142,15 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
 
 <button id="voiceBtn">🎙 Start voice counting</button>
 <div id="vpanel">
+  <div class="popts" style="justify-content:center;gap:8px"><span>Count</span><select id="vmode"><option value="smart">Only "Astaghfirullah" (recommended)</option><option value="any">Any sound (works offline)</option></select></div>
+  <div class="popts" id="vlangrow" style="justify-content:center;gap:8px"><span>I speak it in</span><select id="vlang"><option value="ar-SA">Arabic style</option><option value="hi-IN">Hindi style</option><option value="en-IN">English style</option></select></div>
   <div id="vstatus">Starting microphone…</div>
-  <div class="meter"><div id="vlevel"></div></div>
-  <div>Sensitivity: <span id="sensv">5</span> <small>(raise it if words are missed, lower it if noise is counted)</small></div>
-  <input type="range" id="sens" min="1" max="10" step="1" value="5">
+  <div id="vheard" style="font-size:14px;color:#cfe3d9;min-height:20px;margin:6px 0"></div>
+  <div id="vany">
+    <div class="meter"><div id="vlevel"></div></div>
+    <div>Sensitivity: <span id="sensv">5</span> <small>(raise it if words are missed, lower it if noise is counted)</small></div>
+    <input type="range" id="sens" min="1" max="10" step="1" value="5">
+  </div>
 </div>
 <div class="row">
   <button id="undo">− Undo</button>
@@ -256,7 +261,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   var lock=null;
   function setWake(){
     if(!('wakeLock' in navigator))return;
-    if((S.wake||V.on)&&document.visibilityState==='visible'){navigator.wakeLock.request('screen').then(function(l){lock=l}).catch(function(){})}
+    if((S.wake||V.on||(typeof R!=='undefined'&&R.on))&&document.visibilityState==='visible'){navigator.wakeLock.request('screen').then(function(l){lock=l}).catch(function(){})}
     else if(lock){lock.release().catch(function(){});lock=null}
   }
   $('wake').onchange=function(){S.wake=this.checked;save();setWake()};
@@ -570,7 +575,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     $('vlevel').style.background=V.inWord?'#e6c36a':'#4fd1a0';
     $('vstatus').textContent='🎙 Listening… keep saying Astaghfirullah';
   }
-  function vstart(){
+  function vstartAny(){
     if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){
       alert('Microphone is not available here. Please open the hosted https link of this app in Chrome.');return}
     $('vpanel').classList.add('show');$('vstatus').textContent='Starting microphone…';
@@ -590,17 +595,71 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
       $('vstatus').textContent='Microphone permission was denied. Allow it in browser settings and try again.';
     });
   }
-  function vstop(){
+  // ---------- Smart mode: counts only when the phrase Astaghfirullah is recognised ----------
+  var R={on:false,rec:null,raw:{},cnt:{},nrm:{},timer:null};
+  function normTxt(t){
+    return (t||'').toLowerCase().normalize('NFD').replace(/[ً-ٰٟۖ-़ۭ॑-॔]/g,'').normalize('NFC').replace(/[أإآٱ]/g,'ا');
+  }
+  var RX=[/ا?ستغفر/g,/[aei]st[ai]g+h?f[aie]r/g,/(?:अ|इ|ए)स्त[ा]?[ि]?ग?[ा]?फ/g];
+  function countMatches(n){var c=0;RX.forEach(function(r){var m=n.match(r);if(m)c+=m.length});return c}
+  function newSession(){
+    var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    var r=new SR();R.rec=r;R.raw={};R.cnt={};R.nrm={};
+    r.lang=S.vlang||'ar-SA';r.continuous=true;r.interimResults=true;r.maxAlternatives=1;
+    r.onstart=function(){$('vstatus').textContent='🎙 Listening… say Astaghfirullah'};
+    r.onresult=function(ev){
+      for(var i=ev.resultIndex;i<ev.results.length;i++){
+        var tx=ev.results[i][0].transcript,n=normTxt(tx),raw=countMatches(n),eff=raw;
+        // some Android versions repeat earlier text inside each new result: don't count it twice
+        if(i>0&&R.nrm[i-1]&&n.indexOf(R.nrm[i-1])===0)eff=Math.max(0,raw-(R.raw[i-1]||0));
+        R.nrm[i]=n;R.raw[i]=raw;
+        var prev=R.cnt[i]||0;
+        if(eff>prev){add(eff-prev,true);R.cnt[i]=eff}
+        $('vheard').textContent='Heard: '+tx.slice(-60);
+      }
+    };
+    r.onerror=function(e){
+      var er=e&&e.error;
+      if(er==='not-allowed'||er==='service-not-allowed'){$('vstatus').textContent='Microphone or speech permission was denied. Allow it in Chrome settings and try again.';vstop(true)}
+      else if(er==='audio-capture'){$('vstatus').textContent='No microphone was found.';vstop(true)}
+      else if(er==='network'){$('vstatus').textContent='Smart counting needs internet. Reconnecting…'}
+    };
+    r.onend=function(){if(R.on){clearTimeout(R.timer);R.timer=setTimeout(function(){if(R.on){try{newSession()}catch(e){}}},250)}};
+    try{r.start()}catch(e){}
+  }
+  function startSmart(){
+    var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!SR){alert('Smart counting needs Chrome on Android. Please open the app in Chrome, or switch to "Any sound".');return}
+    R.on=true;$('vheard').textContent='';
+    $('voiceBtn').textContent='⏹ Stop voice counting';$('voiceBtn').classList.add('on');
+    newSession();setWake();
+  }
+  function applyVmode(){
+    var smart=(S.vmode||'smart')==='smart';
+    $('vany').style.display=smart?'none':'block';
+    $('vlangrow').style.display=smart?'flex':'none';
+    $('vheard').style.display=smart?'block':'none';
+  }
+  function vstart(){
+    $('vpanel').classList.add('show');applyVmode();
+    if((S.vmode||'smart')==='smart')startSmart();else vstartAny();
+  }
+  function vstop(keepPanel){
+    R.on=false;clearTimeout(R.timer);
+    try{if(R.rec){R.rec.onend=null;R.rec.abort()}}catch(e){}
+    R.rec=null;
     V.on=false;clearInterval(V.timer);
     try{if(V.stream)V.stream.getTracks().forEach(function(t){t.stop()})}catch(e){}
     try{if(V.ctx)V.ctx.close()}catch(e){}
     $('voiceBtn').textContent='🎙 Start voice counting';$('voiceBtn').classList.remove('on');
-    $('vpanel').classList.remove('show');
+    if(!keepPanel)$('vpanel').classList.remove('show');
     setWake();
   }
-  $('voiceBtn').onclick=function(){V.on?vstop():vstart()};
+  $('voiceBtn').onclick=function(){(V.on||R.on)?vstop():vstart()};
+  $('vmode').onchange=function(){S.vmode=this.value;save();var was=V.on||R.on;if(was)vstop(true);applyVmode();if(was)vstart()};
+  $('vlang').onchange=function(){S.vlang=this.value;save();if(R.on){vstop(true);vstart()}};
   $('sens').oninput=function(){S.sens=parseInt(this.value,10);$('sensv').textContent=S.sens;save()};
-  var _r=render;render=function(){_r();$('sens').value=S.sens||5;$('sensv').textContent=S.sens||5};
+  var _r=render;render=function(){_r();$('sens').value=S.sens||5;$('sensv').textContent=S.sens||5;$('vmode').value=S.vmode||'smart';$('vlang').value=S.vlang||'ar-SA'};
   if('serviceWorker' in navigator&&/^https?:/.test(location.protocol)){try{navigator.serviceWorker.register('/sw.js')}catch(e){}}
   load();render();setWake();showTab('h');
 })();
