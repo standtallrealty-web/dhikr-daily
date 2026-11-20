@@ -161,7 +161,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
 
 <button id="voiceBtn">🎙 Start voice counting</button>
 <div id="vpanel">
-  <div class="popts" id="vmoderow" style="display:none;justify-content:center;gap:8px"><span>Count</span><select id="vmode"><option value="smart">Only "Astaghfirullah" (recommended)</option><option value="any">Any sound (works offline)</option></select></div>
+  <div class="popts" id="vmoderow" style="justify-content:center;gap:8px"><span>Mode</span><select id="vmode"><option value="any">Close-mic: my voice (recommended, works offline)</option><option value="smart">Speech recognition (needs internet)</option></select></div>
   <div class="popts" id="vlangrow" style="justify-content:center;gap:8px"><span>I speak it in</span><select id="vlang"><option value="ar-SA">Arabic style</option><option value="hi-IN">Hindi style</option><option value="en-IN">English style</option></select></div>
   <div id="vstatus">Starting microphone…</div>
   <div id="vtip" style="font-size:11.5px;color:var(--muted);line-height:1.5;margin:4px 6px">Counts only when it recognises <b>Astaghfirullah</b>. Hold the phone close to your mouth in a quiet place.</div>
@@ -826,39 +826,70 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   // ---------- Voice counting (sound-burst detection, works offline) ----------
   var V={on:false,ctx:null,stream:null,an:null,buf:null,timer:null,env:0,floor:0.01,inWord:false,start:0,lastCount:0,t0:0,cal:0,calN:0};
   function sensFactor(){return (S.sens||5)/5}
+//DET-START
+function makeDet(){
+  var D={phase:'noise',t0:null,nsum:0,nn:0,floor:0.008,env:0,inWord:false,start:0,peak:0,lastCount:-9999,lastEnd:-9999,
+    hi:0.02,minDur:200,gap:220,ref:700,learn:[],sens:1,count:0,msg:''};
+  function endWord(now,dur,pk){
+    if(D.phase==='learn'){
+      if(dur>=250&&dur<=2500){D.learn.push({p:pk,d:dur});
+        if(D.learn.length>=3){
+          var ps=D.learn.map(function(x){return x.p}).sort(function(a,b){return a-b}),ds=D.learn.map(function(x){return x.d}).sort(function(a,b){return a-b});
+          D.ref=ds[1];var rp=ps[1];
+          D.hi=Math.max(D.floor*3.5,rp*0.33);
+          D.minDur=Math.min(450,Math.max(150,D.ref*0.35));D.gap=Math.max(180,D.ref*0.3);
+          D.phase='count';D.msg='ok';return 3}}
+      return 0}
+    if(dur<D.minDur||now-D.lastCount<D.gap)return 0;
+    var n=dur<D.ref*1.65?1:Math.min(8,Math.round(dur/D.ref));
+    D.lastCount=now;return n}
+  D.feed=function(rms,now){
+    if(D.t0===null)D.t0=now;
+    if(D.phase==='noise'){
+      if(now-D.t0<1000){D.nsum+=rms;D.nn++;D.floor=Math.max(0.003,D.nsum/D.nn);return 0}
+      D.phase='learn';D.hi=Math.max(0.015,D.floor*4);D.minDur=200;D.gap=200}
+    var hi=D.hi/D.sens;
+    D.env=Math.max(rms,D.env*0.85);
+    if(!D.inWord){
+      if(rms>hi&&now-D.lastEnd>=50){D.inWord=true;D.start=now;D.peak=rms}
+      else if(D.phase==='count')D.floor=D.floor*0.995+rms*0.005;
+      return 0}
+    D.peak=Math.max(D.peak,rms);
+    if(D.env<D.peak*0.42||D.env<hi*0.5){
+      D.inWord=false;D.lastEnd=now;
+      return endWord(now,now-D.start,D.peak)}
+    return 0};
+  return D}
+//DET-END
+
   function vloop(){
-    if(!V.on)return;
+    if(!V.on||!V.det)return;
     V.an.getFloatTimeDomainData(V.buf);
-    var s=0,i;for(i=0;i<V.buf.length;i++)s+=V.buf[i]*V.buf[i];
-    var rms=Math.sqrt(s/V.buf.length),now=Date.now();
-    // 1) calibration: first second = measure background noise
-    if(now-V.t0<1000){V.cal+=rms;V.calN++;V.floor=Math.max(0.004,V.cal/V.calN);
-      $('vstatus').textContent='Stay quiet for a second…';$('vlevel').style.width='0%';return}
-    V.env=Math.max(rms,V.env*0.92);
-    var hi=Math.max(0.02,V.floor*3)/sensFactor(),lo=hi*0.55;
-    if(!V.inWord){
-      if(V.env>hi){V.inWord=true;V.start=now}
-      else V.floor=V.floor*0.995+rms*0.005;
-    }else if(V.env<lo){
-      V.inWord=false;
-      if(now-V.start>=180&&now-V.lastCount>250){V.lastCount=now;add(1,true)}
-    }
-    $('vlevel').style.width=Math.min(100,V.env/(hi*2)*100)+'%';
-    $('vlevel').style.background=V.inWord?'#e6c36a':'#4fd1a0';
-    $('vstatus').textContent='🎙 Listening… keep saying Astaghfirullah';
+    var sum=0,k;for(k=0;k<V.buf.length;k++)sum+=V.buf[k]*V.buf[k];
+    var rms=Math.sqrt(sum/V.buf.length),D=V.det;
+    D.sens=sensFactor();
+    var n=D.feed(rms,Date.now());
+    if(n>0)add(n,true);
+    var hi=D.hi/D.sens;
+    $('vlevel').style.width=Math.min(100,D.phase==='noise'?0:D.env/(hi*2)*100)+'%';
+    $('vlevel').style.background=D.inWord?'#e6c36a':'#4fd1a0';
+    $('vstatus').textContent=D.phase==='noise'?'Stay quiet for a second…':D.phase==='learn'?'Now say Astaghfirullah 3 times ('+D.learn.length+'/3). These count too.':'🎙 Listening to your voice… keep saying Astaghfirullah';
   }
   function vstartAny(){
     if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){
       alert('Microphone is not available here. Please open the hosted https link of this app in Chrome.');return}
     $('vpanel').classList.add('show');$('vstatus').textContent='Starting microphone…';
-    navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}}).then(function(st){
+    navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:false,channelCount:1}}).then(function(st){
       V.stream=st;
       var AC=window.AudioContext||window.webkitAudioContext;
       V.ctx=new AC();
       var src=V.ctx.createMediaStreamSource(st);
       V.an=V.ctx.createAnalyser();V.an.fftSize=1024;
       V.buf=new Float32Array(V.an.fftSize);
-      src.connect(V.an);
+      var hp=V.ctx.createBiquadFilter();hp.type='highpass';hp.frequency.value=180;
+      var lp=V.ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=3800;
+      src.connect(hp);hp.connect(lp);lp.connect(V.an);
+      V.det=makeDet();
       V.on=true;V.env=0;V.inWord=false;V.t0=Date.now();V.cal=0;V.calN=0;
       V.timer=setInterval(vloop,20);
       $('voiceBtn').textContent='⏹ Stop voice counting';$('voiceBtn').classList.add('on');
@@ -919,7 +950,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     newSession();setWake();
   }
   function applyVmode(){
-    var smart=(S.vmode||'smart')==='smart';
+    var smart=S.vmode==='smart';$('vtip').innerHTML=smart?'Counts when the phone recognises <b>Astaghfirullah</b>. Needs internet. It can miss fast repeats.':'Hold the phone <b>close to your mouth</b>. The app learns your voice from your first 3 words, then counts only sounds that loud. It uses the phone\'s noise cancelling, and works offline.';
     $('vany').style.display=smart?'none':'block';
     $('vlangrow').style.display=smart?'flex':'none';
     $('vheard').style.display=smart?'block':'none';
@@ -927,7 +958,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   function vstart(){
     var hasSR=!!(window.SpeechRecognition||window.webkitSpeechRecognition)&&navigator.onLine!==false;
     $('vpanel').classList.add('show');
-    if(hasSR){S.vmode='smart';applyVmode();startSmart()}
+    if(S.vmode==='smart'&&hasSR){applyVmode();startSmart()}
     else{
       alert(navigator.onLine===false?'You are offline. Exact Astaghfirullah recognition needs internet, so for now the app will count any sound. Keep the phone close and the room quiet.':'This browser cannot recognise speech, so the app can only detect any sound. Please open it in Chrome on Android for exact Astaghfirullah counting.');
       S.vmode='any';applyVmode();vstartAny();
@@ -948,10 +979,10 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   $('vmode').onchange=function(){S.vmode=this.value;save();var was=V.on||R.on;if(was)vstop(true);applyVmode();if(was)vstart()};
   $('vlang').onchange=function(){S.vlang=this.value;save();if(R.on){vstop(true);vstart()}};
   $('sens').oninput=function(){S.sens=parseInt(this.value,10);$('sensv').textContent=S.sens;save()};
-  var _r=render;render=function(){_r();$('sens').value=S.sens||5;$('sensv').textContent=S.sens||5;$('vmode').value=S.vmode||'smart';$('vlang').value=S.vlang||'ar-SA'};
+  var _r=render;render=function(){_r();$('sens').value=S.sens||5;$('sensv').textContent=S.sens||5;$('vmode').value=S.vmode||'any';$('vlang').value=S.vlang||'ar-SA'};
   if('serviceWorker' in navigator&&/^https?:/.test(location.protocol)){try{navigator.serviceWorker.register('/sw.js')}catch(e){}}
   loadOff().then(function(){applyFont();if(tab==='h')renderAd()});
-  load();window.__ex=1;render();setWake();showTab('h');
+  load();if(!S.vm2){S.vmode='any';S.vm2=1;save()}window.__ex=1;render();setWake();showTab('h');
 })();
 </script>
 </body>
