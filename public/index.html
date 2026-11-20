@@ -195,6 +195,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     <div class="set"><span>Arabic style</span><select id="afont" style="background:#0c3a2c;color:#f3f1e7;border:1px solid #1c6b52;border-radius:8px;padding:6px"><option value="naskh">Clear Naskh</option><option value="sch">Scheherazade (Quran style)</option><option value="own">My own font file</option></select></div>
     <div class="set" id="ownfontrow" style="display:none"><span>Font file (.ttf / .otf)</span><button id="ofbtn" style="padding:8px 12px">Choose font</button><input type="file" id="offile" accept=".ttf,.otf,.woff,.woff2,font/*" style="display:none"></div>
     <div class="set"><span>Arabic text size</span><span><button id="afm" style="padding:6px 12px">A−</button> <button id="afp" style="padding:6px 12px">A+</button></span></div>
+    <div class="set"><span>Start counting from today<br><small style="color:var(--muted)">Clears earlier days, streak and history</small></span><button id="fresh" style="padding:8px 12px">Start fresh</button></div>
     <div class="set"><span>Backup your data</span><button id="bkp" style="padding:8px 12px">Save file</button></div>
     <div class="set"><span>Restore backup</span><button id="rst2" style="padding:8px 12px">Choose file</button><input type="file" id="afile" accept="audio/*" style="display:none"><input type="file" id="rfile" accept="application/json,.json" style="display:none"></div>
     <div class="set"><span>Backup status</span><small id="bkst" style="color:#9fc4b5"></small></div>
@@ -292,6 +293,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     }catch(e){alert('Could not save the backup.')}
   };
   $('rst2').onclick=function(){$('rfile').click()};
+  $('fresh').onclick=function(){ask('Clear all days before today, including your streak and history? Today\'s count stays.',function(){var keep=S.days[today];S.days={};if(keep)S.days[today]=keep;var ka=S.ad&&S.ad[today];S.ad={};if(ka)S.ad[today]=ka;save();render();try{renderExtra()}catch(e){}})};
   $('rfile').onchange=function(){
     var f=this.files&&this.files[0];if(!f)return;var inp=this;
     var r=new FileReader();r.onload=function(){
