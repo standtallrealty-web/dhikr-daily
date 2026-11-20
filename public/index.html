@@ -122,6 +122,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   .chips button{background:none;border:1px solid #1c6b52;color:#cfe3d9;border-radius:16px;padding:6px 10px;font-size:12px}
   .chips button.on{background:#e6c36a;color:#0b3d2e;border-color:#e6c36a;font-weight:700}
   #tbig{width:100%;padding:22px;font-size:34px;font-weight:700;background:#1c6b52;color:#fff;border:0;border-radius:18px;margin:6px 0;touch-action:manipulation}
+  .rec{background:none;border:1px solid #1c6b52;color:#e6c36a;border-radius:10px;padding:3px 8px;font-size:11px;margin-left:6px}
   .btnrow{display:flex;gap:8px}.btnrow button{flex:1;background:none;border:1px solid #1c6b52;color:#cfe3d9;border-radius:12px;padding:10px;font-size:14px}
 </style>
 </head>
@@ -181,7 +182,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     <div class="set"><span>Keep screen on</span><input id="wake" type="checkbox"></div>
     <div class="set"><span>Arabic text size</span><span><button id="afm" style="padding:6px 12px">A−</button> <button id="afp" style="padding:6px 12px">A+</button></span></div>
     <div class="set"><span>Backup your data</span><button id="bkp" style="padding:8px 12px">Save file</button></div>
-    <div class="set"><span>Restore backup</span><button id="rst2" style="padding:8px 12px">Choose file</button><input type="file" id="rfile" accept="application/json,.json" style="display:none"></div>
+    <div class="set"><span>Restore backup</span><button id="rst2" style="padding:8px 12px">Choose file</button><input type="file" id="afile" accept="audio/*" style="display:none"><input type="file" id="rfile" accept="application/json,.json" style="display:none"></div>
     <div class="set"><span>Backup status</span><small id="bkst" style="color:#9fc4b5"></small></div>
     <div class="set"><span>Today's count</span><button id="reset" style="background:#5a1f1f;color:#fff;border:0;border-radius:8px;padding:8px 12px">Reset today</button></div>
   </details>
@@ -363,11 +364,10 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
    {id:'amutu',c:'b',t:'Bismika Allahumma amutu wa ahya',ar:'بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا',en:'In Your name, O Allah, I die and I live. (Last words before sleeping.)',ref:'Sahih al-Bukhari 6324',n:1},
    {id:'t_sub',c:'t',t:'SubhanAllah ×33',ar:'سُبْحَانَ اللَّهِ',en:'Glory be to Allah. Say 33 times after every obligatory prayer.',ref:'Sahih al-Bukhari 843, Sahih Muslim 595, 597',n:33},
    {id:'t_hamd',c:'t',t:'Alhamdulillah ×33',ar:'الْحَمْدُ لِلَّهِ',en:'All praise is for Allah. Say 33 times after every obligatory prayer.',ref:'Sahih al-Bukhari 843, Sahih Muslim 595, 597',n:33},
-   {id:'t_akbar',c:'t',t:'Allahu Akbar ×34',ar:'اللَّهُ أَكْبَرُ',en:'Allah is the Greatest. Say 34 times after every obligatory prayer (33 in another narration).',ref:'Sahih Muslim 596, 597',n:34},
-   {id:'t_complete',c:'t',t:'To complete the hundred',ar:TAHLIL,en:'After the 99 above, say this once to make it one hundred. Whoever does so, his sins are forgiven even if they are like the foam of the sea.',ref:'Sahih Muslim 597',n:1},
+   {id:'t_akbar',c:'t',t:'Allahu Akbar ×34',ar:'اللَّهُ أَكْبَرُ',en:'Allah is the Greatest. Say 34 times after every obligatory prayer (33 in another narration). Then complete the hundred with "La ilaha illallah wahdahu" below.',ref:'Sahih Muslim 596, 597',n:34},
    {id:'t_bihamdihi',c:'t',t:'SubhanAllahi wa bihamdihi ×100',ar:'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',en:'Glory and praise be to Allah. Whoever says it 100 times in a day, his sins are forgiven even if they are like the foam of the sea.',ref:'Sahih al-Bukhari 6405, Sahih Muslim 2691',n:100},
    {id:'t_azim',c:'t',t:'Two light words, heavy on the scale',ar:'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ، سُبْحَانَ اللَّهِ الْعَظِيمِ',en:'Glory and praise be to Allah; glory be to Allah, the Magnificent. Two words light on the tongue, heavy on the scale, beloved to the Most Merciful. (No fixed count is given; 10 is only a target in this app.)',ref:'Sahih al-Bukhari 6406, Sahih Muslim 2694',n:10},
-   {id:'t_tahlil100',c:'t',t:'La ilaha illallah wahdahu ×100',ar:TAHLIL,en:'Whoever says this 100 times in a day gets the reward of freeing ten slaves, 100 good deeds are written, 100 sins are erased, and he is protected from Shaytan until evening.',ref:'Sahih al-Bukhari 3293, Sahih Muslim 2691',n:100},
+   {id:'t_tahlil100',c:'t',t:'La ilaha illallah wahdahu ×100',ar:TAHLIL,en:'After the 99 tasbih following a prayer, say this once to complete the hundred; his sins are forgiven even if like the foam of the sea (Muslim 597). Separately, whoever says it 100 times in a day gets the reward of freeing ten slaves, 100 good deeds are written, 100 sins are erased, and he is protected from Shaytan until evening.',ref:'Sahih Muslim 597; 100 times a day: Sahih al-Bukhari 3293, Sahih Muslim 2691',n:100},
    {id:'t_hawqala',c:'t',t:'La hawla wa la quwwata illa billah',ar:'لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ',en:'There is no power and no strength except with Allah. It is a treasure from the treasures of Paradise. (No fixed count is given; 10 is only a target in this app.)',ref:'Sahih al-Bukhari 6384, Sahih Muslim 2704',n:10},
    {id:'t_four',c:'t',t:'The four most beloved words to Allah',ar:'سُبْحَانَ اللَّهِ، وَالْحَمْدُ لِلَّهِ، وَلَا إِلَهَ إِلَّا اللَّهُ، وَاللَّهُ أَكْبَرُ',en:'Glory be to Allah, all praise is for Allah, there is no god but Allah, and Allah is the Greatest. The most beloved words to Allah are four. (No fixed count is given; 10 is only a target in this app.)',ref:'Sahih Muslim 2137',n:10},
    {id:'t_juwayriyya',c:'t',t:'Glory to Allah by the number of His creation',ar:'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ عَدَدَ خَلْقِهِ، وَرِضَا نَفْسِهِ، وَزِنَةَ عَرْشِهِ، وَمِدَادَ كَلِمَاتِهِ',en:'Glory and praise be to Allah, by the number of His creation, to the extent of His pleasure, the weight of His Throne, and the ink of His words. Say 3 times.',ref:'Sahih Muslim 2726',n:3},
@@ -393,6 +393,11 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     try{if('speechSynthesis' in window)speechSynthesis.cancel()}catch(e){}
     P.key=null;
   }
+  function playFile(url){return new Promise(function(res){var a=new Audio(url),t0=Date.now(),fin=false;P.aud=a;
+      function done(ok){if(fin)return;fin=true;P.stopNow=null;res({ok:ok,ms:Date.now()-t0})}
+      a.onended=function(){done(true)};a.onerror=function(){done(false)};
+      P.stopNow=function(){a.onended=null;a.onerror=null;try{a.pause()}catch(e){}done(true)};
+      var pr=a.play();if(pr&&pr.catch)pr.catch(function(){done(false)})})}
   function wait(ms){return new Promise(function(r){var t=setTimeout(function(){P.cancel=null;r()},ms);P.cancel=function(){clearTimeout(t);r()}})}
   // load an audio file (tries each url in turn), resolves the audio element or null
   function readyAudio(urls){
@@ -429,12 +434,13 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   function idb(){return new Promise(function(res,rej){var r=indexedDB.open('dhikr-audio',1);r.onupgradeneeded=function(){r.result.createObjectStore('f')};r.onsuccess=function(){res(r.result)};r.onerror=function(){rej(r.error)}})}
   function idbPut(k,b){return idb().then(function(d){return new Promise(function(res,rej){var t=d.transaction('f','readwrite');t.objectStore('f').put(b,k);t.oncomplete=function(){res()};t.onerror=function(){rej(t.error)}})})}
   function idbAll(){return idb().then(function(d){return new Promise(function(res){var o={},t=d.transaction('f','readonly'),c=t.objectStore('f').openCursor();c.onsuccess=function(){var cur=c.result;if(cur){o[cur.key]=cur.value;cur.continue()}else res(o)};c.onerror=function(){res(o)}})})}
-  function idbClear(){return idb().then(function(d){return new Promise(function(res){var t=d.transaction('f','readwrite');t.objectStore('f').clear();t.oncomplete=function(){res()};t.onerror=function(){res()}})})}
+  function idbClear(){return idb().then(function(d){return new Promise(function(res){var t=d.transaction('f','readwrite'),st=t.objectStore('f'),c=st.openKeyCursor();c.onsuccess=function(){var cur=c.result;if(cur){if(String(cur.key).indexOf('u_')!==0)st.delete(cur.key);cur.continue()}};t.oncomplete=function(){res()};t.onerror=function(){res()}})})}
+  function idbDel(k){return idb().then(function(d){return new Promise(function(res){var t=d.transaction('f','readwrite');t.objectStore('f').delete(k);t.oncomplete=function(){res()};t.onerror=function(){res()}})})}
   function loadOff(){
     return idbAll().then(function(o){
       Object.keys(OFF).forEach(function(k){try{URL.revokeObjectURL(OFF[k])}catch(e){}});
       OFF={};var sz=0,n=0;
-      Object.keys(o).forEach(function(k){OFF[k]=URL.createObjectURL(o[k]);sz+=o[k].size;n++});
+      Object.keys(o).forEach(function(k){OFF[k]=URL.createObjectURL(o[k]);if(k.indexOf('u_')!==0){sz+=o[k].size;n++}});
       DL.count=n;DL.bytes=sz;
     }).catch(function(){});
   }
@@ -627,6 +633,14 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
       }
       return true;
     }
+    // your own recording (from a reciter you trust) is used first
+    var ukey='u_'+x.id+'_'+x.c;
+    if(OFF[ukey]){
+      var ra=await playFile(OFF[ukey]);if(P.tok!==tok)return false;
+      if(!ra.ok){msg('Your recording could not play. Remove it and add it again.');return false}
+      if(mode==='learn'){msg('🗣 your turn, repeat');await wait(Math.max(2000,ra.ms*gf()));if(P.tok!==tok)return false;msg('🎧 once more');var rb=await playFile(OFF[ukey]);if(P.tok!==tok)return false;if(!rb.ok)return false}
+      return true;
+    }
     // device voice (duas)
     if(!('speechSynthesis' in window)){msg('Device voice is not available on this phone.');return false}
     await waitVoices();
@@ -701,16 +715,22 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     h+='<div class="adhead"><span>'+CATN[tab]+' · '+done+'/'+it.length+' done</span><button data-act="resetall">Reset section</button></div><div class="ppanel"><div class="seg"><button data-m="listen" class="'+(pmode()==='listen'?'on':'')+'">▶ Listen<small>full recitation</small></button><button data-m="learn" class="'+(pmode()==='learn'?'on':'')+'">🎓 Learn<small>repeat after me</small></button></div>'+(pmode()==='learn'?'<div class="popts"><span>Phrase length</span><select id="plsel"><option value="short"'+(plen()==='short'?' selected':'')+'>Short</option><option value="med"'+(plen()==='med'?' selected':'')+'>Medium</option><option value="long"'+(plen()==='long'?' selected':'')+'>Long</option></select></div><div class="popts"><span>Your pause</span><select id="gapsel"><option value="0.8"'+(gf()===0.8?' selected':'')+'>Short</option><option value="1.2"'+(gf()===1.2?' selected':'')+'>Normal</option><option value="2"'+(gf()===2?' selected':'')+'>Long</option></select></div>':'')+'<button class="aud big'+(P.all?' on':'')+'" data-act="playall">'+(P.all?'⏹ Stop':'▶ Play all '+(pmode()==='learn'?'(learn)':'(listen)'))+'</button></div>';
     it.forEach(function(x){
       var k=tab+':'+x.id,c=st[k]||0,d=c>=x.n;
-      h+='<div class="card'+(d?' done':'')+'"><div class="ct">'+x.t+'</div><div class="ar2" dir="rtl" lang="ar">'+x.ar.replace(/\n/g,'<br>')+'</div><div class="en">'+x.en+'</div><div class="ref">'+x.ref+'</div><div class="audrow"><button class="aud'+(P.key===k?' on':'')+'" data-a="'+k+'" data-id="'+x.id+'">'+(P.key===k?'⏹ Stop':(pmode()==='learn'?'🎓 Learn this':'🔊 Listen'))+'</button><span class="astat" data-stat="'+k+'">'+(P.msg[k]||'')+'</span></div><div class="asrc">'+(QAUD[x.id]?'Recitation: Mishary Alafasy (needs internet)':'Device voice, not a qari. Use it only to follow the rhythm.')+'</div><div class="acts"><button class="cnt" data-k="'+k+'" data-n="'+x.n+'">'+(d?'✓ Done':c+' / '+x.n+' · tap')+'</button><button class="rst" data-r="'+k+'">↺</button></div></div>';
+      h+='<div class="card'+(d?' done':'')+'"><div class="ct">'+x.t+'</div><div class="ar2" dir="rtl" lang="ar">'+x.ar.replace(/\n/g,'<br>')+'</div><div class="en">'+x.en+'</div><div class="ref">'+x.ref+'</div><div class="audrow"><button class="aud'+(P.key===k?' on':'')+'" data-a="'+k+'" data-id="'+x.id+'">'+(P.key===k?'⏹ Stop':(pmode()==='learn'?'🎓 Learn this':'🔊 Listen'))+'</button><span class="astat" data-stat="'+k+'">'+(P.msg[k]||'')+'</span></div><div class="asrc">'+(QAUD[x.id]?'Recitation: Mishary Alafasy (saved offline after Download)':(OFF['u_'+x.id+'_'+x.c]?'Your own recording ✓':'Device voice, not a qari. Use it only to follow the rhythm.'))+(QAUD[x.id]?'':' <button class="rec" data-rec="'+x.id+'_'+x.c+'">'+(OFF['u_'+x.id+'_'+x.c]?'Remove recording':'📎 Add recording')+'</button>')+'</div><div class="acts"><button class="cnt" data-k="'+k+'" data-n="'+x.n+'">'+(d?'✓ Done':c+' / '+x.n+' · tap')+'</button><button class="rst" data-r="'+k+'">↺</button></div></div>';
     });
     h+='<div class="powered" style="margin-top:10px">Powered by <b>Stand Tall Realty</b></div><div class="note">'+TIPS[tab]+'<br>Sources: Sahih al-Bukhari, Sahih Muslim, Abu Dawud, Tirmidhi, an-Nasa\'i, Ahmad, with gradings of Shaykh al-Albani as compiled by IslamQA and Hisn al-Muslim. Please verify the Arabic once against a printed Hisn al-Muslim or with your scholar.</div>';
     v.innerHTML=h;v.scrollTop=top;
   }
+  var REC=null;
+  $('afile').onchange=function(){var f=this.files&&this.files[0];if(!f||!REC)return;var k=REC;REC=null;
+    idbPut(k,f).then(loadOff).then(renderAd).catch(function(){alert('Could not save the recording.')})};
   $('v2').addEventListener('click',function(e){
     var g=e.target.closest('[data-go]');if(g){showTab(g.dataset.go);return}
     var mb=e.target.closest('[data-m]');if(mb){stopPlay();S.pmode=mb.dataset.m;save();renderAd();return}
     var pa=e.target.closest('[data-act="playall"]');if(pa){runAll();return}
     var au=e.target.closest('[data-a]');if(au){var xi=adItems().filter(function(q){return q.id===au.dataset.id})[0];if(xi)runPlay(xi,au.dataset.a);return}
+    var rc=e.target.closest('[data-rec]');if(rc){var rk='u_'+rc.dataset.rec;
+      if(OFF[rk]){ask('Remove your recording for this dua?',function(){idbDel(rk).then(loadOff).then(renderAd)});return}
+      REC=rk;$('afile').value='';$('afile').click();return}
     var b=e.target.closest('button');if(!b)return;
     if(b.dataset.act==='dlall'){downloadAll();return}
     if(b.dataset.act==='dlclear'){if(DL.busy)return;ask('Delete the downloaded audio from this phone?',function(){clearDl()});return}
