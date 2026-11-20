@@ -1,4 +1,21 @@
-var C='istighfar-v1';
-self.addEventListener('install',function(e){e.waitUntil(caches.open(C).then(function(c){return c.addAll(['./','index.html','manifest.webmanifest','icon-192.png','icon-512.png'])}));self.skipWaiting()});
-self.addEventListener('activate',function(e){e.waitUntil(caches.keys().then(function(k){return Promise.all(k.filter(function(x){return x!==C}).map(function(x){return caches.delete(x)}))}));self.clients.claim()});
-self.addEventListener('fetch',function(e){e.respondWith(fetch(e.request).then(function(r){var cp=r.clone();caches.open(C).then(function(c){c.put(e.request,cp)});return r}).catch(function(){return caches.match(e.request)}))});
+var C='dhikr-v2';
+self.addEventListener('install',function(e){
+  self.skipWaiting();
+  e.waitUntil(caches.open(C).then(function(c){
+    return Promise.all(['/','/manifest.webmanifest','/icon-192.png','/icon-512.png'].map(function(u){return c.add(u).catch(function(){})}));
+  }));
+});
+self.addEventListener('activate',function(e){
+  e.waitUntil(caches.keys().then(function(k){return Promise.all(k.filter(function(x){return x!==C}).map(function(x){return caches.delete(x)}))}).then(function(){return self.clients.claim()}));
+});
+self.addEventListener('fetch',function(e){
+  var r=e.request;
+  // Only handle our own pages/files. Never touch audio or API requests to other sites.
+  if(r.method!=='GET'||new URL(r.url).origin!==self.location.origin||r.headers.has('range'))return;
+  e.respondWith(fetch(r).then(function(res){
+    if(res&&res.ok&&!res.redirected){var cp=res.clone();caches.open(C).then(function(c){c.put(r,cp)}).catch(function(){})}
+    return res;
+  }).catch(function(){
+    return caches.match(r).then(function(m){return m||caches.match('/')});
+  }));
+});

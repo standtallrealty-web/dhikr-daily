@@ -4,8 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0b3d2e">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icon-192.png">
+<script>
+window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttribute('style','position:fixed;top:0;left:0;right:0;z-index:999;background:#b3392f;color:#fff;font:13px sans-serif;padding:10px');d.textContent='App error: '+m+' (line '+l+'). Please send a screenshot of this.';(document.body||document.documentElement).appendChild(d)}catch(e){}};
+</script>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <title>Dhikr Daily</title>
@@ -563,7 +567,7 @@
   $('voiceBtn').onclick=function(){V.on?vstop():vstart()};
   $('sens').oninput=function(){S.sens=parseInt(this.value,10);$('sensv').textContent=S.sens;save()};
   var _r=render;render=function(){_r();$('sens').value=S.sens||5;$('sensv').textContent=S.sens||5};
-  if('serviceWorker' in navigator&&/^https?:/.test(location.protocol)){try{navigator.serviceWorker.register('sw.js')}catch(e){}}
+  if('serviceWorker' in navigator&&/^https?:/.test(location.protocol)){try{navigator.serviceWorker.register('/sw.js')}catch(e){}}
   load();render();setWake();showTab('h');
 })();
 </script>
