@@ -142,9 +142,10 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
 
 <button id="voiceBtn">🎙 Start voice counting</button>
 <div id="vpanel">
-  <div class="popts" style="justify-content:center;gap:8px"><span>Count</span><select id="vmode"><option value="smart">Only "Astaghfirullah" (recommended)</option><option value="any">Any sound (works offline)</option></select></div>
+  <div class="popts" id="vmoderow" style="display:none;justify-content:center;gap:8px"><span>Count</span><select id="vmode"><option value="smart">Only "Astaghfirullah" (recommended)</option><option value="any">Any sound (works offline)</option></select></div>
   <div class="popts" id="vlangrow" style="justify-content:center;gap:8px"><span>I speak it in</span><select id="vlang"><option value="ar-SA">Arabic style</option><option value="hi-IN">Hindi style</option><option value="en-IN">English style</option></select></div>
   <div id="vstatus">Starting microphone…</div>
+  <div id="vtip" style="font-size:11.5px;color:var(--muted);line-height:1.5;margin:4px 6px">Counts only when it recognises <b>Astaghfirullah</b>. Hold the phone close to your mouth in a quiet place.</div>
   <div id="vheard" style="font-size:14px;color:#cfe3d9;min-height:20px;margin:6px 0"></div>
   <div id="vany">
     <div class="meter"><div id="vlevel"></div></div>
@@ -640,25 +641,37 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     });
   }
   // ---------- Smart mode: counts only when the phrase Astaghfirullah is recognised ----------
-  var R={on:false,rec:null,raw:{},cnt:{},nrm:{},timer:null};
+  var R={on:false,rec:null,raw:{},cnt:{},nrm:{},seen:{},timer:null};
   function normTxt(t){
     return (t||'').toLowerCase().normalize('NFD').replace(/[ً-ٰٟۖ-़ۭ॑-॔]/g,'').normalize('NFC').replace(/[أإآٱ]/g,'ا');
   }
   var RX=[/ا?ستغفر/g,/[aei]st[ai]g+h?f[aie]r/g,/(?:अ|इ|ए)स्त[ा]?[ि]?ग?[ा]?फ/g];
   function countMatches(n){var c=0;RX.forEach(function(r){var m=n.match(r);if(m)c+=m.length});return c}
+  var TGT=/ا?ستغفر|[aei]st[ai]g+h?f[aie]r|(?:अ|इ|ए)स्त[ा]?[ि]?ग?[ा]?फ/;
+  var ALH=/^(?:الله|لله|allah|alla|ullah|ulla|illah|अल्लाह|अल्ला|उल्लाह|उल्ला)$|ull?a?h?$/;
+  function purity(n){var t=n.split(/\s+/).filter(Boolean);if(!t.length)return 0;var ok=0;t.forEach(function(w){if(TGT.test(w)||ALH.test(w))ok++});return ok/t.length}
+  function safeAdd(k){if(k>0)add(k,true)}
   function newSession(){
     var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-    var r=new SR();R.rec=r;R.raw={};R.cnt={};R.nrm={};
+    var r=new SR();R.rec=r;R.raw={};R.cnt={};R.nrm={};R.seen={};
     r.lang=S.vlang||'ar-SA';r.continuous=true;r.interimResults=true;r.maxAlternatives=1;
     r.onstart=function(){$('vstatus').textContent='🎙 Listening… say Astaghfirullah'};
     r.onresult=function(ev){
       for(var i=ev.resultIndex;i<ev.results.length;i++){
-        var tx=ev.results[i][0].transcript,n=normTxt(tx),raw=countMatches(n),eff=raw;
+        var res=ev.results[i],tx=res[0].transcript,n=normTxt(tx),raw=countMatches(n),eff=raw;
+        var conf=res[0].confidence||0,fin=!!res.isFinal;
         // some Android versions repeat earlier text inside each new result: don't count it twice
         if(i>0&&R.nrm[i-1]&&n.indexOf(R.nrm[i-1])===0)eff=Math.max(0,raw-(R.raw[i-1]||0));
         R.nrm[i]=n;R.raw[i]=raw;
+        // reject results that are mostly other words (conversation, TV, other people)
+        if(purity(n)<0.6)eff=0;
+        // reject low-confidence final results
+        if(fin&&conf>0&&conf<0.45)eff=0;
+        // an interim guess must be seen twice in a row before it counts; final results count at once
+        var seen=R.seen[i]||0;R.seen[i]=eff;
+        var allowed=fin?eff:Math.min(eff,seen);
         var prev=R.cnt[i]||0;
-        if(eff>prev){add(eff-prev,true);R.cnt[i]=eff}
+        if(allowed>prev){safeAdd(allowed-prev);R.cnt[i]=allowed}
         $('vheard').textContent='Heard: '+tx.slice(-60);
       }
     };
@@ -685,8 +698,13 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     $('vheard').style.display=smart?'block':'none';
   }
   function vstart(){
-    $('vpanel').classList.add('show');applyVmode();
-    if((S.vmode||'smart')==='smart')startSmart();else vstartAny();
+    var hasSR=!!(window.SpeechRecognition||window.webkitSpeechRecognition);
+    $('vpanel').classList.add('show');
+    if(hasSR){S.vmode='smart';applyVmode();startSmart()}
+    else{
+      alert('This browser cannot recognise speech, so the app can only detect any sound. Please open it in Chrome on Android for exact Astaghfirullah counting.');
+      S.vmode='any';applyVmode();vstartAny();
+    }
   }
   function vstop(keepPanel){
     R.on=false;clearTimeout(R.timer);
