@@ -1,4 +1,4 @@
-var C='dhikr-v2';
+var C='dhikr-v3';
 self.addEventListener('install',function(e){
   self.skipWaiting();
   e.waitUntil(caches.open(C).then(function(c){

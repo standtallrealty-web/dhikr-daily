@@ -321,7 +321,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   var PT={short:1800,med:3200,long:5200},PW={short:3,med:5,long:8};
   function pmode(){return S.pmode||'listen'}
   function p3(n){return ('000'+n).slice(-3)}
-  function lurls(sa){var f=p3(sa[0])+p3(sa[1])+'.mp3';return ['https://everyayah.com/data/Alafasy_128kbps/'+f,'https://verses.quran.foundation/Alafasy/mp3/'+f,'https://verses.quran.com/Alafasy/mp3/'+f]}
+  function lurls(sa){var f=p3(sa[0])+p3(sa[1])+'.mp3',u=[];if(OFF['qa'+f])u.push(OFF['qa'+f]);if(OFF['ev'+f])u.push(OFF['ev'+f]);return u.concat(['https://everyayah.com/data/Alafasy_128kbps/'+f,'https://verses.quran.foundation/Alafasy/mp3/'+f,'https://verses.quran.com/Alafasy/mp3/'+f])}
   function stat(t){if(P.key)P.msg[P.key]=t;var e=document.querySelector('[data-stat="'+P.key+'"]');if(e)e.textContent=t}
   function stopPlay(){
     P.tok++;P.all=false;
@@ -361,6 +361,69 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
         else if(left<120){try{a.volume=Math.max(0.05,left/120)}catch(x){}}
       },20);
     });
+  }
+  // ---------- Offline audio store (saved on this phone, works without internet) ----------
+  var OFF={},DL={busy:false,msg:'',count:0,bytes:0,fail:0};
+  function idb(){return new Promise(function(res,rej){var r=indexedDB.open('dhikr-audio',1);r.onupgradeneeded=function(){r.result.createObjectStore('f')};r.onsuccess=function(){res(r.result)};r.onerror=function(){rej(r.error)}})}
+  function idbPut(k,b){return idb().then(function(d){return new Promise(function(res,rej){var t=d.transaction('f','readwrite');t.objectStore('f').put(b,k);t.oncomplete=function(){res()};t.onerror=function(){rej(t.error)}})})}
+  function idbAll(){return idb().then(function(d){return new Promise(function(res){var o={},t=d.transaction('f','readonly'),c=t.objectStore('f').openCursor();c.onsuccess=function(){var cur=c.result;if(cur){o[cur.key]=cur.value;cur.continue()}else res(o)};c.onerror=function(){res(o)}})})}
+  function idbClear(){return idb().then(function(d){return new Promise(function(res){var t=d.transaction('f','readwrite');t.objectStore('f').clear();t.oncomplete=function(){res()};t.onerror=function(){res()}})})}
+  function loadOff(){
+    return idbAll().then(function(o){
+      Object.keys(OFF).forEach(function(k){try{URL.revokeObjectURL(OFF[k])}catch(e){}});
+      OFF={};var sz=0,n=0;
+      Object.keys(o).forEach(function(k){OFF[k]=URL.createObjectURL(o[k]);sz+=o[k].size;n++});
+      DL.count=n;DL.bytes=sz;
+    }).catch(function(){});
+  }
+  function setDl(t){DL.msg=t;var e=$('dlstat');if(e)e.textContent=t}
+  function ayKey(sa){return p3(sa[0])+p3(sa[1])+'.mp3'}
+  function dlJobs(){
+    var j=[];
+    [112,113,114].forEach(function(n){j.push({key:'ch'+n,srcs:[CH+n+'.mp3']})});
+    Object.keys(QAUD).forEach(function(id){QAUD[id].forEach(function(sa){
+      var f=ayKey(sa);
+      j.push({key:'qa'+f,srcs:['https://verses.quran.foundation/Alafasy/mp3/'+f,'https://verses.quran.com/Alafasy/mp3/'+f],alt:{key:'ev'+f,srcs:['https://everyayah.com/data/Alafasy_128kbps/'+f]},seg:sa});
+    })});
+    return j;
+  }
+  async function fetchStore(key,srcs){
+    for(var i=0;i<srcs.length;i++){
+      try{
+        var ctl=new AbortController(),tm=setTimeout(function(){ctl.abort()},90000);
+        var r=await fetch(srcs[i],{signal:ctl.signal});clearTimeout(tm);
+        if(!r.ok)continue;
+        var b=await r.blob();if(b.size<2000)continue;
+        await idbPut(key,b);return true;
+      }catch(e){}
+    }
+    return false;
+  }
+  async function downloadAll(){
+    if(DL.busy)return;
+    if(navigator.onLine===false){setDl('You are offline. Connect to the internet first, then tap Download.');return}
+    DL.busy=true;DL.fail=0;
+    try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+    var jobs=dlJobs();
+    for(var i=0;i<jobs.length;i++){
+      var jb=jobs[i];setDl('Downloading '+(i+1)+' of '+jobs.length+'…');
+      if(!OFF[jb.key]&&!(jb.alt&&OFF[jb.alt.key])){
+        var ok=await fetchStore(jb.key,jb.srcs);
+        if(!ok&&jb.alt)ok=await fetchStore(jb.alt.key,jb.alt.srcs);
+        if(!ok)DL.fail++;
+      }
+      if(jb.seg){try{await getSeg(jb.seg)}catch(e){}}
+    }
+    await loadOff();DL.busy=false;
+    setDl(DL.fail===0?'✓ All audio is saved on this phone.':'Saved '+(jobs.length-DL.fail)+' of '+jobs.length+' files. '+DL.fail+' could not be saved (the audio site may not allow it). Tap Download to try again.');
+    if(tab==='h')renderAd();
+  }
+  async function clearDl(){await idbClear();await loadOff();setDl('Downloaded audio was deleted.');if(tab==='h')renderAd()}
+  function arabicVoiceInfo(){
+    try{var v=speechSynthesis.getVoices().filter(function(x){return /^ar/i.test(x.lang)});
+      if(!v.length)return 'No Arabic voice found on this phone';
+      return v.some(function(x){return x.localService})?'Arabic voice on this phone: works offline ✓':'Arabic voice found, but it needs internet';
+    }catch(e){return 'Phone voice not available'}
   }
   var CH='https://download.quranicaudio.com/qdc/mishari_al_afasy/murattal/';
   // independent audio element that is fully buffered before we play it (so the next file is ready in advance)
@@ -447,14 +510,14 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
       if(mode==='listen'){
         msg('🎧 Playing the full recitation…');
         var chain,gapL=150;
-        if(x.id==='quls'){chain=[112,113,114].map(function(n){return {urls:[CH+n+'.mp3'],ays:ays.filter(function(q){return q[0]===n})}});gapL=700}
+        if(x.id==='quls'){chain=[112,113,114].map(function(n){return {urls:(OFF['ch'+n]?[OFF['ch'+n]]:[]).concat([CH+n+'.mp3']),ch:true,ays:ays.filter(function(q){return q[0]===n})}});gapL=700}
         else chain=ays.map(function(sa){return {urls:lurls(sa),ays:[sa]}});
         var rs=await playChain(chain,gapL,tok);
         if(P.tok!==tok)return false;
         if(rs.failAt!=null){
           var rest=[];
           for(var q=rs.failAt;q<chain.length;q++)chain[q].ays.forEach(function(sa){rest.push({urls:lurls(sa),ays:[sa]})});
-          var failedChapter=chain[rs.failAt].urls.length===1&&x.id==='quls';
+          var failedChapter=!!chain[rs.failAt].ch;
           var r2=failedChapter?await playChain(rest,150,tok):{failAt:0};
           if(P.tok!==tok)return false;
           if(r2.failAt!=null){msg('Audio could not load. Check your internet. If you opened this file inside the Claude app, open it in Chrome instead.');return false}
@@ -468,7 +531,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
         if(mode==='learn'){
           try{
             var o=await getSeg(ays[ai]);if(P.tok!==tok)return false;
-            var au=await readyAudio(o.urls);if(P.tok!==tok)return false;
+            var offU=OFF['qa'+ayKey(ays[ai])];var au=await readyAudio((offU?[offU]:[]).concat(o.urls));if(P.tok!==tok)return false;
             if(!au)throw new Error('audio');
             var sg=o.seg,ph=phrasesOf(sg,PT[plen()]);
             for(i=0;i<ph.length;i++){
@@ -560,6 +623,8 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
       else{var r=secProg(c);p=r.p;lab=r.d+' / '+r.t+' done'}
       h+='<div class="hcard'+(p>=1?' ok':'')+'" data-go="'+c+'"><div class="hrow"><span>'+SEC[c][0]+' '+SEC[c][1]+'</span><small>'+(p>=1?'✓ Complete':lab)+'</small></div><div class="pbar"><div style="width:'+Math.round(p*100)+'%"></div></div><div class="hs">'+SEC[c][2]+'</div></div>';
     });
+    var have=DL.count>0;
+    h+='<div class="hcard" style="cursor:default"><div class="hrow"><span>📥 Use without internet</span><small>'+(have?'✓ '+DL.count+' files · '+(DL.bytes/1048576).toFixed(1)+' MB':'Not downloaded')+'</small></div><div class="hs" style="margin:8px 0;line-height:1.5">The app itself already opens offline. Download the Quran audio once (about a few MB) to listen and learn offline. '+arabicVoiceInfo()+'. Counting by voice needs internet; offline it counts any sound.</div><div style="display:flex;gap:8px"><button class="aud big" data-act="dlall" style="flex:1">'+(DL.busy?'Downloading…':(have?'📥 Update download':'📥 Download audio'))+'</button>'+(have?'<button class="rst" data-act="dlclear" style="padding:0 14px;border:1px solid #1c6b52;background:none;color:#cfe3d9;border-radius:12px">Delete</button>':'')+'</div><div class="astat" id="dlstat" style="margin-top:8px">'+DL.msg+'</div></div>';
     h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b></div>';
     v.innerHTML=h;
   }
@@ -580,7 +645,10 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     var mb=e.target.closest('[data-m]');if(mb){stopPlay();S.pmode=mb.dataset.m;save();renderAd();return}
     var pa=e.target.closest('[data-act="playall"]');if(pa){runAll();return}
     var au=e.target.closest('[data-a]');if(au){var xi=adItems().filter(function(q){return q.id===au.dataset.id})[0];if(xi)runPlay(xi,au.dataset.a);return}
-    var b=e.target.closest('button');if(!b)return;var st=adState();
+    var b=e.target.closest('button');if(!b)return;
+    if(b.dataset.act==='dlall'){downloadAll();return}
+    if(b.dataset.act==='dlclear'){if(DL.busy)return;ask('Delete the downloaded audio from this phone?',function(){clearDl()});return}
+    var st=adState();
     if(b.dataset.k){var n=parseInt(b.dataset.n,10);st[b.dataset.k]=Math.min(n,(st[b.dataset.k]||0)+1);
       if(st[b.dataset.k]>=n)buzz(60);else buzz(8);}
     else if(b.dataset.r){delete st[b.dataset.r]}
@@ -698,11 +766,11 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     $('vheard').style.display=smart?'block':'none';
   }
   function vstart(){
-    var hasSR=!!(window.SpeechRecognition||window.webkitSpeechRecognition);
+    var hasSR=!!(window.SpeechRecognition||window.webkitSpeechRecognition)&&navigator.onLine!==false;
     $('vpanel').classList.add('show');
     if(hasSR){S.vmode='smart';applyVmode();startSmart()}
     else{
-      alert('This browser cannot recognise speech, so the app can only detect any sound. Please open it in Chrome on Android for exact Astaghfirullah counting.');
+      alert(navigator.onLine===false?'You are offline. Exact Astaghfirullah recognition needs internet, so for now the app will count any sound. Keep the phone close and the room quiet.':'This browser cannot recognise speech, so the app can only detect any sound. Please open it in Chrome on Android for exact Astaghfirullah counting.');
       S.vmode='any';applyVmode();vstartAny();
     }
   }
@@ -723,6 +791,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   $('sens').oninput=function(){S.sens=parseInt(this.value,10);$('sensv').textContent=S.sens;save()};
   var _r=render;render=function(){_r();$('sens').value=S.sens||5;$('sensv').textContent=S.sens||5;$('vmode').value=S.vmode||'smart';$('vlang').value=S.vlang||'ar-SA'};
   if('serviceWorker' in navigator&&/^https?:/.test(location.protocol)){try{navigator.serviceWorker.register('/sw.js')}catch(e){}}
+  loadOff().then(function(){if(tab==='h')renderAd()});
   load();render();setWake();showTab('h');
 })();
 </script>
