@@ -420,7 +420,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   }
   async function clearDl(){await idbClear();await loadOff();setDl('Downloaded audio was deleted.');if(tab==='h')renderAd()}
   function arabicVoiceInfo(){
-    try{var v=speechSynthesis.getVoices().filter(function(x){return /^ar/i.test(x.lang)});
+    try{var v=arVoices();
       if(!v.length)return 'No Arabic voice found on this phone';
       return v.some(function(x){return x.localService})?'Arabic voice on this phone: works offline ✓':'Arabic voice found, but it needs internet';
     }catch(e){return 'Phone voice not available'}
@@ -452,12 +452,15 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     }
     return {ok:true};
   }
+  function arVoices(){try{return speechSynthesis.getVoices().filter(function(x){return /^ar/i.test(String(x.lang).replace('_','-'))||/arabic/i.test(x.name)})}catch(e){return []}}
+  function waitVoices(){return new Promise(function(res){var n=0;(function t(){var v=speechSynthesis.getVoices();if(v.length||n++>12)return res(v);setTimeout(t,250)})()})}
+  var LASTERR='';
   function speak(t,rate){
     return new Promise(function(res){
       var t0=Date.now(),fin=false;
       function done(ok){if(fin)return;fin=true;P.stopNow=null;res({ok:ok,ms:Date.now()-t0})}
-      var u=new SpeechSynthesisUtterance(t);u.lang='ar-SA';u.rate=rate||0.85;
-      u.onend=function(){done(true)};u.onerror=function(){done(false)};
+      var u=new SpeechSynthesisUtterance(t);u.lang='ar-SA';u.rate=rate||0.85;var av=arVoices();if(av.length){u.voice=av[0];u.lang=av[0].lang}
+      u.onend=function(){done(true)};u.onerror=function(e){LASTERR=(e&&e.error)||'unknown';done(false)};
       P.stopNow=function(){u.onend=null;u.onerror=null;done(true)};
       speechSynthesis.cancel();speechSynthesis.speak(u);
     });
@@ -564,19 +567,20 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     }
     // device voice (duas)
     if(!('speechSynthesis' in window)){msg('Device voice is not available on this phone.');return false}
-    var vs=speechSynthesis.getVoices();
-    if(vs.length&&!vs.some(function(v){return /^ar/i.test(v.lang)})){msg('No Arabic voice found. Install Arabic in your phone\'s Google Text-to-speech settings.');return false}
+    await waitVoices();
+    if(P.tok!==tok)return false;
+    if(!arVoices().length){msg('No Arabic voice found yet. After installing it, fully close Chrome (swipe it away from recent apps) and open the app again. Trying anyway…')}
     if(mode==='listen'){
       msg('🎧 Listening…');
       var r0=await speak(x.ar.replace(/•/g,'،'),0.85);if(P.tok!==tok)return false;
-      if(!r0.ok){msg('The voice could not play.');return false}
+      if(!r0.ok){msg('The voice could not play (error: '+LASTERR+'). Fully close Chrome and reopen, then try again.');return false}
       return true;
     }
     var ch=ttsChunks(x.ar,PW[plen()]);
     for(i=0;i<ch.length;i++){
       msg('Phrase '+(i+1)+' of '+ch.length+' · 🎧 listen');
       var r=await speak(ch[i],0.8);if(P.tok!==tok)return false;
-      if(!r.ok){msg('The voice could not play.');return false}
+      if(!r.ok){msg('The voice could not play (error: '+LASTERR+')');return false}
       msg('Phrase '+(i+1)+' of '+ch.length+' · 🗣 your turn, repeat');
       await wait(Math.max(1500,r.ms*gf()));if(P.tok!==tok)return false;
     }
