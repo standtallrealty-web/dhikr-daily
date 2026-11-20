@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0b3d2e">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Dhikr Daily</title>
+<style>
+  :root{--bg:#0b3d2e;--bg2:#072a20;--card:#0f4d3a;--gold:#e6c36a;--text:#f3f1e7;--muted:#9fc3b3;--ring:#1c6b52}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+  html,body{margin:0;height:100%;background:linear-gradient(180deg,var(--bg),var(--bg2));color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overscroll-behavior:none}
+  body{display:flex;flex-direction:column;padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom)}
+  header{display:flex;justify-content:space-between;align-items:center;padding:14px 4px 4px}
+  header .date{font-size:14px;color:var(--muted)}
+  header .streak{font-size:14px;background:var(--card);padding:6px 12px;border-radius:20px}
+  .arabic{text-align:center;font-size:34px;color:var(--gold);margin:6px 0 0;font-family:"Amiri","Noto Naskh Arabic","Traditional Arabic",serif}
+  .sub{text-align:center;font-size:13px;color:var(--muted);margin-bottom:6px}
+  .wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0}
+  #tap{position:relative;width:min(78vw,340px);aspect-ratio:1;border:0;background:none;padding:0;touch-action:manipulation;cursor:pointer}
+  #tap svg{width:100%;height:100%;transform:rotate(-90deg)}
+  #tap .in{position:absolute;inset:11%;border-radius:50%;background:radial-gradient(circle at 35% 30%,#17705a,#0d4636);box-shadow:0 10px 30px rgba(0,0,0,.45),inset 0 2px 6px rgba(255,255,255,.12);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:transform .06s}
+  #tap:active .in{transform:scale(.96)}
+  #count{font-size:clamp(44px,15vw,68px);font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+  #of{font-size:14px;color:var(--muted);margin-top:6px}
+  #pct{font-size:13px;color:var(--gold);margin-top:4px}
+  #msg{height:22px;margin-top:10px;font-size:15px;color:var(--gold);text-align:center}
+  .row{display:flex;gap:8px;justify-content:center;margin:6px 0 10px;flex-wrap:wrap}
+  .row button{background:var(--card);color:var(--text);border:1px solid #1c6b52;border-radius:12px;padding:11px 16px;font-size:15px;touch-action:manipulation}
+  .row button:active{background:#17705a}
+  .panel{background:rgba(15,77,58,.7);border-radius:16px;padding:12px 14px;margin-bottom:12px}
+  .days{display:flex;gap:6px;align-items:flex-end;height:70px}
+  .day{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;font-size:10px;color:var(--muted)}
+  .bar{width:100%;border-radius:4px 4px 0 0;background:#2a8a6c;min-height:2px}
+  .bar.done{background:var(--gold)}
+  .set{display:flex;justify-content:space-between;align-items:center;font-size:14px;padding:6px 0;gap:10px}
+  .set input[type=number]{width:100px;background:var(--bg2);color:var(--text);border:1px solid #1c6b52;border-radius:8px;padding:6px 8px;font-size:15px;text-align:right;user-select:text;-webkit-user-select:text}
+  details summary{font-size:14px;color:var(--muted);padding:4px 0;list-style:none;cursor:pointer}
+  .total{font-size:12px;color:var(--muted);text-align:center;margin-bottom:8px}
+  #voiceBtn{display:block;margin:0 auto 8px;background:#1c6b52;color:#fff;border:0;border-radius:14px;padding:13px 22px;font-size:16px;font-weight:600;touch-action:manipulation}
+  #voiceBtn.on{background:#b3392f}
+  #vpanel{display:none;margin:0 0 10px;text-align:center;font-size:13px;color:var(--muted)}
+  #vpanel.show{display:block}
+  .meter{height:8px;background:#06251c;border-radius:6px;overflow:hidden;margin:6px 0}
+  .meter div{height:100%;width:0;background:#4fd1a0;transition:width .05s}
+  #vpanel input[type=range]{width:70%;accent-color:#e6c36a}
+  .tabs{display:flex;gap:6px;overflow-x:auto;padding:6px 0 8px;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tabs button{flex:none;background:var(--card);color:var(--text);border:1px solid #1c6b52;border-radius:18px;padding:8px 14px;font-size:14px;touch-action:manipulation}
+  .tabs button.act{background:var(--gold);color:#0b3d2e;border-color:var(--gold);font-weight:700}
+  .view{display:flex;flex-direction:column;flex:1;min-height:0}
+  #v2{display:none;overflow-y:auto;padding-bottom:24px;-webkit-overflow-scrolling:touch}
+  .adhead{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--muted);margin:4px 2px 10px}
+  .adhead button{background:none;border:1px solid #1c6b52;color:var(--muted);border-radius:10px;padding:5px 10px;font-size:12px}
+  .card{background:rgba(15,77,58,.8);border-radius:16px;padding:14px;margin-bottom:12px}
+  .card.done{opacity:.55}
+  .card .ct{font-size:13px;color:var(--gold);margin-bottom:8px;font-weight:600}
+  .card .ar2{font-size:26px;line-height:2;text-align:right;direction:rtl;font-family:"Amiri","Noto Naskh Arabic","Traditional Arabic",serif;user-select:text;-webkit-user-select:text}
+  .card .en{font-size:13px;color:#cfe3d9;margin-top:6px;line-height:1.5}
+  .card .ref{font-size:11px;color:var(--muted);margin-top:6px}
+  .card .acts{display:flex;gap:8px;margin-top:10px}
+  .card .cnt{flex:1;background:#1c6b52;color:#fff;border:0;border-radius:12px;padding:12px;font-size:16px;font-weight:700;touch-action:manipulation}
+  .card.done .cnt{background:#3a8a2f}
+  .card .rst{background:none;border:1px solid #1c6b52;color:var(--muted);border-radius:12px;padding:0 14px;font-size:16px}
+  .note{font-size:11px;color:var(--muted);line-height:1.5;margin:6px 2px 0}
+  .powered{text-align:center;font-size:11px;color:var(--muted);padding:6px 0 10px;letter-spacing:.3px}
+  .powered b{color:var(--gold);font-weight:600}
+  /* ---- layout fix: scrollable content + bottom navigation ---- */
+  html,body{height:100%}
+  body{height:100dvh;overflow:hidden;padding:env(safe-area-inset-top) 0 0}
+  header{padding:12px 16px 8px;border-bottom:1px solid rgba(255,255,255,.06)}
+  .view{padding:0 16px}
+  #v1{display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:24px}
+  #v2{display:block;overflow-y:auto;padding-bottom:24px}
+  .wrap{flex:none;padding:10px 0 4px}
+  #tap{width:min(62vw,250px)}
+  #count{font-size:clamp(36px,12vw,54px)}
+  .bottomnav{display:flex;background:#06251c;border-top:1px solid #1c6b52;padding-bottom:env(safe-area-inset-bottom);flex:none}
+  .bottomnav button{flex:1;background:none;border:0;color:var(--muted);padding:8px 2px 7px;font-size:10.5px;display:flex;flex-direction:column;align-items:center;gap:3px;touch-action:manipulation}
+  .bottomnav button .ic{font-size:20px;line-height:1}
+  .bottomnav button.act{color:var(--gold);font-weight:700}
+  .hello{font-size:20px;font-weight:700;margin:14px 2px 2px}
+  .hsub{font-size:13px;color:var(--muted);margin:0 2px 14px}
+  .hcard{background:rgba(15,77,58,.85);border-radius:16px;padding:14px;margin-bottom:10px;cursor:pointer}
+  .hcard:active{background:#17705a}
+  .hrow{display:flex;justify-content:space-between;align-items:center;font-size:16px;font-weight:600}
+  .hrow small{font-size:13px;color:var(--gold);font-weight:600}
+  .pbar{height:7px;background:#06251c;border-radius:6px;overflow:hidden;margin:10px 0 6px}
+  .pbar div{height:100%;background:var(--gold);border-radius:6px}
+  .hcard.ok .pbar div{background:#4fd1a0}
+  .hs{font-size:12px;color:var(--muted)}
+  .row{margin-top:10px}
+  #tap{color:var(--text)}
+  .card .ar2{font-size:24px}
+  .audrow{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+  .aud{background:var(--gold);color:#0b3d2e;border:0;border-radius:12px;padding:10px 14px;font-size:14px;font-weight:700;touch-action:manipulation}
+  .aud.on{background:#b3392f;color:#fff}
+  .astat{font-size:12px;color:var(--gold);flex:1;min-width:120px}
+  .asrc{font-size:10.5px;color:var(--muted);margin-top:4px}
+  #gapsel{background:var(--bg2);color:var(--text);border:1px solid #1c6b52;border-radius:8px;padding:4px 6px;font-size:12px}
+  .ppanel{background:rgba(15,77,58,.85);border:1px solid #1c6b52;border-radius:16px;padding:12px;margin-bottom:12px}
+  .seg{display:flex;gap:6px;margin-bottom:10px}
+  .seg button{flex:1;background:var(--bg2);color:var(--muted);border:1px solid #1c6b52;border-radius:12px;padding:9px 6px;font-size:14px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px;touch-action:manipulation}
+  .seg button small{font-size:10.5px;font-weight:400}
+  .seg button.on{background:var(--gold);color:#0b3d2e;border-color:var(--gold)}
+  .popts{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);margin-bottom:8px}
+  .aud.big{width:100%;padding:12px;font-size:15px}
+  @keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.08)}100%{transform:scale(1)}}
+  .pop{animation:pop .35s}
+</style>
+</head>
+<body>
+<header>
+  <div><div style="font-size:17px;font-weight:700;color:var(--gold)">Dhikr Daily</div><div class="date" id="date"></div></div>
+  <div class="streak" id="streak">🔥 0 day streak</div>
+</header>
+<div id="v1" class="view">
+<div class="arabic">أَسْتَغْفِرُ اللَّهَ</div>
+<div class="sub">Astaghfirullah</div>
+
+<div class="wrap">
+  <button id="tap" aria-label="Tap to count">
+    <svg viewBox="0 0 200 200">
+      <circle cx="100" cy="100" r="92" fill="none" stroke="#1c6b52" stroke-width="9" opacity=".5"/>
+      <circle id="prog" cx="100" cy="100" r="92" fill="none" stroke="#e6c36a" stroke-width="9" stroke-linecap="round" stroke-dasharray="578.05" stroke-dashoffset="578.05"/>
+    </svg>
+    <div class="in">
+      <div id="count">0</div>
+      <div id="of">of 10,000</div>
+      <div id="pct">0%</div>
+    </div>
+  </button>
+  <div id="msg"></div>
+</div>
+
+<button id="voiceBtn">🎙 Start voice counting</button>
+<div id="vpanel">
+  <div id="vstatus">Starting microphone…</div>
+  <div class="meter"><div id="vlevel"></div></div>
+  <div>Sensitivity: <span id="sensv">5</span> <small>(raise it if words are missed, lower it if noise is counted)</small></div>
+  <input type="range" id="sens" min="1" max="10" step="1" value="5">
+</div>
+<div class="row">
+  <button id="undo">− Undo</button>
+  <button id="p10">+10</button>
+  <button id="p100">+100</button>
+  <button id="resetTop" style="border-color:#8a3a35;color:#ffb4ab">⟲ Reset</button>
+</div>
+
+<div class="panel">
+  <div class="days" id="days"></div>
+</div>
+
+<div class="panel">
+  <details>
+    <summary>⚙ Settings</summary>
+    <div class="set"><span>Daily target</span><input id="target" type="number" min="1" step="100"></div>
+    <div class="set"><span>Vibrate on tap</span><input id="vib" type="checkbox"></div>
+    <div class="set"><span>Keep screen on</span><input id="wake" type="checkbox"></div>
+    <div class="set"><span>Today's count</span><button id="reset" style="background:#5a1f1f;color:#fff;border:0;border-radius:8px;padding:8px 12px">Reset today</button></div>
+  </details>
+</div>
+<div class="total" id="total"></div>
+<div class="powered">Powered by <b>Stand Tall Realty</b></div>
+</div>
+<div id="v2" class="view"></div>
+<nav class="bottomnav">
+  <button id="tab_h" class="act"><span class="ic">🏠</span><span>Today</span></button>
+  <button id="tab_i"><span class="ic">📿</span><span>Istighfar</span></button>
+  <button id="tab_m"><span class="ic">🌅</span><span>Morning</span></button>
+  <button id="tab_e"><span class="ic">🌇</span><span>Evening</span></button>
+  <button id="tab_s"><span class="ic">🕌</span><span>Salah</span></button>
+  <button id="tab_b"><span class="ic">🌙</span><span>Sleep</span></button>
+</nav>
+
+<div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;align-items:center;justify-content:center;padding:24px"><div style="background:#0f4d3a;border:1px solid #1c6b52;border-radius:18px;padding:20px;max-width:320px;width:100%;text-align:center"><div id="mtext" style="font-size:16px;line-height:1.5;margin-bottom:16px"></div><div style="display:flex;gap:10px"><button id="mno" style="flex:1;background:none;border:1px solid #1c6b52;color:#f3f1e7;border-radius:12px;padding:12px;font-size:15px">Cancel</button><button id="myes" style="flex:1;background:#b3392f;border:0;color:#fff;border-radius:12px;padding:12px;font-size:15px;font-weight:700">Yes, reset</button></div></div></div>
+<script>
+(function(){
+  var KEY='istighfar_v1';
+  var DEF={target:10000,vib:true,wake:false,days:{}};
+  var S;
+  function load(){try{var r=localStorage.getItem(KEY);S=r?JSON.parse(r):null}catch(e){S=null}
+    if(!S||typeof S!=='object')S=JSON.parse(JSON.stringify(DEF));
+    if(!S.days)S.days={};if(!S.target)S.target=10000;}
+  var mem=false;
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+  function key(d){d=d||new Date();var m=d.getMonth()+1,dd=d.getDate();return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(dd<10?'0':'')+dd}
+  var today=key();
+  function cur(){if(!S.days[today])S.days[today]={n:0,t:S.target};return S.days[today]}
+  function fmt(n){return n.toLocaleString('en-IN')}
+  var $=function(id){return document.getElementById(id)};
+  function ask(msg,cb){$('mtext').textContent=msg;$('modal').style.display='flex';$('mno').onclick=function(){$('modal').style.display='none'};$('myes').onclick=function(){$('modal').style.display='none';cb()}}
+  var C=2*Math.PI*92;
+
+  function streak(){
+    var s=0,d=new Date();
+    var t=S.days[key(d)];
+    if(!(t&&t.n>=t.t))d.setDate(d.getDate()-1);
+    for(;;){var e=S.days[key(d)];if(e&&e.n>=e.t){s++;d.setDate(d.getDate()-1)}else break}
+    return s;
+  }
+  function render(){
+    var c=cur(),t=S.target;c.t=t;
+    $('count').textContent=fmt(c.n);
+    $('of').textContent='of '+fmt(t);
+    var p=Math.min(1,c.n/t);
+    $('pct').textContent=Math.floor(p*100)+'%';
+    $('prog').style.strokeDashoffset=C*(1-p);
+    $('msg').textContent=c.n>=t?'🌙 MashaAllah! Today\'s goal complete':fmt(t-c.n)+' remaining';
+    $('date').textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'});
+    var st=streak();$('streak').textContent='🔥 '+st+(st===1?' day':' days')+' streak';
+    // last 7 days
+    var h='',max=1,arr=[];
+    for(var i=6;i>=0;i--){var d=new Date();d.setDate(d.getDate()-i);var e=S.days[key(d)]||{n:0,t:t};arr.push({d:d,e:e});max=Math.max(max,e.n,e.t)}
+    arr.forEach(function(x){
+      var ht=Math.max(2,Math.round(x.e.n/max*52));
+      h+='<div class="day"><div style="font-size:9px">'+(x.e.n?(x.e.n>=1000?(x.e.n/1000).toFixed(1)+'k':x.e.n):'')+'</div><div class="bar'+(x.e.n>=x.e.t?' done':'')+'" style="height:'+ht+'px"></div><div>'+x.d.toLocaleDateString('en-GB',{weekday:'narrow'})+'</div></div>';
+    });
+    $('days').innerHTML=h;
+    var tot=0;for(var k in S.days)tot+=S.days[k].n;
+    $('total').textContent='All-time: '+fmt(tot)+' Astaghfirullah';
+    $('target').value=t;$('vib').checked=!!S.vib;$('wake').checked=!!S.wake;
+  }
+  function checkDay(){var k=key();if(k!==today){today=k;render()}}
+  function buzz(ms){if(S.vib&&navigator.vibrate)try{navigator.vibrate(ms)}catch(e){}}
+  function add(n,quiet){
+    checkDay();
+    var c=cur(),before=c.n;
+    c.n=Math.max(0,c.n+n);c.t=S.target;
+    save();render();
+    if(n>0){
+      if(before<S.target&&c.n>=S.target){buzz([200,100,200,100,400]);$('tap').classList.add('pop')}
+      else if(!quiet){
+        if(Math.floor(c.n/100)>Math.floor(before/100))buzz(40);
+        else buzz(8);
+      }
+    }
+  }
+  // fast tapping: pointerdown
+  var tap=$('tap');
+  tap.addEventListener('pointerdown',function(e){e.preventDefault();add(1)});
+  tap.addEventListener('animationend',function(){tap.classList.remove('pop')});
+  tap.addEventListener('keydown',function(e){if(e.key===' '||e.key==='Enter'){e.preventDefault();add(1)}});
+  $('undo').onclick=function(){add(-1)};
+  $('p10').onclick=function(){add(10)};
+  $('p100').onclick=function(){add(100)};
+  $('target').onchange=function(){var v=parseInt(this.value,10);if(v>0){S.target=v;save();render()}else render()};
+  $('vib').onchange=function(){S.vib=this.checked;save()};
+  var lock=null;
+  function setWake(){
+    if(!('wakeLock' in navigator))return;
+    if((S.wake||V.on)&&document.visibilityState==='visible'){navigator.wakeLock.request('screen').then(function(l){lock=l}).catch(function(){})}
+    else if(lock){lock.release().catch(function(){});lock=null}
+  }
+  $('wake').onchange=function(){S.wake=this.checked;save();setWake()};
+  function resetToday(){ask("Reset today's Istighfar count to 0?",function(){cur().n=0;save();render()})}
+  $('reset').onclick=resetToday;$('resetTop').onclick=resetToday;
+  document.addEventListener('visibilitychange',function(){checkDay();setWake()});
+  setInterval(checkDay,30000);
+  // block double-tap zoom / context menu
+  document.addEventListener('contextmenu',function(e){e.preventDefault()});
+  // ---------- Adhkar (Qur'an & authentic hadith only) ----------
+  var KURSI='ٱللَّهُ لَآ إِلَٰهَ إِلَّا هُوَ ٱلْحَىُّ ٱلْقَيُّومُ ۚ لَا تَأْخُذُهُۥ سِنَةٌ وَلَا نَوْمٌ ۚ لَّهُۥ مَا فِى ٱلسَّمَٰوَٰتِ وَمَا فِى ٱلْأَرْضِ ۗ مَن ذَا ٱلَّذِى يَشْفَعُ عِندَهُۥٓ إِلَّا بِإِذْنِهِۦ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَىْءٍ مِّنْ عِلْمِهِۦٓ إِلَّا بِمَا شَآءَ ۚ وَسِعَ كُرْسِيُّهُ ٱلسَّمَٰوَٰتِ وَٱلْأَرْضَ ۖ وَلَا يَـُٔودُهُۥ حِفْظُهُمَا ۚ وَهُوَ ٱلْعَلِىُّ ٱلْعَظِيمُ';
+  var QULS='قُلْ هُوَ اللَّهُ أَحَدٌ • اللَّهُ الصَّمَدُ • لَمْ يَلِدْ وَلَمْ يُولَدْ • وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ\n\nقُلْ أَعُوذُ بِرَبِّ الْفَلَقِ • مِنْ شَرِّ مَا خَلَقَ • وَمِنْ شَرِّ غَاسِقٍ إِذَا وَقَبَ • وَمِنْ شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ • وَمِنْ شَرِّ حَاسِدٍ إِذَا حَسَدَ\n\nقُلْ أَعُوذُ بِرَبِّ النَّاسِ • مَلِكِ النَّاسِ • إِلَهِ النَّاسِ • مِنْ شَرِّ الْوَسْوَاسِ الْخَنَّاسِ • الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ • مِنَ الْجِنَّةِ وَالنَّاسِ';
+  var BAQ2='آمَنَ الرَّسُولُ بِمَا أُنْزِلَ إِلَيْهِ مِنْ رَبِّهِ وَالْمُؤْمِنُونَ ۚ كُلٌّ آمَنَ بِاللَّهِ وَمَلَائِكَتِهِ وَكُتُبِهِ وَرُسُلِهِ لَا نُفَرِّقُ بَيْنَ أَحَدٍ مِنْ رُسُلِهِ ۚ وَقَالُوا سَمِعْنَا وَأَطَعْنَا ۖ غُفْرَانَكَ رَبَّنَا وَإِلَيْكَ الْمَصِيرُ • لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا ۚ لَهَا مَا كَسَبَتْ وَعَلَيْهَا مَا اكْتَسَبَتْ ۗ رَبَّنَا لَا تُؤَاخِذْنَا إِنْ نَسِينَا أَوْ أَخْطَأْنَا ۚ رَبَّنَا وَلَا تَحْمِلْ عَلَيْنَا إِصْرًا كَمَا حَمَلْتَهُ عَلَى الَّذِينَ مِنْ قَبْلِنَا ۚ رَبَّنَا وَلَا تُحَمِّلْنَا مَا لَا طَاقَةَ لَنَا بِهِ ۖ وَاعْفُ عَنَّا وَاغْفِرْ لَنَا وَارْحَمْنَا ۚ أَنْتَ مَوْلَانَا فَانْصُرْنَا عَلَى الْقَوْمِ الْكَافِرِينَ';
+  var TAHLIL='لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ';
+  var AD=[
+   {id:'kursi',c:'me',t:'Ayat al-Kursi',ar:KURSI,en:'Recite once. Whoever recites it in the morning is protected until evening, and in the evening until morning.',ref:"Qur'an 2:255 · al-Hakim, graded sahih by al-Albani (Sahih at-Targhib 1/273)",n:1},
+   {id:'quls',c:'me',t:'Al-Ikhlas, Al-Falaq, An-Nas',ar:QULS,en:'Recite the three surahs together, 3 times. They suffice you against everything.',ref:'Abu Dawud 5082, Tirmidhi 3575 · graded sahih/hasan',n:3},
+   {id:'mulk',c:'m',t:'Morning: Asbahna wa asbahal-mulku lillah',ar:'أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ وَالْحَمْدُ لِلَّهِ، لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ، رَبِّ أَسْأَلُكَ خَيْرَ مَا فِي هَذَا الْيَوْمِ وَخَيْرَ مَا بَعْدَهُ، وَأَعُوذُ بِكَ مِنْ شَرِّ مَا فِي هَذَا الْيَوْمِ وَشَرِّ مَا بَعْدَهُ، رَبِّ أَعُوذُ بِكَ مِنَ الْكَسَلِ وَسُوءِ الْكِبَرِ، رَبِّ أَعُوذُ بِكَ مِنْ عَذَابٍ فِي النَّارِ وَعَذَابٍ فِي الْقَبْرِ',en:'We have reached the morning and the dominion belongs to Allah. My Lord, I ask You for the good of this day and what follows it, and seek refuge in You from the evil of this day and what follows it, from laziness and the evil of old age, and from punishment in the Fire and in the grave.',ref:'Sahih Muslim 2723',n:1},
+   {id:'mulk',c:'e',t:'Evening: Amsayna wa amsal-mulku lillah',ar:'أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ وَالْحَمْدُ لِلَّهِ، لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ، رَبِّ أَسْأَلُكَ خَيْرَ مَا فِي هَذِهِ اللَّيْلَةِ وَخَيْرَ مَا بَعْدَهَا، وَأَعُوذُ بِكَ مِنْ شَرِّ مَا فِي هَذِهِ اللَّيْلَةِ وَشَرِّ مَا بَعْدَهَا، رَبِّ أَعُوذُ بِكَ مِنَ الْكَسَلِ وَسُوءِ الْكِبَرِ، رَبِّ أَعُوذُ بِكَ مِنْ عَذَابٍ فِي النَّارِ وَعَذَابٍ فِي الْقَبْرِ',en:'We have reached the evening and the dominion belongs to Allah. My Lord, I ask You for the good of this night and what follows it, and seek refuge in You from the evil of this night and what follows it, from laziness and the evil of old age, and from punishment in the Fire and in the grave.',ref:'Sahih Muslim 2723',n:1},
+   {id:'bika',c:'m',t:'Morning: Allahumma bika asbahna',ar:'اللَّهُمَّ بِكَ أَصْبَحْنَا، وَبِكَ أَمْسَيْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ، وَإِلَيْكَ النُّشُورُ',en:'O Allah, by You we reach the morning, by You we reach the evening, by You we live and by You we die, and to You is the resurrection.',ref:'Abu Dawud 5068, Tirmidhi 3391 · sahih (al-Albani)',n:1},
+   {id:'bika',c:'e',t:'Evening: Allahumma bika amsayna',ar:'اللَّهُمَّ بِكَ أَمْسَيْنَا، وَبِكَ أَصْبَحْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ، وَإِلَيْكَ الْمَصِيرُ',en:'O Allah, by You we reach the evening, by You we reach the morning, by You we live and by You we die, and to You is the final return.',ref:'Abu Dawud 5068, Tirmidhi 3391 · sahih (al-Albani)',n:1},
+   {id:'sayyid',c:'me',t:'Sayyid al-Istighfar',ar:'اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ، أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ، وَأَبُوءُ لَكَ بِذَنْبِي فَاغْفِرْ لِي، فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ',en:'O Allah, You are my Lord; none has the right to be worshipped but You. You created me and I am Your servant, and I keep Your covenant and promise as best I can. I seek refuge in You from the evil I have done. I acknowledge Your favour upon me and I acknowledge my sin, so forgive me, for none forgives sins but You. (Say it with firm belief.)',ref:'Sahih al-Bukhari 6306',n:1},
+   {id:'raditu',c:'me',t:'Raditu billahi rabba',ar:'رَضِيتُ بِاللَّهِ رَبًّا، وَبِالْإِسْلَامِ دِينًا، وَبِمُحَمَّدٍ ﷺ نَبِيًّا',en:'I am pleased with Allah as my Lord, Islam as my religion, and Muhammad ﷺ as my Prophet.',ref:'Ahmad 18967 · sahih through corroborating chains',n:3},
+   {id:'bismillah',c:'me',t:'Bismillahilladhi la yadurru',ar:'بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ',en:'In the name of Allah, with whose name nothing on earth or in the heavens can cause harm, and He is the All-Hearing, All-Knowing.',ref:'Abu Dawud 5088, Tirmidhi 3388 · sahih (Ibn al-Qayyim, al-Albani)',n:3},
+   {id:'hasbi',c:'me',t:'Hasbiyallahu la ilaha illa huwa',ar:'حَسْبِيَ اللَّهُ لَا إِلَهَ إِلَّا هُوَ، عَلَيْهِ تَوَكَّلْتُ وَهُوَ رَبُّ الْعَرْشِ الْعَظِيمِ',en:'Allah is sufficient for me; none has the right to be worshipped but Him. Upon Him I rely, and He is the Lord of the Mighty Throne.',ref:'Abu Dawud 5081 · isnad jayyid (Ibn Baz)',n:7},
+   {id:'afiyah',c:'me',t:'Allahumma inni as-alukal-afiyah',ar:'اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَافِيَةَ فِي الدُّنْيَا وَالْآخِرَةِ، اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي دِينِي وَدُنْيَايَ وَأَهْلِي وَمَالِي، اللَّهُمَّ اسْتُرْ عَوْرَاتِي وَآمِنْ رَوْعَاتِي، اللَّهُمَّ احْفَظْنِي مِنْ بَيْنِ يَدَيَّ وَمِنْ خَلْفِي وَعَنْ يَمِينِي وَعَنْ شِمَالِي وَمِنْ فَوْقِي، وَأَعُوذُ بِعَظَمَتِكَ أَنْ أُغْتَالَ مِنْ تَحْتِي',en:'O Allah, I ask You for well-being in this world and the next; for pardon and well-being in my religion, worldly life, family and wealth. O Allah, conceal my faults and calm my fears. Protect me from front and behind, right and left, and above, and I seek refuge in Your greatness from being swallowed up from beneath me.',ref:'Abu Dawud 5074 · sahih (al-Albani)',n:1},
+   {id:'hayy',c:'me',t:'Ya Hayyu ya Qayyum',ar:'يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغِيثُ، أَصْلِحْ لِي شَأْنِي كُلَّهُ، وَلَا تَكِلْنِي إِلَى نَفْسِي طَرْفَةَ عَيْنٍ',en:'O Ever-Living, O Sustainer, in Your mercy I seek relief. Set right all my affairs and do not leave me to myself even for the blink of an eye.',ref:'as-Silsilah as-Sahihah 227 · hasan (al-Albani)',n:1},
+   {id:'tahlil',c:'me',t:'La ilaha illallahu wahdahu',ar:TAHLIL,en:'There is none worthy of worship but Allah alone, with no partner; His is the dominion and His is the praise, and He is over all things capable. (Once now; it may also be said up to 100 times during the day.)',ref:'Abu Dawud 5077 · sahih (al-Albani); 100×/day: Bukhari & Muslim',n:1},
+   {id:'tasbih100',c:'me',t:'SubhanAllahi wa bihamdihi',ar:'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',en:'Glory and praise be to Allah. Whoever says it 100 times morning and evening, no one will come on the Day of Resurrection with better, except one who said the same or more.',ref:'Sahih Muslim 2692',n:100},
+   {id:'adad',c:'m',t:'SubhanAllahi wa bihamdihi adada khalqihi',ar:'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ عَدَدَ خَلْقِهِ، وَرِضَا نَفْسِهِ، وَزِنَةَ عَرْشِهِ، وَمِدَادَ كَلِمَاتِهِ',en:'Glory and praise be to Allah as many times as the number of His creation, as much as pleases Him, as heavy as His Throne, and as much as the ink of His words.',ref:'Sahih Muslim 2726 · 3 times in the morning',n:3},
+   {id:'tamma',c:'e',t:'Audhu bikalimatillahit-tammati',ar:'أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ',en:'I seek refuge in the perfect words of Allah from the evil of what He has created.',ref:'Sahih Muslim 2709 · 3 times in the evening (Hisn al-Muslim)',n:3},
+   {id:'istig',c:'s',t:'Astaghfirullah',ar:'أَسْتَغْفِرُ اللَّهَ',en:'I seek the forgiveness of Allah. Say it 3 times right after the salam.',ref:'Sahih Muslim 591',n:3},
+   {id:'salam',c:'s',t:'Allahumma antas-salam',ar:'اللَّهُمَّ أَنْتَ السَّلَامُ وَمِنْكَ السَّلَامُ تَبَارَكْتَ يَا ذَا الْجَلَالِ وَالْإِكْرَامِ',en:'O Allah, You are Peace and from You comes peace. Blessed are You, O Possessor of majesty and honour.',ref:'Sahih Muslim 591',n:1},
+   {id:'kursi',c:'s',t:'Ayat al-Kursi',ar:KURSI,en:'After every obligatory prayer; nothing stands between him and Paradise except death.',ref:"Qur'an 2:255 · an-Nasa'i al-Kubra 9848 · sahih (al-Albani)",n:1},
+   {id:'quls',c:'s',t:'Al-Ikhlas, Al-Falaq, An-Nas',ar:QULS,en:'Once after every prayer (3 times after Fajr and Maghrib, as in Hisn al-Muslim).',ref:'Abu Dawud 1523, Tirmidhi 2903',n:1},
+   {id:'sub33',c:'s',t:'SubhanAllah ×33',ar:'سُبْحَانَ اللَّهِ',en:'Glory be to Allah.',ref:'Sahih Muslim 597',n:33},
+   {id:'hamd33',c:'s',t:'Alhamdulillah ×33',ar:'الْحَمْدُ لِلَّهِ',en:'All praise is for Allah.',ref:'Sahih Muslim 597',n:33},
+   {id:'akbar33',c:'s',t:'Allahu Akbar ×33',ar:'اللَّهُ أَكْبَرُ',en:'Allah is the Greatest.',ref:'Sahih Muslim 597',n:33},
+   {id:'tahlil',c:'s',t:'Complete the hundred with tahlil',ar:TAHLIL,en:'Say this once to complete the hundred; his sins are forgiven even if like the foam of the sea.',ref:'Sahih Muslim 597',n:1},
+   {id:'kursi',c:'b',t:'Ayat al-Kursi',ar:KURSI,en:'Whoever recites it at bedtime has a guardian from Allah and Satan will not come near him until morning.',ref:"Qur'an 2:255 · Sahih al-Bukhari 2311",n:1},
+   {id:'baq2',c:'b',t:'Last two verses of Surah al-Baqarah',ar:BAQ2,en:'Whoever recites them at night, they suffice him.',ref:"Qur'an 2:285-286 · Bukhari 5009, Muslim 807",n:1},
+   {id:'quls',c:'b',t:'Al-Ikhlas, Al-Falaq, An-Nas',ar:QULS,en:'Cup both palms, blow into them, recite the three surahs, then wipe over the body starting with head and face. Do this 3 times.',ref:'Sahih al-Bukhari 5017',n:3},
+   {id:'sub33',c:'b',t:'SubhanAllah ×33',ar:'سُبْحَانَ اللَّهِ',en:'Taught by the Prophet ﷺ to Fatimah and Ali (may Allah be pleased with them), better than a servant.',ref:'Bukhari 3113, Muslim 2727',n:33},
+   {id:'hamd33',c:'b',t:'Alhamdulillah ×33',ar:'الْحَمْدُ لِلَّهِ',en:'All praise is for Allah.',ref:'Bukhari 3113, Muslim 2727',n:33},
+   {id:'akbar34',c:'b',t:'Allahu Akbar ×34',ar:'اللَّهُ أَكْبَرُ',en:'Allah is the Greatest.',ref:'Bukhari 3113, Muslim 2727',n:34},
+   {id:'rabbi',c:'b',t:'Bismika rabbi wada-tu janbi',ar:'بِاسْمِكَ رَبِّي وَضَعْتُ جَنْبِي، وَبِكَ أَرْفَعُهُ، فَإِنْ أَمْسَكْتَ نَفْسِي فَارْحَمْهَا، وَإِنْ أَرْسَلْتَهَا فَاحْفَظْهَا بِمَا تَحْفَظُ بِهِ عِبَادَكَ الصَّالِحِينَ',en:'In Your name, my Lord, I lay down my side and by You I raise it. If You take my soul, have mercy on it; and if You release it, protect it as You protect Your righteous servants.',ref:'Bukhari 6320, Muslim 2714',n:1},
+   {id:'amutu',c:'b',t:'Bismika Allahumma amutu wa ahya',ar:'بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا',en:'In Your name, O Allah, I die and I live. (Last words before sleeping.)',ref:'Sahih al-Bukhari 6324',n:1}
+  ];
+  var CATN={m:'Morning adhkar',e:'Evening adhkar',s:'After every obligatory prayer',b:'Before sleeping'};
+  var TIPS={m:'Time: after Fajr until sunrise (can be said until mid-morning).',e:'Time: after Asr until sunset (can be said until night).',s:'Say right after the salam.',b:'Say after lying down on the right side.'};
+  // ---------- Listen / Learn player ----------
+  var QAUD={kursi:[[2,255]],quls:[[112,1],[112,2],[112,3],[112,4],[113,1],[113,2],[113,3],[113,4],[113,5],[114,1],[114,2],[114,3],[114,4],[114,5],[114,6]],baq2:[[2,285],[2,286]]};
+  var P={key:null,tok:0,aud:null,msg:{},cancel:null,stopNow:null,all:false};
+  function gf(){return S.gapf||1.2}
+  function wps(){return S.wps||1}
+  function pmode(){return S.pmode||'listen'}
+  function p3(n){return ('000'+n).slice(-3)}
+  function lurls(sa){var f=p3(sa[0])+p3(sa[1])+'.mp3';return ['https://everyayah.com/data/Alafasy_128kbps/'+f,'https://verses.quran.foundation/Alafasy/mp3/'+f,'https://verses.quran.com/Alafasy/mp3/'+f]}
+  function stat(t){if(P.key)P.msg[P.key]=t;var e=document.querySelector('[data-stat="'+P.key+'"]');if(e)e.textContent=t}
+  function stopPlay(){
+    P.tok++;P.all=false;
+    if(P.cancel){var c=P.cancel;P.cancel=null;c()}
+    if(P.stopNow){var n=P.stopNow;P.stopNow=null;n()}
+    try{if(P.aud)P.aud.pause()}catch(e){}
+    try{if('speechSynthesis' in window)speechSynthesis.cancel()}catch(e){}
+    P.key=null;
+  }
+  function wait(ms){return new Promise(function(r){var t=setTimeout(function(){P.cancel=null;r()},ms);P.cancel=function(){clearTimeout(t);r()}})}
+  // load an audio file (tries each url in turn), resolves the audio element or null
+  function readyAudio(urls){
+    return new Promise(function(res){
+      var a=P.aud||(P.aud=new Audio()),i=0;
+      function clean(){a.onerror=null;a.onloadedmetadata=null}
+      function load(){
+        a.onerror=function(){i++;if(i<urls.length)load();else{clean();P.stopNow=null;res(null)}};
+        a.onloadedmetadata=function(){clean();P.stopNow=null;res(a)};
+        a.src=urls[i];a.load();
+      }
+      P.stopNow=function(){clean();res(null)};
+      load();
+    });
+  }
+  // play from startMs to endMs (endMs null = until the end of the file)
+  function playRange(a,sMs,eMs){
+    return new Promise(function(res){
+      var iv;
+      function fin(){clearInterval(iv);a.onended=null;P.stopNow=null;try{a.pause()}catch(x){}res()}
+      P.stopNow=fin;a.onended=fin;
+      try{a.currentTime=sMs/1000}catch(x){}
+      var q=a.play();if(q&&q.catch)q.catch(function(){});
+      iv=setInterval(function(){if(eMs!=null&&a.currentTime*1000>=eMs)fin()},25);
+    });
+  }
+  function speak(t,rate){
+    return new Promise(function(res){
+      var t0=Date.now(),fin=false;
+      function done(ok){if(fin)return;fin=true;P.stopNow=null;res({ok:ok,ms:Date.now()-t0})}
+      var u=new SpeechSynthesisUtterance(t);u.lang='ar-SA';u.rate=rate||0.85;
+      u.onend=function(){done(true)};u.onerror=function(){done(false)};
+      P.stopNow=function(){u.onend=null;u.onerror=null;done(true)};
+      speechSynthesis.cancel();speechSynthesis.speak(u);
+    });
+  }
+  var SEGC={};
+  function getSeg(sa){
+    var k=sa[0]+':'+sa[1];
+    if(SEGC[k])return Promise.resolve(SEGC[k]);
+    try{var c=JSON.parse(localStorage.getItem('seg_'+k));if(c&&c.seg){SEGC[k]=c;return Promise.resolve(c)}}catch(e){}
+    return fetch('https://api.quran.com/api/v4/quran/recitations/7?verse_key='+k+'&fields=segments,url').then(function(r){return r.json()}).then(function(d){
+      var f=d&&d.audio_files?d.audio_files[0]:d;
+      if(!f||!f.segments||!f.segments.length||!f.url)throw new Error('no segments');
+      var u=f.url.charAt(0)==='h'?[f.url]:['https://verses.quran.foundation/'+f.url.replace(/^\//,''),'https://verses.quran.com/'+f.url.replace(/^\//,'')];
+      var o={urls:u,seg:f.segments};SEGC[k]=o;try{localStorage.setItem('seg_'+k,JSON.stringify(o))}catch(e){}return o;
+    });
+  }
+  function cleanWords(t){return t.replace(/•/g,' ').replace(/[،.]/g,' ').split(/\s+/).filter(Boolean)}
+  function msg(t){stat(t)}
+  // returns true if finished normally, false if stopped or failed
+  async function runItem(x,tok){
+    var mode=pmode(),N=wps(),i,g;
+    if(QAUD[x.id]){
+      var ays=QAUD[x.id];
+      for(var ai=0;ai<ays.length;ai++){
+        if(P.tok!==tok)return false;
+        var label=ays.length>1?'Ayah '+(ai+1)+' of '+ays.length+' · ':'';
+        var done=false;
+        if(mode==='learn'){
+          try{
+            var o=await getSeg(ays[ai]);if(P.tok!==tok)return false;
+            var au=await readyAudio(o.urls);if(P.tok!==tok)return false;
+            if(!au)throw new Error('audio');
+            var sg=o.seg;
+            for(i=0;i<sg.length;i+=N){
+              var j=Math.min(i+N,sg.length),st=sg[i][2],en=sg[j-1][3];
+              msg(label+'words '+(i+1)+(j>i+1?'–'+j:'')+' of '+sg.length+' · listen');
+              await playRange(au,st,en);if(P.tok!==tok)return false;
+              msg(label+'words '+(i+1)+(j>i+1?'–'+j:'')+' · now you repeat…');
+              await wait(Math.max(1000,(en-st)*gf()));if(P.tok!==tok)return false;
+            }
+            done=true;
+          }catch(err){
+            if(P.tok!==tok)return false;
+            msg('Word timing could not load. Playing the full ayah instead.');
+            await wait(2200);if(P.tok!==tok)return false;
+          }
+        }
+        if(!done){
+          msg(label+'listen');
+          var a2=await readyAudio(lurls(ays[ai]));if(P.tok!==tok)return false;
+          if(!a2){msg('Audio could not load. Check your internet. If you opened this file inside the Claude app, open it in Chrome instead.');return false}
+          await playRange(a2,0,null);if(P.tok!==tok)return false;
+          if(mode==='learn'){msg(label+'now you repeat the full ayah…');await wait(2500)}
+          else await wait(350);
+        }
+      }
+      return true;
+    }
+    // device voice (duas)
+    if(!('speechSynthesis' in window)){msg('Device voice is not available on this phone.');return false}
+    var vs=speechSynthesis.getVoices();
+    if(vs.length&&!vs.some(function(v){return /^ar/i.test(v.lang)})){msg('No Arabic voice found. Install Arabic in your phone\'s Google Text-to-speech settings.');return false}
+    if(mode==='listen'){
+      msg('Listening…');
+      var r0=await speak(x.ar.replace(/•/g,' '),0.85);if(P.tok!==tok)return false;
+      if(!r0.ok){msg('The voice could not play.');return false}
+      return true;
+    }
+    var words=cleanWords(x.ar);
+    for(i=0;i<words.length;i+=N){
+      g=words.slice(i,i+N).join(' ');
+      msg('Word '+(i+1)+(Math.min(i+N,words.length)>i+1?'–'+Math.min(i+N,words.length):'')+' of '+words.length+' · listen');
+      var r=await speak(g,0.7);if(P.tok!==tok)return false;
+      if(!r.ok){msg('The voice could not play.');return false}
+      msg('Word '+(i+1)+' · now you repeat…');
+      await wait(Math.max(1200,r.ms*gf()));if(P.tok!==tok)return false;
+    }
+    return true;
+  }
+  async function runPlay(x,key){
+    if(P.key===key){stopPlay();renderAd();return}
+    stopPlay();
+    var tok=P.tok;P.key=key;P.msg[key]='Starting…';renderAd();
+    var ok=await runItem(x,tok);
+    if(P.tok!==tok)return;
+    if(ok)P.msg[key]='Finished ✓';
+    P.key=null;renderAd();
+  }
+  async function runAll(){
+    if(P.all){stopPlay();renderAd();return}
+    stopPlay();
+    var tok=P.tok,items=adItems(),cat=tab;P.all=true;
+    for(var n=0;n<items.length;n++){
+      if(P.tok!==tok)return;
+      var x=items[n],key=cat+':'+x.id;
+      P.key=key;P.msg[key]='Starting…';renderAd();
+      var el=document.querySelector('[data-stat="'+key+'"]');if(el&&el.scrollIntoView)el.scrollIntoView({block:'center',behavior:'smooth'});
+      var ok=await runItem(x,tok);
+      if(P.tok!==tok)return;
+      if(!ok){P.all=false;P.key=null;renderAd();return}
+      P.msg[key]='Finished ✓';
+      await wait(1500);
+    }
+    if(P.tok===tok){P.all=false;P.key=null;renderAd()}
+  }
+  var tab='h';
+  function adState(){if(!S.ad)S.ad={};if(!S.ad[today])S.ad[today]={};return S.ad[today]}
+  function adItems(){return AD.filter(function(x){return x.c.indexOf(tab)>=0})}
+  var SEC={i:['📿','Istighfar','Say Astaghfirullah through the day'],m:['🌅','Morning adhkar','After Fajr until sunrise'],e:['🌇','Evening adhkar','After Asr until sunset'],s:['🕌','After Salah','After every obligatory prayer'],b:['🌙','Before sleep','When you lie down to sleep']};
+  function secProg(c){var st=adState(),it=AD.filter(function(x){return x.c.indexOf(c)>=0}),got=0,d=0;
+    it.forEach(function(x){var q=Math.min(1,(st[c+':'+x.id]||0)/x.n);got+=q;if(q>=1)d++});
+    return {d:d,t:it.length,p:got/it.length}}
+  function renderHome(){
+    var v=$('v2'),h='<div class="hello">Assalamu alaikum</div><div class="hsub">What would you like to do today? Tap a section to begin.</div>';
+    ['i','m','e','s','b'].forEach(function(c){
+      var d,t,p,lab;
+      if(c==='i'){var n=cur().n;p=Math.min(1,n/S.target);lab=fmt(n)+' / '+fmt(S.target)}
+      else{var r=secProg(c);p=r.p;lab=r.d+' / '+r.t+' done'}
+      h+='<div class="hcard'+(p>=1?' ok':'')+'" data-go="'+c+'"><div class="hrow"><span>'+SEC[c][0]+' '+SEC[c][1]+'</span><small>'+(p>=1?'✓ Complete':lab)+'</small></div><div class="pbar"><div style="width:'+Math.round(p*100)+'%"></div></div><div class="hs">'+SEC[c][2]+'</div></div>';
+    });
+    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b></div>';
+    v.innerHTML=h;
+  }
+  function renderAd(){
+    if(tab==='h'){renderHome();return}
+    var v=$('v2'),top=v.scrollTop,st=adState(),it=adItems(),done=0,h='';
+    it.forEach(function(x){var k=tab+':'+x.id;if((st[k]||0)>=x.n)done++});
+    h+='<div class="adhead"><span>'+CATN[tab]+' · '+done+'/'+it.length+' done</span><button data-act="resetall">Reset section</button></div><div class="ppanel"><div class="seg"><button data-m="listen" class="'+(pmode()==='listen'?'on':'')+'">▶ Listen<small>full recitation</small></button><button data-m="learn" class="'+(pmode()==='learn'?'on':'')+'">🎓 Learn<small>word by word</small></button></div>'+(pmode()==='learn'?'<div class="popts"><span>Words per step</span><select id="wpsel"><option value="1"'+(wps()===1?' selected':'')+'>1 word</option><option value="2"'+(wps()===2?' selected':'')+'>2 words</option><option value="3"'+(wps()===3?' selected':'')+'>3 words</option></select></div><div class="popts"><span>Your pause</span><select id="gapsel"><option value="0.8"'+(gf()===0.8?' selected':'')+'>Short</option><option value="1.2"'+(gf()===1.2?' selected':'')+'>Normal</option><option value="2"'+(gf()===2?' selected':'')+'>Long</option></select></div>':'')+'<button class="aud big'+(P.all?' on':'')+'" data-act="playall">'+(P.all?'⏹ Stop':'▶ Play all '+(pmode()==='learn'?'(learn)':'(listen)'))+'</button></div>';
+    it.forEach(function(x){
+      var k=tab+':'+x.id,c=st[k]||0,d=c>=x.n;
+      h+='<div class="card'+(d?' done':'')+'"><div class="ct">'+x.t+'</div><div class="ar2" dir="rtl" lang="ar">'+x.ar.replace(/\n/g,'<br>')+'</div><div class="en">'+x.en+'</div><div class="ref">'+x.ref+'</div><div class="audrow"><button class="aud'+(P.key===k?' on':'')+'" data-a="'+k+'" data-id="'+x.id+'">'+(P.key===k?'⏹ Stop':(pmode()==='learn'?'🎓 Learn this':'🔊 Listen'))+'</button><span class="astat" data-stat="'+k+'">'+(P.msg[k]||'')+'</span></div><div class="asrc">'+(QAUD[x.id]?'Recitation: Mishary Alafasy (needs internet)':'Device voice, not a qari. Use it only to follow the rhythm.')+'</div><div class="acts"><button class="cnt" data-k="'+k+'" data-n="'+x.n+'">'+(d?'✓ Done':c+' / '+x.n+' · tap')+'</button><button class="rst" data-r="'+k+'">↺</button></div></div>';
+    });
+    h+='<div class="powered" style="margin-top:10px">Powered by <b>Stand Tall Realty</b></div><div class="note">'+TIPS[tab]+'<br>Sources: Sahih al-Bukhari, Sahih Muslim, Abu Dawud, Tirmidhi, an-Nasa\'i, Ahmad, with gradings of Shaykh al-Albani as compiled by IslamQA and Hisn al-Muslim. Please verify the Arabic once against a printed Hisn al-Muslim or with your scholar.</div>';
+    v.innerHTML=h;v.scrollTop=top;
+  }
+  $('v2').addEventListener('click',function(e){
+    var g=e.target.closest('[data-go]');if(g){showTab(g.dataset.go);return}
+    var mb=e.target.closest('[data-m]');if(mb){stopPlay();S.pmode=mb.dataset.m;save();renderAd();return}
+    var pa=e.target.closest('[data-act="playall"]');if(pa){runAll();return}
+    var au=e.target.closest('[data-a]');if(au){var xi=adItems().filter(function(q){return q.id===au.dataset.id})[0];if(xi)runPlay(xi,au.dataset.a);return}
+    var b=e.target.closest('button');if(!b)return;var st=adState();
+    if(b.dataset.k){var n=parseInt(b.dataset.n,10);st[b.dataset.k]=Math.min(n,(st[b.dataset.k]||0)+1);
+      if(st[b.dataset.k]>=n)buzz(60);else buzz(8);}
+    else if(b.dataset.r){delete st[b.dataset.r]}
+    else if(b.dataset.act==='resetall'){ask('Reset this section for today?',function(){adItems().forEach(function(x){delete st[tab+':'+x.id]});save();renderAd()});return}
+    save();renderAd();
+  });
+  $('v2').addEventListener('change',function(e){if(e.target.id==='gapsel'){S.gapf=parseFloat(e.target.value);save()}if(e.target.id==='wpsel'){S.wps=parseInt(e.target.value,10);save()}});
+  function showTab(t){
+    stopPlay();tab=t;
+    ['h','i','m','e','s','b'].forEach(function(k){$('tab_'+k).classList.toggle('act',k===t)});
+    $('v1').style.display=t==='i'?'block':'none';
+    $('v2').style.display=t==='i'?'none':'block';
+    if(t!=='i'){renderAd();$('v2').scrollTop=0}
+  }
+  ['h','i','m','e','s','b'].forEach(function(k){$('tab_'+k).onclick=function(){showTab(k)}});
+  // ---------- Voice counting (sound-burst detection, works offline) ----------
+  var V={on:false,ctx:null,stream:null,an:null,buf:null,timer:null,env:0,floor:0.01,inWord:false,start:0,lastCount:0,t0:0,cal:0,calN:0};
+  function sensFactor(){return (S.sens||5)/5}
+  function vloop(){
+    if(!V.on)return;
+    V.an.getFloatTimeDomainData(V.buf);
+    var s=0,i;for(i=0;i<V.buf.length;i++)s+=V.buf[i]*V.buf[i];
+    var rms=Math.sqrt(s/V.buf.length),now=Date.now();
+    // 1) calibration: first second = measure background noise
+    if(now-V.t0<1000){V.cal+=rms;V.calN++;V.floor=Math.max(0.004,V.cal/V.calN);
+      $('vstatus').textContent='Stay quiet for a second…';$('vlevel').style.width='0%';return}
+    V.env=Math.max(rms,V.env*0.92);
+    var hi=Math.max(0.02,V.floor*3)/sensFactor(),lo=hi*0.55;
+    if(!V.inWord){
+      if(V.env>hi){V.inWord=true;V.start=now}
+      else V.floor=V.floor*0.995+rms*0.005;
+    }else if(V.env<lo){
+      V.inWord=false;
+      if(now-V.start>=180&&now-V.lastCount>250){V.lastCount=now;add(1,true)}
+    }
+    $('vlevel').style.width=Math.min(100,V.env/(hi*2)*100)+'%';
+    $('vlevel').style.background=V.inWord?'#e6c36a':'#4fd1a0';
+    $('vstatus').textContent='🎙 Listening… keep saying Astaghfirullah';
+  }
+  function vstart(){
+    if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){
+      alert('Microphone is not available here. Please open the hosted https link of this app in Chrome.');return}
+    $('vpanel').classList.add('show');$('vstatus').textContent='Starting microphone…';
+    navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}}).then(function(st){
+      V.stream=st;
+      var AC=window.AudioContext||window.webkitAudioContext;
+      V.ctx=new AC();
+      var src=V.ctx.createMediaStreamSource(st);
+      V.an=V.ctx.createAnalyser();V.an.fftSize=1024;
+      V.buf=new Float32Array(V.an.fftSize);
+      src.connect(V.an);
+      V.on=true;V.env=0;V.inWord=false;V.t0=Date.now();V.cal=0;V.calN=0;
+      V.timer=setInterval(vloop,20);
+      $('voiceBtn').textContent='⏹ Stop voice counting';$('voiceBtn').classList.add('on');
+      setWake();
+    }).catch(function(){
+      $('vstatus').textContent='Microphone permission was denied. Allow it in browser settings and try again.';
+    });
+  }
+  function vstop(){
+    V.on=false;clearInterval(V.timer);
+    try{if(V.stream)V.stream.getTracks().forEach(function(t){t.stop()})}catch(e){}
+    try{if(V.ctx)V.ctx.close()}catch(e){}
+    $('voiceBtn').textContent='🎙 Start voice counting';$('voiceBtn').classList.remove('on');
+    $('vpanel').classList.remove('show');
+    setWake();
+  }
+  $('voiceBtn').onclick=function(){V.on?vstop():vstart()};
+  $('sens').oninput=function(){S.sens=parseInt(this.value,10);$('sensv').textContent=S.sens;save()};
+  var _r=render;render=function(){_r();$('sens').value=S.sens||5;$('sensv').textContent=S.sens||5};
+  if('serviceWorker' in navigator&&/^https?:/.test(location.protocol)){try{navigator.serviceWorker.register('sw.js')}catch(e){}}
+  load();render();setWake();showTab('h');
+})();
+</script>
+</body>
+</html>
