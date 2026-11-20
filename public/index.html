@@ -183,6 +183,8 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     <div class="set"><span>Daily target</span><input id="target" type="number" min="1" step="100"></div>
     <div class="set"><span>Vibrate on tap</span><input id="vib" type="checkbox"></div>
     <div class="set"><span>Keep screen on</span><input id="wake" type="checkbox"></div>
+    <div class="set"><span>Reader voice</span><select id="vsel" style="max-width:150px;background:#0c3a2c;color:#f3f1e7;border:1px solid #1c6b52;border-radius:8px;padding:6px"></select></div>
+    <div class="set"><span>Test the voice</span><button id="vtest" style="padding:8px 12px">▶ Play sample</button></div>
     <div class="set"><span>Show English letters</span><input id="trtog" type="checkbox"></div>
     <div class="set"><span>Arabic style</span><select id="afont" style="background:#0c3a2c;color:#f3f1e7;border:1px solid #1c6b52;border-radius:8px;padding:6px"><option value="naskh">Clear Naskh</option><option value="sch">Scheherazade (Quran style)</option><option value="own">My own font file</option></select></div>
     <div class="set" id="ownfontrow" style="display:none"><span>Font file (.ttf / .otf)</span><button id="ofbtn" style="padding:8px 12px">Choose font</button><input type="file" id="offile" accept=".ttf,.otf,.woff,.woff2,font/*" style="display:none"></div>
@@ -296,6 +298,17 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
 
   function gfont(id,href){if(!document.getElementById(id)){var l=document.createElement('link');l.id=id;l.rel='stylesheet';l.href=href;document.head.appendChild(l)}}
   var OWNLOADED='';
+
+  function fillVoices(){
+    var sel=$('vsel');if(!sel)return;var av=arVoices(),h='';
+    if(!av.length)h='<option>No Arabic voice found</option>';
+    av.forEach(function(v,i){h+='<option value="'+v.name.replace(/"/g,'')+'">Voice '+(i+1)+' · '+v.name.replace(/Google|Arabic|\(|\)/g,'').trim().slice(0,22)+' ('+v.lang+')</option>'});
+    sel.innerHTML=h;var pv=pickVoice();if(pv)sel.value=pv.name;
+  }
+  try{speechSynthesis.addEventListener('voiceschanged',fillVoices)}catch(e){}
+  setTimeout(fillVoices,600);setTimeout(fillVoices,2500);
+  $('vsel').onchange=function(){S.vname=this.value;save()};
+  $('vtest').onclick=function(){try{speechSynthesis.cancel()}catch(e){}speak('اللَّهُ أَكْبَرُ كَبِيرًا، وَالْحَمْدُ لِلَّهِ كَثِيرًا، وَسُبْحَانَ اللَّهِ بُكْرَةً وَأَصِيلًا',0.85).then(function(r){if(!r.ok)alert('The voice could not play (error: '+LASTERR+').')})};
   function applyFont(){
     var st=S.afont;if(st!=='sch'&&st!=='own')st='naskh';var r=document.documentElement.style;
     if(st==='naskh'){gfont('gf1','https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600&display=swap');r.setProperty('--arfont','"Noto Naskh Arabic","Amiri","Traditional Arabic",serif');r.setProperty('--arlh','2.1')}
@@ -550,11 +563,22 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   function arVoices(){try{return speechSynthesis.getVoices().filter(function(x){return /^ar/i.test(String(x.lang).replace('_','-'))||/arabic/i.test(x.name)})}catch(e){return []}}
   function waitVoices(){return new Promise(function(res){var n=0;(function t(){var v=speechSynthesis.getVoices();if(v.length||n++>12)return res(v);setTimeout(t,250)})()})}
   var LASTERR='';
+  // Pause rule (waqf): when the reader stops, the last word loses its case ending (no -un/-in/-u/-i)
+  function waqf(t){
+    var E='(?=\\s*(?:[،.؛:!?•\\n]|$))';
+    t=t.replace(new RegExp('\u0627\u064B'+E,'g'),'\u0627');
+    t=t.replace(new RegExp('\u064B\u0627'+E,'g'),'\u064E\u0627');
+    t=t.replace(new RegExp('([\u0621-\u064A])([\u064B\u064C\u064D\u064E\u064F\u0650]+)'+E,'g'),'$1\u0652');
+    t=t.replace(new RegExp('(\u0651)[\u064B\u064C\u064D\u064E\u064F\u0650]+'+E,'g'),'$1');
+    return t;
+  }
+  function pickVoice(){var av=arVoices();if(!av.length)return null;if(S.vname){for(var i=0;i<av.length;i++)if(av[i].name===S.vname)return av[i]}return av[0]}
   function speak(t,rate){
+    t=waqf(t);
     return new Promise(function(res){
       var t0=Date.now(),fin=false;
       function done(ok){if(fin)return;fin=true;P.stopNow=null;res({ok:ok,ms:Date.now()-t0})}
-      var u=new SpeechSynthesisUtterance(t);u.lang='ar-SA';u.rate=rate||0.85;var av=arVoices();if(av.length){u.voice=av[0];u.lang=av[0].lang}
+      var u=new SpeechSynthesisUtterance(t);u.lang='ar-SA';u.rate=rate||0.85;var pv=pickVoice();if(pv){u.voice=pv;u.lang=pv.lang}
       u.onend=function(){done(true)};u.onerror=function(e){LASTERR=(e&&e.error)||'unknown';done(false)};
       P.stopNow=function(){u.onend=null;u.onerror=null;done(true)};
       speechSynthesis.cancel();speechSynthesis.speak(u);
