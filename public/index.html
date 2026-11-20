@@ -191,7 +191,6 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
 <div class="powered">Powered by <b>Stand Tall Realty</b></div>
 </div>
 <div id="v2" class="view"></div>
-<div id="v3" class="view" style="display:none"><div class="hello" style="margin-bottom:8px">📿 Tasbih counter</div><div class="panel"><div class="chips" id="tchips"></div><div id="tar" style="text-align:center;font-size:24px;direction:rtl;color:#e6c36a;margin:4px 0"></div><button id="tbig">0</button><div id="tinfo" style="text-align:center;font-size:13px;color:#9fc4b5;margin-bottom:8px"></div><div class="btnrow"><button id="tundo">− Undo</button><button id="treset">⟲ Reset</button></div></div>
 <div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b></div></div>
 <nav class="bottomnav">
   <button id="tab_h" class="act"><span class="ic">🏠</span><span>Today</span></button>
@@ -254,8 +253,6 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   }
 
   // ---------- extras: stats, tasbih, text size, backup ----------
-  var TAS=[['SubhanAllah','سُبْحَانَ اللَّهِ',33],['Alhamdulillah','الْحَمْدُ لِلَّهِ',33],['Allahu Akbar','اللَّهُ أَكْبَرُ',34],['SubhanAllahi wa bihamdihi','سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',100],['La ilaha illallah','لَا إِلَٰهَ إِلَّا اللَّهُ',100],['Durood (Allahumma salli ala Muhammad)','اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ',100]];
-  function tcur(){if(!S.tas)S.tas={};if(!S.tas[today])S.tas[today]={};var i=S.tsel||0;var n=TAS[i][0];if(!S.tas[today][n])S.tas[today][n]=0;return n}
   function bestStreak(){var ks=Object.keys(S.days).sort(),best=0,run=0,prev=null;ks.forEach(function(k){var e=S.days[k];if(e.n>=e.t){if(prev){var a=new Date(prev),b=new Date(k);run=((b-a)/864e5===1)?run+1:1}else run=1;prev=k;best=Math.max(best,run)}else{prev=null;run=0}});return best}
   function applyFs(){var f=S.afs||0;document.documentElement.style.setProperty('--afs',f?f+'px':'')}
   function renderExtra(){
@@ -267,16 +264,8 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     var days=Object.keys(S.days).filter(function(k){return S.days[k].n>0}).length||1;
     $('stats').innerHTML='<div>Best streak<b>'+bestStreak()+' days</b></div><div>This week<b>'+fmt(wk)+'</b></div><div>Average per active day<b>'+fmt(Math.round(tot/days))+'</b></div><div>Active days (30)<b>'+act+' / 30</b></div>';
     $('hm').innerHTML=hm;
-    var sel=S.tsel||0,ch='';TAS.forEach(function(x,i){ch+='<button data-i="'+i+'"'+(i===sel?' class="on"':'')+'>'+x[0]+'</button>'});$('tchips').innerHTML=ch;
-    var nm=tcur(),c=S.tas[today][nm],tg=TAS[sel][2];
-    $('tar').textContent=TAS[sel][1];$('tbig').textContent=c;
-    $('tinfo').textContent=c>=tg?'✓ '+tg+' completed':(tg-c)+' more to reach '+tg;
     $('bkst').textContent=S.lastBackup?('Last saved: '+S.lastBackup):'Not saved yet';
   }
-  $('tchips').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;S.tsel=+b.dataset.i;save();renderExtra()});
-  $('tbig').addEventListener('pointerdown',function(e){e.preventDefault();var n=tcur();S.tas[today][n]++;var tg=TAS[S.tsel||0][2];if(S.tas[today][n]===tg&&S.vib&&navigator.vibrate)try{navigator.vibrate([200,100,200])}catch(x){}else if(S.vib&&navigator.vibrate)try{navigator.vibrate(8)}catch(x){}save();renderExtra()});
-  $('tundo').onclick=function(){var n=tcur();S.tas[today][n]=Math.max(0,S.tas[today][n]-1);save();renderExtra()};
-  $('treset').onclick=function(){ask('Reset this tasbih counter for today?',function(){var n=tcur();S.tas[today][n]=0;save();renderExtra()})};
   $('afm').onclick=function(){S.afs=Math.max(18,(S.afs||26)-3);save();applyFs()};
   $('afp').onclick=function(){S.afs=Math.min(48,(S.afs||26)+3);save();applyFs()};
   $('bkp').onclick=function(){
@@ -372,10 +361,21 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
    {id:'hamd33',c:'b',t:'Alhamdulillah ×33',ar:'الْحَمْدُ لِلَّهِ',en:'All praise is for Allah.',ref:'Bukhari 3113, Muslim 2727',n:33},
    {id:'akbar34',c:'b',t:'Allahu Akbar ×34',ar:'اللَّهُ أَكْبَرُ',en:'Allah is the Greatest.',ref:'Bukhari 3113, Muslim 2727',n:34},
    {id:'rabbi',c:'b',t:'Bismika rabbi wada-tu janbi',ar:'بِاسْمِكَ رَبِّي وَضَعْتُ جَنْبِي، وَبِكَ أَرْفَعُهُ، فَإِنْ أَمْسَكْتَ نَفْسِي فَارْحَمْهَا، وَإِنْ أَرْسَلْتَهَا فَاحْفَظْهَا بِمَا تَحْفَظُ بِهِ عِبَادَكَ الصَّالِحِينَ',en:'In Your name, my Lord, I lay down my side and by You I raise it. If You take my soul, have mercy on it; and if You release it, protect it as You protect Your righteous servants.',ref:'Bukhari 6320, Muslim 2714',n:1},
-   {id:'amutu',c:'b',t:'Bismika Allahumma amutu wa ahya',ar:'بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا',en:'In Your name, O Allah, I die and I live. (Last words before sleeping.)',ref:'Sahih al-Bukhari 6324',n:1}
+   {id:'amutu',c:'b',t:'Bismika Allahumma amutu wa ahya',ar:'بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا',en:'In Your name, O Allah, I die and I live. (Last words before sleeping.)',ref:'Sahih al-Bukhari 6324',n:1},
+   {id:'t_sub',c:'t',t:'SubhanAllah ×33',ar:'سُبْحَانَ اللَّهِ',en:'Glory be to Allah. Say 33 times after every obligatory prayer.',ref:'Sahih al-Bukhari 843, Sahih Muslim 595',n:33},
+   {id:'t_hamd',c:'t',t:'Alhamdulillah ×33',ar:'الْحَمْدُ لِلَّهِ',en:'All praise is for Allah. Say 33 times after every obligatory prayer.',ref:'Sahih al-Bukhari 843, Sahih Muslim 595',n:33},
+   {id:'t_akbar',c:'t',t:'Allahu Akbar ×34',ar:'اللَّهُ أَكْبَرُ',en:'Allah is the Greatest. Say 34 times after every obligatory prayer (33 in another narration).',ref:'Sahih Muslim 596, 597',n:34},
+   {id:'t_complete',c:'t',t:'To complete the hundred',ar:TAHLIL,en:'After the 99 above, say this once to make it one hundred. Whoever does so, his sins are forgiven even if they are like the foam of the sea.',ref:'Sahih Muslim 597',n:1},
+   {id:'t_bihamdihi',c:'t',t:'SubhanAllahi wa bihamdihi ×100',ar:'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',en:'Glory and praise be to Allah. Whoever says it 100 times in a day, his sins are forgiven even if they are like the foam of the sea.',ref:'Sahih al-Bukhari 6405, Sahih Muslim 2691',n:100},
+   {id:'t_azim',c:'t',t:'Two light words, heavy on the scale',ar:'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ، سُبْحَانَ اللَّهِ الْعَظِيمِ',en:'Glory and praise be to Allah; glory be to Allah, the Magnificent. Two words light on the tongue, heavy on the scale, beloved to the Most Merciful. (No fixed count is given; 10 is only a target in this app.)',ref:'Sahih al-Bukhari 6406, Sahih Muslim 2694',n:10},
+   {id:'t_tahlil100',c:'t',t:'La ilaha illallah wahdahu ×100',ar:TAHLIL,en:'Whoever says this 100 times in a day gets the reward of freeing ten slaves, 100 good deeds are written, 100 sins are erased, and he is protected from Shaytan until evening.',ref:'Sahih al-Bukhari 3293, Sahih Muslim 2691',n:100},
+   {id:'t_hawqala',c:'t',t:'La hawla wa la quwwata illa billah',ar:'لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ',en:'There is no power and no strength except with Allah. It is a treasure from the treasures of Paradise. (No fixed count is given; 10 is only a target in this app.)',ref:'Sahih al-Bukhari 6384, Sahih Muslim 2704',n:10},
+   {id:'t_four',c:'t',t:'The four most beloved words to Allah',ar:'سُبْحَانَ اللَّهِ، وَالْحَمْدُ لِلَّهِ، وَلَا إِلَهَ إِلَّا اللَّهُ، وَاللَّهُ أَكْبَرُ',en:'Glory be to Allah, all praise is for Allah, there is no god but Allah, and Allah is the Greatest. The most beloved words to Allah are four. (No fixed count is given; 10 is only a target in this app.)',ref:'Sahih Muslim 2137',n:10},
+   {id:'t_juwayriyya',c:'t',t:'Glory to Allah by the number of His creation',ar:'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ عَدَدَ خَلْقِهِ، وَرِضَا نَفْسِهِ، وَزِنَةَ عَرْشِهِ، وَمِدَادَ كَلِمَاتِهِ',en:'Glory and praise be to Allah, by the number of His creation, to the extent of His pleasure, the weight of His Throne, and the ink of His words. Say 3 times.',ref:'Sahih Muslim 2726',n:3},
+   {id:'t_durood',c:'t',t:'Salawat upon the Prophet ﷺ',ar:'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ، كَمَا صَلَّيْتَ عَلَى إِبْرَاهِيمَ وَعَلَى آلِ إِبْرَاهِيمَ، إِنَّكَ حَمِيدٌ مَجِيدٌ. اللَّهُمَّ بَارِكْ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ، كَمَا بَارَكْتَ عَلَى إِبْرَاهِيمَ وَعَلَى آلِ إِبْرَاهِيمَ، إِنَّكَ حَمِيدٌ مَجِيدٌ',en:'O Allah, send prayers upon Muhammad and the family of Muhammad as You sent prayers upon Ibrahim and the family of Ibrahim; You are Praiseworthy and Glorious. O Allah, bless Muhammad and the family of Muhammad as You blessed Ibrahim and the family of Ibrahim; You are Praiseworthy and Glorious. Whoever sends one prayer upon me, Allah sends ten upon him. (No fixed count is given; 10 is only a target in this app.)',ref:'Sahih al-Bukhari 3370; reward of salawat: Sahih Muslim 408',n:10}
   ];
-  var CATN={m:'Morning adhkar',e:'Evening adhkar',s:'After every obligatory prayer',b:'Before sleeping'};
-  var TIPS={m:'Time: after Fajr until sunrise (can be said until mid-morning).',e:'Time: after Asr until sunset (can be said until night).',s:'Say right after the salam.',b:'Say after lying down on the right side.'};
+  var CATN={t:'Tasbih',m:'Morning adhkar',e:'Evening adhkar',s:'After every obligatory prayer',b:'Before sleeping'};
+  var TIPS={t:'Count each tasbih on your fingers or with the tap button. Where no number is given in the hadith, the target here is only a suggestion.',m:'Time: after Fajr until sunrise (can be said until mid-morning).',e:'Time: after Asr until sunset (can be said until night).',s:'Say right after the salam.',b:'Say after lying down on the right side.'};
   // ---------- Listen / Learn player ----------
   var QAUD={kursi:[[2,255]],quls:[[112,1],[112,2],[112,3],[112,4],[113,1],[113,2],[113,3],[113,4],[113,5],[114,1],[114,2],[114,3],[114,4],[114,5],[114,6]],baq2:[[2,285],[2,286]]};
   var P={key:null,tok:0,aud:null,msg:{},cancel:null,stopNow:null,all:false};
@@ -678,13 +678,13 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   var tab='h';
   function adState(){if(!S.ad)S.ad={};if(!S.ad[today])S.ad[today]={};return S.ad[today]}
   function adItems(){return AD.filter(function(x){return x.c.indexOf(tab)>=0})}
-  var SEC={i:['📿','Istighfar','Say Astaghfirullah through the day'],m:['🌅','Morning adhkar','After Fajr until sunrise'],e:['🌇','Evening adhkar','After Asr until sunset'],s:['🕌','After Salah','After every obligatory prayer'],b:['🌙','Before sleep','When you lie down to sleep']};
+  var SEC={t:['🔢','Tasbih','Full text with meaning, listen and learn'],i:['📿','Istighfar','Say Astaghfirullah through the day'],m:['🌅','Morning adhkar','After Fajr until sunrise'],e:['🌇','Evening adhkar','After Asr until sunset'],s:['🕌','After Salah','After every obligatory prayer'],b:['🌙','Before sleep','When you lie down to sleep']};
   function secProg(c){var st=adState(),it=AD.filter(function(x){return x.c.indexOf(c)>=0}),got=0,d=0;
     it.forEach(function(x){var q=Math.min(1,(st[c+':'+x.id]||0)/x.n);got+=q;if(q>=1)d++});
     return {d:d,t:it.length,p:got/it.length}}
   function renderHome(){
     var v=$('v2'),h='<div class="hello">Assalamu alaikum</div><div class="hsub">What would you like to do today? Tap a section to begin.</div>';
-    ['i','m','e','s','b'].forEach(function(c){
+    ['i','t','m','e','s','b'].forEach(function(c){
       var d,t,p,lab;
       if(c==='i'){var n=cur().n;p=Math.min(1,n/S.target);lab=fmt(n)+' / '+fmt(S.target)}
       else{var r=secProg(c);p=r.p;lab=r.d+' / '+r.t+' done'}
@@ -727,10 +727,8 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     stopPlay();tab=t;
     ['h','i','t','m','e','s','b'].forEach(function(k){$('tab_'+k).classList.toggle('act',k===t)});
     $('v1').style.display=t==='i'?'block':'none';
-    $('v3').style.display=t==='t'?'block':'none';
-    $('v2').style.display=(t==='i'||t==='t')?'none':'block';
-    if(t==='t'){renderExtra();$('v3').scrollTop=0}
-    else if(t!=='i'){renderAd();$('v2').scrollTop=0}
+    $('v2').style.display=t==='i'?'none':'block';
+    if(t!=='i'){renderAd();$('v2').scrollTop=0}
   }
   ['h','i','t','m','e','s','b'].forEach(function(k){$('tab_'+k).onclick=function(){showTab(k)}});
   // ---------- Voice counting (sound-burst detection, works offline) ----------
