@@ -83,7 +83,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   #tap{width:min(62vw,250px)}
   #count{font-size:clamp(36px,12vw,54px)}
   .bottomnav{display:flex;background:#06251c;border-top:1px solid #1c6b52;padding-bottom:env(safe-area-inset-bottom);flex:none}
-  .bottomnav button{flex:1;background:none;border:0;color:var(--muted);padding:8px 2px 7px;font-size:10.5px;display:flex;flex-direction:column;align-items:center;gap:3px;touch-action:manipulation}
+  .bottomnav button{flex:1;min-width:0;background:none;border:0;color:var(--muted);padding:8px 2px 7px;font-size:10.5px;display:flex;flex-direction:column;align-items:center;gap:3px;touch-action:manipulation}
   .bottomnav button .ic{font-size:20px;line-height:1}
   .bottomnav button.act{color:var(--gold);font-weight:700}
   .hello{font-size:20px;font-weight:700;margin:14px 2px 2px}
@@ -187,14 +187,16 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   </details>
 </div>
 <div class="panel"><b>📊 Your progress</b><div class="stats" id="stats"></div><div class="hm" id="hm"></div><small style="color:#9fc4b5">Last 30 days · brighter = closer to your daily target</small></div>
-<div class="panel"><b>📿 Tasbih counter</b><div class="chips" id="tchips"></div><div id="tar" style="text-align:center;font-size:24px;direction:rtl;color:#e6c36a;margin:4px 0"></div><button id="tbig">0</button><div id="tinfo" style="text-align:center;font-size:13px;color:#9fc4b5;margin-bottom:8px"></div><div class="btnrow"><button id="tundo">− Undo</button><button id="treset">⟲ Reset</button></div></div>
 <div class="total" id="total"></div>
 <div class="powered">Powered by <b>Stand Tall Realty</b></div>
 </div>
 <div id="v2" class="view"></div>
+<div id="v3" class="view" style="display:none"><div class="hello" style="margin-bottom:8px">📿 Tasbih counter</div><div class="panel"><div class="chips" id="tchips"></div><div id="tar" style="text-align:center;font-size:24px;direction:rtl;color:#e6c36a;margin:4px 0"></div><button id="tbig">0</button><div id="tinfo" style="text-align:center;font-size:13px;color:#9fc4b5;margin-bottom:8px"></div><div class="btnrow"><button id="tundo">− Undo</button><button id="treset">⟲ Reset</button></div></div>
+<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b></div></div>
 <nav class="bottomnav">
   <button id="tab_h" class="act"><span class="ic">🏠</span><span>Today</span></button>
   <button id="tab_i"><span class="ic">📿</span><span>Istighfar</span></button>
+  <button id="tab_t"><span class="ic">🔢</span><span>Tasbih</span></button>
   <button id="tab_m"><span class="ic">🌅</span><span>Morning</span></button>
   <button id="tab_e"><span class="ic">🌇</span><span>Evening</span></button>
   <button id="tab_s"><span class="ic">🕌</span><span>Salah</span></button>
@@ -723,12 +725,14 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   $('v2').addEventListener('change',function(e){if(e.target.id==='gapsel'){S.gapf=parseFloat(e.target.value);save()}if(e.target.id==='plsel'){S.plen=e.target.value;save()}});
   function showTab(t){
     stopPlay();tab=t;
-    ['h','i','m','e','s','b'].forEach(function(k){$('tab_'+k).classList.toggle('act',k===t)});
+    ['h','i','t','m','e','s','b'].forEach(function(k){$('tab_'+k).classList.toggle('act',k===t)});
     $('v1').style.display=t==='i'?'block':'none';
-    $('v2').style.display=t==='i'?'none':'block';
-    if(t!=='i'){renderAd();$('v2').scrollTop=0}
+    $('v3').style.display=t==='t'?'block':'none';
+    $('v2').style.display=(t==='i'||t==='t')?'none':'block';
+    if(t==='t'){renderExtra();$('v3').scrollTop=0}
+    else if(t!=='i'){renderAd();$('v2').scrollTop=0}
   }
-  ['h','i','m','e','s','b'].forEach(function(k){$('tab_'+k).onclick=function(){showTab(k)}});
+  ['h','i','t','m','e','s','b'].forEach(function(k){$('tab_'+k).onclick=function(){showTab(k)}});
   // ---------- Voice counting (sound-burst detection, works offline) ----------
   var V={on:false,ctx:null,stream:null,an:null,buf:null,timer:null,env:0,floor:0.01,inWord:false,start:0,lastCount:0,t0:0,cal:0,calN:0};
   function sensFactor(){return (S.sens||5)/5}
