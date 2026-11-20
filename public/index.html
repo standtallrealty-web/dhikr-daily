@@ -361,6 +361,33 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
       },20);
     });
   }
+  var CH='https://download.quranicaudio.com/qdc/mishari_al_afasy/murattal/';
+  // independent audio element that is fully buffered before we play it (so the next file is ready in advance)
+  function loadAudio(urls){
+    return new Promise(function(res){
+      var a=new Audio(),i=0;a.preload='auto';
+      function tryU(){
+        a.onerror=function(){i++;if(i<urls.length)tryU();else{a.onerror=null;a.oncanplay=null;res(null)}};
+        a.oncanplay=function(){a.onerror=null;a.oncanplay=null;res(a)};
+        a.src=urls[i];a.load();
+      }
+      tryU();
+    });
+  }
+  // play files one after another with no loading gap: the next file is fetched while the current one plays
+  async function playChain(list,gapMs,tok){
+    var curP=loadAudio(list[0].urls);
+    for(var i=0;i<list.length;i++){
+      var a=await curP;if(P.tok!==tok)return {stopped:true};
+      if(!a)return {failAt:i};
+      var nextP=i+1<list.length?loadAudio(list[i+1].urls):null;
+      P.aud=a;
+      await playRange(a,0,null);if(P.tok!==tok)return {stopped:true};
+      if(nextP&&gapMs){await wait(gapMs);if(P.tok!==tok)return {stopped:true}}
+      curP=nextP;
+    }
+    return {ok:true};
+  }
   function speak(t,rate){
     return new Promise(function(res){
       var t0=Date.now(),fin=false;
@@ -416,6 +443,23 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     var mode=pmode(),i;
     if(QAUD[x.id]){
       var ays=QAUD[x.id];
+      if(mode==='listen'){
+        msg('🎧 Playing the full recitation…');
+        var chain,gapL=150;
+        if(x.id==='quls'){chain=[112,113,114].map(function(n){return {urls:[CH+n+'.mp3'],ays:ays.filter(function(q){return q[0]===n})}});gapL=700}
+        else chain=ays.map(function(sa){return {urls:lurls(sa),ays:[sa]}});
+        var rs=await playChain(chain,gapL,tok);
+        if(P.tok!==tok)return false;
+        if(rs.failAt!=null){
+          var rest=[];
+          for(var q=rs.failAt;q<chain.length;q++)chain[q].ays.forEach(function(sa){rest.push({urls:lurls(sa),ays:[sa]})});
+          var failedChapter=chain[rs.failAt].urls.length===1&&x.id==='quls';
+          var r2=failedChapter?await playChain(rest,150,tok):{failAt:0};
+          if(P.tok!==tok)return false;
+          if(r2.failAt!=null){msg('Audio could not load. Check your internet. If you opened this file inside the Claude app, open it in Chrome instead.');return false}
+        }
+        return true;
+      }
       for(var ai=0;ai<ays.length;ai++){
         if(P.tok!==tok)return false;
         var label=ays.length>1?'Ayah '+(ai+1)+' of '+ays.length+' · ':'';
