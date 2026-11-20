@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#0b3d2e">
+<meta name="theme-color" content="#0a1612">
 <script>
 window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttribute('style','position:fixed;top:0;left:0;right:0;z-index:999;background:#b3392f;color:#fff;font:13px sans-serif;padding:10px');d.textContent='App error: '+m+' (line '+l+'). Please send a screenshot of this.';(document.body||document.documentElement).appendChild(d)}catch(e){}};
 </script>
@@ -14,7 +14,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
 <meta name="mobile-web-app-capable" content="yes">
 <title>Dhikr Daily</title>
 <style>
-  :root{--bg:#0b3d2e;--bg2:#072a20;--card:#0f4d3a;--gold:#e6c36a;--text:#f3f1e7;--muted:#9fc3b3;--ring:#1c6b52}
+  :root{--bg:#0d1a17;--bg2:#08130f;--card:#14261f;--gold:#d9b765;--text:#eef2ee;--muted:#8da79e;--ring:#2c5247;--line:#24403a}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
   html,body{margin:0;height:100%;background:linear-gradient(180deg,var(--bg),var(--bg2));color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overscroll-behavior:none}
   body{display:flex;flex-direction:column;padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom)}
@@ -26,49 +26,49 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   .wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0}
   #tap{position:relative;width:min(78vw,340px);aspect-ratio:1;border:0;background:none;padding:0;touch-action:manipulation;cursor:pointer}
   #tap svg{width:100%;height:100%;transform:rotate(-90deg)}
-  #tap .in{position:absolute;inset:11%;border-radius:50%;background:radial-gradient(circle at 35% 30%,#17705a,#0d4636);box-shadow:0 10px 30px rgba(0,0,0,.45),inset 0 2px 6px rgba(255,255,255,.12);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:transform .06s}
+  #tap .in{position:absolute;inset:11%;border-radius:50%;background:radial-gradient(circle at 35% 30%,#1f6b58,#134537);box-shadow:0 10px 30px rgba(0,0,0,.45),inset 0 2px 6px rgba(255,255,255,.12);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:transform .06s}
   #tap:active .in{transform:scale(.96)}
   #count{font-size:clamp(44px,15vw,68px);font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
   #of{font-size:14px;color:var(--muted);margin-top:6px}
   #pct{font-size:13px;color:var(--gold);margin-top:4px}
   #msg{height:22px;margin-top:10px;font-size:15px;color:var(--gold);text-align:center}
   .row{display:flex;gap:8px;justify-content:center;margin:6px 0 10px;flex-wrap:wrap}
-  .row button{background:var(--card);color:var(--text);border:1px solid #1c6b52;border-radius:12px;padding:11px 16px;font-size:15px;touch-action:manipulation}
+  .row button{background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:11px 16px;font-size:15px;touch-action:manipulation}
   .row button:active{background:#17705a}
-  .panel{background:rgba(15,77,58,.7);border-radius:16px;padding:12px 14px;margin-bottom:12px}
+  .panel{background:var(--card);border-radius:16px;padding:12px 14px;margin-bottom:12px}
   .days{display:flex;gap:6px;align-items:flex-end;height:70px}
   .day{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;font-size:10px;color:var(--muted)}
   .bar{width:100%;border-radius:4px 4px 0 0;background:#2a8a6c;min-height:2px}
   .bar.done{background:var(--gold)}
   .set{display:flex;justify-content:space-between;align-items:center;font-size:14px;padding:6px 0;gap:10px}
-  .set input[type=number]{width:100px;background:var(--bg2);color:var(--text);border:1px solid #1c6b52;border-radius:8px;padding:6px 8px;font-size:15px;text-align:right;user-select:text;-webkit-user-select:text}
+  .set input[type=number]{width:100px;background:var(--bg2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:15px;text-align:right;user-select:text;-webkit-user-select:text}
   details summary{font-size:14px;color:var(--muted);padding:4px 0;list-style:none;cursor:pointer}
   .total{font-size:12px;color:var(--muted);text-align:center;margin-bottom:8px}
-  #voiceBtn{display:block;margin:0 auto 8px;background:#1c6b52;color:#fff;border:0;border-radius:14px;padding:13px 22px;font-size:16px;font-weight:600;touch-action:manipulation}
+  #voiceBtn{display:block;margin:0 auto 8px;background:var(--line);color:#fff;border:0;border-radius:14px;padding:13px 22px;font-size:16px;font-weight:600;touch-action:manipulation}
   #voiceBtn.on{background:#b3392f}
   #vpanel{display:none;margin:0 0 10px;text-align:center;font-size:13px;color:var(--muted)}
   #vpanel.show{display:block}
-  .meter{height:8px;background:#06251c;border-radius:6px;overflow:hidden;margin:6px 0}
-  .meter div{height:100%;width:0;background:#4fd1a0;transition:width .05s}
+  .meter{height:8px;background:#0a1612;border-radius:6px;overflow:hidden;margin:6px 0}
+  .meter div{height:100%;width:0;background:#5fcfa6;transition:width .05s}
   #vpanel input[type=range]{width:70%;accent-color:#e6c36a}
   .tabs{display:flex;gap:6px;overflow-x:auto;padding:6px 0 8px;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
-  .tabs button{flex:none;background:var(--card);color:var(--text);border:1px solid #1c6b52;border-radius:18px;padding:8px 14px;font-size:14px;touch-action:manipulation}
-  .tabs button.act{background:var(--gold);color:#0b3d2e;border-color:var(--gold);font-weight:700}
+  .tabs button{flex:none;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:18px;padding:8px 14px;font-size:14px;touch-action:manipulation}
+  .tabs button.act{background:var(--gold);color:#0d1a17;border-color:var(--gold);font-weight:700}
   .view{display:flex;flex-direction:column;flex:1;min-height:0}
   #v2{display:none;overflow-y:auto;padding-bottom:24px;-webkit-overflow-scrolling:touch}
   .adhead{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--muted);margin:4px 2px 10px}
-  .adhead button{background:none;border:1px solid #1c6b52;color:var(--muted);border-radius:10px;padding:5px 10px;font-size:12px}
-  .card{background:rgba(15,77,58,.8);border-radius:16px;padding:14px;margin-bottom:12px}
+  .adhead button{background:none;border:1px solid var(--line);color:var(--muted);border-radius:10px;padding:5px 10px;font-size:12px}
+  .card{background:var(--card);border-radius:16px;padding:14px;margin-bottom:12px}
   .card.done{opacity:.55}
   .card .ct{font-size:13px;color:var(--gold);margin-bottom:8px;font-weight:600}
   .card .ar2{font-size:var(--afs,26px);line-height:var(--arlh,2);text-align:right;direction:rtl;font-family:var(--arfont,"Amiri","Noto Naskh Arabic","Traditional Arabic",serif);user-select:text;-webkit-user-select:text}
-  .card .en{font-size:13px;color:#cfe3d9;margin-top:6px;line-height:1.5}
+  .card .en{font-size:13px;color:#c9d9d2;margin-top:6px;line-height:1.5}
   .card .ref{font-size:11px;color:var(--muted);margin-top:6px}
   .card .acts{display:flex;gap:8px;margin-top:10px}
-  .card .cnt{flex:1;background:#1c6b52;color:#fff;border:0;border-radius:12px;padding:12px;font-size:16px;font-weight:700;touch-action:manipulation}
+  .card .cnt{flex:1;background:#1d5a49;color:#fff;border:0;border-radius:12px;padding:12px;font-size:16px;font-weight:700;touch-action:manipulation}
   .card.done .cnt{background:#3a8a2f}
-  .card .rst{background:none;border:1px solid #1c6b52;color:var(--muted);border-radius:12px;padding:0 14px;font-size:16px}
+  .card .rst{background:none;border:1px solid var(--line);color:var(--muted);border-radius:12px;padding:0 14px;font-size:16px}
   .note{font-size:11px;color:var(--muted);line-height:1.5;margin:6px 2px 0}
   .powered{text-align:center;font-size:11px;color:var(--muted);padding:6px 0 10px;letter-spacing:.3px}
   .powered b{color:var(--gold);font-weight:600}
@@ -82,35 +82,35 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   .wrap{flex:none;padding:10px 0 4px}
   #tap{width:min(62vw,250px)}
   #count{font-size:clamp(36px,12vw,54px)}
-  .bottomnav{display:flex;background:#06251c;border-top:1px solid #1c6b52;padding-bottom:env(safe-area-inset-bottom);flex:none}
-  .bottomnav{overflow-x:auto;scrollbar-width:none}.bottomnav::-webkit-scrollbar{display:none}
-  .bottomnav button{flex:1 0 auto;min-width:46px;background:none;border:0;color:var(--muted);padding:8px 2px 7px;font-size:10.5px;display:flex;flex-direction:column;align-items:center;gap:3px;touch-action:manipulation}
-  .bottomnav button .ic{font-size:20px;line-height:1}
+  .bottomnav{display:flex;background:#0a1612;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);flex:none;margin:0 -16px}
+  .bottomnav button{flex:1;position:relative;background:none;border:0;color:var(--muted);padding:11px 2px 10px;font-size:12px;font-weight:500;display:flex;flex-direction:column;align-items:center;gap:5px;touch-action:manipulation;letter-spacing:.2px}
+  .bottomnav button svg{width:27px;height:27px}
   .bottomnav button.act{color:var(--gold);font-weight:700}
+  .bottomnav button.act::before{content:"";position:absolute;top:0;left:30%;right:30%;height:3px;border-radius:0 0 3px 3px;background:var(--gold)}
   .hello{font-size:20px;font-weight:700;margin:14px 2px 2px}
   .hsub{font-size:13px;color:var(--muted);margin:0 2px 14px}
-  .hcard{background:rgba(15,77,58,.85);border-radius:16px;padding:14px;margin-bottom:10px;cursor:pointer}
+  .hcard{background:var(--card);border-radius:16px;padding:14px;margin-bottom:10px;cursor:pointer}
   .hcard:active{background:#17705a}
   .hrow{display:flex;justify-content:space-between;align-items:center;font-size:16px;font-weight:600}
   .hrow small{font-size:13px;color:var(--gold);font-weight:600}
-  .pbar{height:7px;background:#06251c;border-radius:6px;overflow:hidden;margin:10px 0 6px}
+  .pbar{height:7px;background:#0a1612;border-radius:6px;overflow:hidden;margin:10px 0 6px}
   .pbar div{height:100%;background:var(--gold);border-radius:6px}
-  .hcard.ok .pbar div{background:#4fd1a0}
+  .hcard.ok .pbar div{background:#5fcfa6}
   .hs{font-size:12px;color:var(--muted)}
   .row{margin-top:10px}
   #tap{color:var(--text)}
   .card .ar2{font-size:var(--afs,24px)}
   .audrow{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
-  .aud{background:var(--gold);color:#0b3d2e;border:0;border-radius:12px;padding:10px 14px;font-size:14px;font-weight:700;touch-action:manipulation}
+  .aud{background:var(--gold);color:#0d1a17;border:0;border-radius:12px;padding:10px 14px;font-size:14px;font-weight:700;touch-action:manipulation}
   .aud.on{background:#b3392f;color:#fff}
   .astat{font-size:12px;color:var(--gold);flex:1;min-width:120px}
   .asrc{font-size:10.5px;color:var(--muted);margin-top:4px}
-  #gapsel{background:var(--bg2);color:var(--text);border:1px solid #1c6b52;border-radius:8px;padding:4px 6px;font-size:12px}
-  .ppanel{background:rgba(15,77,58,.85);border:1px solid #1c6b52;border-radius:16px;padding:12px;margin-bottom:12px}
+  #gapsel{background:var(--bg2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:4px 6px;font-size:12px}
+  .ppanel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:12px}
   .seg{display:flex;gap:6px;margin-bottom:10px}
-  .seg button{flex:1;background:var(--bg2);color:var(--muted);border:1px solid #1c6b52;border-radius:12px;padding:9px 6px;font-size:14px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px;touch-action:manipulation}
+  .seg button{flex:1;background:var(--bg2);color:var(--muted);border:1px solid var(--line);border-radius:12px;padding:9px 6px;font-size:14px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px;touch-action:manipulation}
   .seg button small{font-size:10.5px;font-weight:400}
-  .seg button.on{background:var(--gold);color:#0b3d2e;border-color:var(--gold)}
+  .seg button.on{background:var(--gold);color:#0d1a17;border-color:var(--gold)}
   .popts{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);margin-bottom:8px}
   .aud.big{width:100%;padding:12px;font-size:15px}
   @keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.08)}100%{transform:scale(1)}}
@@ -118,27 +118,30 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   .hm{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin:8px 0}
   .hm i{aspect-ratio:1;border-radius:4px;background:#12392d;display:block}
   .stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0}
-  .stats div{background:#0c3a2c;border-radius:10px;padding:8px;font-size:12px;color:#9fc4b5}.stats b{display:block;font-size:18px;color:#f3f1e7}
+  .stats div{background:#0f1f1a;border-radius:10px;padding:8px;font-size:12px;color:#9fc4b5}.stats b{display:block;font-size:18px;color:#f3f1e7}
   .chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
-  .chips button{background:none;border:1px solid #1c6b52;color:#cfe3d9;border-radius:16px;padding:6px 10px;font-size:12px}
-  .chips button.on{background:#e6c36a;color:#0b3d2e;border-color:#e6c36a;font-weight:700}
-  #tbig{width:100%;padding:22px;font-size:34px;font-weight:700;background:#1c6b52;color:#fff;border:0;border-radius:18px;margin:6px 0;touch-action:manipulation}
-  .rec{background:none;border:1px solid #1c6b52;color:#e6c36a;border-radius:10px;padding:3px 8px;font-size:11px;margin-left:6px}
-  #dq{width:100%;box-sizing:border-box;background:#0c3a2c;color:#f3f1e7;border:1px solid #1c6b52;border-radius:12px;padding:11px 12px;font-size:15px;margin:2px 0 8px}
+  .chips button{background:none;border:1px solid var(--line);color:#c9d9d2;border-radius:16px;padding:6px 10px;font-size:12px}
+  .chips button.on{background:#e6c36a;color:#0d1a17;border-color:#e6c36a;font-weight:700}
+  #tbig{width:100%;padding:22px;font-size:34px;font-weight:700;background:var(--line);color:#fff;border:0;border-radius:18px;margin:6px 0;touch-action:manipulation}
+  .rec{background:none;border:1px solid var(--line);color:#e6c36a;border-radius:10px;padding:3px 8px;font-size:11px;margin-left:6px}
+  #dq{width:100%;box-sizing:border-box;background:#0f1f1a;color:#f3f1e7;border:1px solid var(--line);border-radius:12px;padding:11px 12px;font-size:15px;margin:2px 0 8px}
   .chips{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}
-  .chips button{flex:none;background:var(--card);color:var(--text);border:1px solid #1c6b52;border-radius:16px;padding:7px 12px;font-size:13px}
-  .chips button.on{background:var(--gold);color:#0b3d2e;border-color:var(--gold);font-weight:700}
-  .when{font-size:13px;color:#cfe3d9;margin:4px 0 6px;line-height:1.45}.when b{color:#e6c36a}
+  .chips button{flex:none;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:16px;padding:7px 12px;font-size:13px}
+  .chips button.on{background:var(--gold);color:#0d1a17;border-color:var(--gold);font-weight:700}
+  .when{font-size:13px;color:#c9d9d2;margin:4px 0 6px;line-height:1.45}.when b{color:#e6c36a}
   .reps{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:#9fc4b5;margin:2px 0 4px}
-  .mini{width:64px;height:64px;border-radius:50%;border:2px solid #e6c36a;background:#1c6b52;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;touch-action:manipulation;-webkit-tap-highlight-color:transparent;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+  .mini{width:64px;height:64px;border-radius:50%;border:2px solid #e6c36a;background:var(--line);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;touch-action:manipulation;-webkit-tap-highlight-color:transparent;box-shadow:0 2px 8px rgba(0,0,0,.35)}
   .mini b{font-size:22px;color:#fff}.mini small{font-size:11px;color:#cfe8dd;margin-top:2px}
   .mini:active{transform:scale(.93)}.mini.dn{background:#3a8a2f;border-color:#7ed36f}
   .reps b{color:#e6c36a}
   .reps>span b{color:#e6c36a}.reps b{color:#e6c36a}
-  .tr{font-size:15px;line-height:1.7;color:#e9e2c8;background:#0c3a2c;border-radius:10px;padding:8px 10px;margin:6px 0}
+  .tr{font-size:15px;line-height:1.7;color:#e9e2c8;background:#0f1f1a;border-radius:10px;padding:8px 10px;margin:6px 0}
   .tr small{display:block;color:#9fc4b5;font-size:11px;margin-bottom:2px}
   .ben{background:#14452f;border-left:3px solid #e6c36a;border-radius:8px;padding:8px 10px;margin:6px 0;font-size:13.5px;line-height:1.55;color:#e8efe9}.ben b{color:#e6c36a}
-  .btnrow{display:flex;gap:8px}.btnrow button{flex:1;background:none;border:1px solid #1c6b52;color:#cfe3d9;border-radius:12px;padding:10px;font-size:14px}
+  .btnrow{display:flex;gap:8px}.btnrow button{flex:1;background:none;border:1px solid var(--line);color:#c9d9d2;border-radius:12px;padding:10px;font-size:14px}
+  .card,.hcard,.ppanel{border:1px solid var(--line);box-shadow:0 1px 0 rgba(255,255,255,.03) inset,0 6px 18px rgba(0,0,0,.25)}
+  header{border-bottom:1px solid var(--line);margin-bottom:6px}
+  html,body{background:linear-gradient(180deg,#0d1a17,#08130f) fixed}
 </style>
 </head>
 <body>
@@ -153,7 +156,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
 <div class="wrap">
   <button id="tap" aria-label="Tap to count">
     <svg viewBox="0 0 200 200">
-      <circle cx="100" cy="100" r="92" fill="none" stroke="#1c6b52" stroke-width="9" opacity=".5"/>
+      <circle cx="100" cy="100" r="92" fill="none" stroke="var(--line)" stroke-width="9" opacity=".5"/>
       <circle id="prog" cx="100" cy="100" r="92" fill="none" stroke="#e6c36a" stroke-width="9" stroke-linecap="round" stroke-dasharray="578.05" stroke-dashoffset="578.05"/>
     </svg>
     <div class="in">
@@ -171,7 +174,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   <div class="popts" id="vlangrow" style="justify-content:center;gap:8px"><span>I speak it in</span><select id="vlang"><option value="ar-SA">Arabic style</option><option value="hi-IN">Hindi style</option><option value="en-IN">English style</option></select></div>
   <div id="vstatus">Starting microphone…</div>
   <div id="vtip" style="font-size:11.5px;color:var(--muted);line-height:1.5;margin:4px 6px">Counts only when it recognises <b>Astaghfirullah</b>. Hold the phone close to your mouth in a quiet place.</div>
-  <div id="vheard" style="font-size:14px;color:#cfe3d9;min-height:20px;margin:6px 0"></div>
+  <div id="vheard" style="font-size:14px;color:#c9d9d2;min-height:20px;margin:6px 0"></div>
   <div id="vany">
     <div class="meter"><div id="vlevel"></div></div>
     <div>Sensitivity: <span id="sensv">5</span> <small>(raise it if words are missed, lower it if noise is counted)</small></div>
@@ -195,10 +198,10 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     <div class="set"><span>Daily target</span><input id="target" type="number" min="1" step="100"></div>
     <div class="set"><span>Vibrate on tap</span><input id="vib" type="checkbox"></div>
     <div class="set"><span>Keep screen on</span><input id="wake" type="checkbox"></div>
-    <div class="set"><span>Reader voice</span><select id="vsel" style="max-width:150px;background:#0c3a2c;color:#f3f1e7;border:1px solid #1c6b52;border-radius:8px;padding:6px"></select></div>
+    <div class="set"><span>Reader voice</span><select id="vsel" style="max-width:150px;background:#0f1f1a;color:#f3f1e7;border:1px solid var(--line);border-radius:8px;padding:6px"></select></div>
     <div class="set"><span>Test the voice</span><button id="vtest" style="padding:8px 12px">▶ Play sample</button></div>
     <div class="set"><span>Show English letters</span><input id="trtog" type="checkbox"></div>
-    <div class="set"><span>Arabic style</span><select id="afont" style="background:#0c3a2c;color:#f3f1e7;border:1px solid #1c6b52;border-radius:8px;padding:6px"><option value="naskh">Clear Naskh</option><option value="sch">Scheherazade (Quran style)</option><option value="own">My own font file</option></select></div>
+    <div class="set"><span>Arabic style</span><select id="afont" style="background:#0f1f1a;color:#f3f1e7;border:1px solid var(--line);border-radius:8px;padding:6px"><option value="naskh">Clear Naskh</option><option value="sch">Scheherazade (Quran style)</option><option value="own">My own font file</option></select></div>
     <div class="set" id="ownfontrow" style="display:none"><span>Font file (.ttf / .otf)</span><button id="ofbtn" style="padding:8px 12px">Choose font</button><input type="file" id="offile" accept=".ttf,.otf,.woff,.woff2,font/*" style="display:none"></div>
     <div class="set"><span>Arabic text size</span><span><button id="afm" style="padding:6px 12px">A−</button> <button id="afp" style="padding:6px 12px">A+</button></span></div>
     <div class="set"><span>Start counting from today<br><small style="color:var(--muted)">Clears earlier days, streak and history</small></span><button id="fresh" style="padding:8px 12px">Start fresh</button></div>
@@ -215,17 +218,13 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
 <div id="v2" class="view"></div>
 <div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b></div></div>
 <nav class="bottomnav">
-  <button id="tab_h" class="act"><span class="ic">🏠</span><span>Today</span></button>
-  <button id="tab_i"><span class="ic">📿</span><span>Istighfar</span></button>
-  <button id="tab_t"><span class="ic">🔢</span><span>Tasbih</span></button>
-  <button id="tab_m"><span class="ic">🌅</span><span>Morning</span></button>
-  <button id="tab_e"><span class="ic">🌇</span><span>Evening</span></button>
-  <button id="tab_s"><span class="ic">🕌</span><span>Salah</span></button>
-  <button id="tab_b"><span class="ic">🌙</span><span>Sleep</span></button>
-  <button id="tab_d"><span class="ic">🤲</span><span>Duas</span></button>
+  <button id="nav_h" class="act"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg><span>Today</span></button>
+  <button id="nav_i"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg><span>Istighfar</span></button>
+  <button id="nav_a"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5.5C5.5 4 9 4 12 6c3-2 6.5-2 9-.5V19c-2.5-1.5-6-1.5-9 .5-3-2-6.5-2-9-.5z"/><path d="M12 6v13.5"/></svg><span>Adhkar</span></button>
+  <button id="nav_d"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span>Duas</span></button>
 </nav>
 
-<div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;align-items:center;justify-content:center;padding:24px"><div style="background:#0f4d3a;border:1px solid #1c6b52;border-radius:18px;padding:20px;max-width:320px;width:100%;text-align:center"><div id="mtext" style="font-size:16px;line-height:1.5;margin-bottom:16px"></div><div style="display:flex;gap:10px"><button id="mno" style="flex:1;background:none;border:1px solid #1c6b52;color:#f3f1e7;border-radius:12px;padding:12px;font-size:15px">Cancel</button><button id="myes" style="flex:1;background:#b3392f;border:0;color:#fff;border-radius:12px;padding:12px;font-size:15px;font-weight:700">Yes, reset</button></div></div></div>
+<div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;align-items:center;justify-content:center;padding:24px"><div style="background:#14261f;border:1px solid var(--line);border-radius:18px;padding:20px;max-width:320px;width:100%;text-align:center"><div id="mtext" style="font-size:16px;line-height:1.5;margin-bottom:16px"></div><div style="display:flex;gap:10px"><button id="mno" style="flex:1;background:none;border:1px solid var(--line);color:#f3f1e7;border-radius:12px;padding:12px;font-size:15px">Cancel</button><button id="myes" style="flex:1;background:#b3392f;border:0;color:#fff;border-radius:12px;padding:12px;font-size:15px;font-weight:700">Yes, reset</button></div></div></div>
 <script>
 (function(){
   var KEY='istighfar_v1';
@@ -796,9 +795,14 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
       h+='<div class="hcard'+(p>=1?' ok':'')+'" data-go="'+c+'"><div class="hrow"><span>'+SEC[c][0]+' '+SEC[c][1]+'</span><small>'+(p>=1?'✓ Complete':lab)+'</small></div><div class="pbar"><div style="width:'+Math.round(p*100)+'%"></div></div><div class="hs">'+SEC[c][2]+'</div></div>';
     });
     var have=DL.count>0;
-    h+='<div class="hcard" style="cursor:default"><div class="hrow"><span>📥 Use without internet</span><small>'+(have?'✓ '+DL.count+' files · '+(DL.bytes/1048576).toFixed(1)+' MB':'Not downloaded')+'</small></div><div class="hs" style="margin:8px 0;line-height:1.5">The app itself already opens offline. Download the audio once (about 20 to 30 MB) to listen and learn offline. '+arabicVoiceInfo()+'. Counting by voice needs internet; offline it counts any sound.</div><div style="display:flex;gap:8px"><button class="aud big" data-act="dlall" style="flex:1">'+(DL.busy?'Downloading…':(have?'📥 Update download':'📥 Download audio'))+'</button>'+(have?'<button class="rst" data-act="dlclear" style="padding:0 14px;border:1px solid #1c6b52;background:none;color:#cfe3d9;border-radius:12px">Delete</button>':'')+'</div><div class="astat" id="dlstat" style="margin-top:8px">'+DL.msg+'</div></div>';
+    h+='<div class="hcard" style="cursor:default"><div class="hrow"><span>📥 Use without internet</span><small>'+(have?'✓ '+DL.count+' files · '+(DL.bytes/1048576).toFixed(1)+' MB':'Not downloaded')+'</small></div><div class="hs" style="margin:8px 0;line-height:1.5">The app itself already opens offline. Download the audio once (about 20 to 30 MB) to listen and learn offline. '+arabicVoiceInfo()+'. Counting by voice needs internet; offline it counts any sound.</div><div style="display:flex;gap:8px"><button class="aud big" data-act="dlall" style="flex:1">'+(DL.busy?'Downloading…':(have?'📥 Update download':'📥 Download audio'))+'</button>'+(have?'<button class="rst" data-act="dlclear" style="padding:0 14px;border:1px solid var(--line);background:none;color:#c9d9d2;border-radius:12px">Delete</button>':'')+'</div><div class="astat" id="dlstat" style="margin-top:8px">'+DL.msg+'</div></div>';
     h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b></div>';
     v.innerHTML=h;
+  }
+  function aBar(){
+    var h='<div class="chips" style="padding-top:4px">';
+    [['m','🌅 Morning'],['e','🌇 Evening'],['s','🕌 After salah'],['b','🌙 Sleep'],['t','📿 Tasbih']].forEach(function(x){h+='<button data-ta="'+x[0]+'" class="'+(tab===x[0]?'on':'')+'">'+x[1]+'</button>'});
+    return h+'</div>';
   }
   function dHead(n){
     var h='<div class="adhead"><span>🤲 '+n+(n===1?' dua':' duas')+'</span></div><input id="dq" type="search" placeholder="Search: debt, illness, travel, anxiety…" value="'+(S.dq||'').replace(/"/g,'&quot;')+'" autocomplete="off"><div class="chips">';
@@ -808,7 +812,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   }
   function renderAd(){
     if(tab==='h'){renderHome();return}
-    var v=$('v2'),top=v.scrollTop,st=adState(),it=adItems(),done=0,h='';
+    var v=$('v2'),top=v.scrollTop,st=adState(),it=adItems(),done=0,h='tmesb'.indexOf(tab)>=0?aBar():'';
     it.forEach(function(x){var k=tab+':'+x.id;if((st[k]||0)>=x.n)done++});
     h+=(tab==='d'?dHead(it.length):'<div class="adhead"><span>'+CATN[tab]+' · '+done+'/'+it.length+' done</span><button data-act="resetall">Reset section</button></div>')+'<div class="ppanel"><div class="seg"><button data-m="listen" class="'+(pmode()==='listen'?'on':'')+'">▶ Listen<small>full recitation</small></button><button data-m="learn" class="'+(pmode()==='learn'?'on':'')+'">🎓 Learn<small>repeat after me</small></button></div>'+(pmode()==='learn'?'<div class="popts"><span>Phrase length</span><select id="plsel"><option value="short"'+(plen()==='short'?' selected':'')+'>Short</option><option value="med"'+(plen()==='med'?' selected':'')+'>Medium</option><option value="long"'+(plen()==='long'?' selected':'')+'>Long</option></select></div><div class="popts"><span>Your pause</span><select id="gapsel"><option value="0.8"'+(gf()===0.8?' selected':'')+'>Short</option><option value="1.2"'+(gf()===1.2?' selected':'')+'>Normal</option><option value="2"'+(gf()===2?' selected':'')+'>Long</option></select></div>':'')+'<button class="aud big'+(P.all?' on':'')+'" data-act="playall">'+(P.all?'⏹ Stop':'▶ Play all '+(pmode()==='learn'?'(learn)':'(listen)'))+'</button></div>';
     it.forEach(function(x){
@@ -823,6 +827,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     idbPut(k,f).then(loadOff).then(renderAd).catch(function(){alert('Could not save the recording.')})};
   $('v2').addEventListener('click',function(e){
     var g=e.target.closest('[data-go]');if(g){showTab(g.dataset.go);return}
+    var ta=e.target.closest('[data-ta]');if(ta){showTab(ta.dataset.ta);return}
     var dg=e.target.closest('[data-dg]');if(dg){S.dg=dg.dataset.dg;save();renderAd();var cb=document.querySelector('.chips button.on');if(cb&&cb.scrollIntoView)cb.scrollIntoView({inline:'center',block:'nearest'});return}
     var mb=e.target.closest('[data-m]');if(mb){stopPlay();S.pmode=mb.dataset.m;save();renderAd();return}
     var pa=e.target.closest('[data-act="playall"]');if(pa){runAll();return}
@@ -843,14 +848,17 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   var _dqt=null;
   $('v2').addEventListener('input',function(e){if(e.target.id!=='dq')return;var val=e.target.value;clearTimeout(_dqt);_dqt=setTimeout(function(){S.dq=val;save();renderAd();var q=$('dq');if(q){q.focus();try{q.setSelectionRange(val.length,val.length)}catch(x){}}},250)});
   $('v2').addEventListener('change',function(e){if(e.target.id==='gapsel'){S.gapf=parseFloat(e.target.value);save()}if(e.target.id==='plsel'){S.plen=e.target.value;save()}});
+  var lastA='m';
   function showTab(t){
     stopPlay();tab=t;
-    ['h','i','t','m','e','s','b','d'].forEach(function(k){$('tab_'+k).classList.toggle('act',k===t)});
+    if('tmesb'.indexOf(t)>=0)lastA=t;
+    var nv={h:'h',i:'i',t:'a',m:'a',e:'a',s:'a',b:'a',d:'d'}[t];
+    ['h','i','a','d'].forEach(function(k){$('nav_'+k).classList.toggle('act',k===nv)});
     $('v1').style.display=t==='i'?'block':'none';
     $('v2').style.display=t==='i'?'none':'block';
     if(t!=='i'){renderAd();$('v2').scrollTop=0}
   }
-  ['h','i','t','m','e','s','b','d'].forEach(function(k){$('tab_'+k).onclick=function(){showTab(k)}});
+  $('nav_h').onclick=function(){showTab('h')};$('nav_i').onclick=function(){showTab('i')};$('nav_a').onclick=function(){showTab(lastA)};$('nav_d').onclick=function(){showTab('d')};
   // ---------- Voice counting (sound-burst detection, works offline) ----------
   var V={on:false,ctx:null,stream:null,an:null,buf:null,timer:null,env:0,floor:0.01,inWord:false,start:0,lastCount:0,t0:0,cal:0,calN:0};
   function sensFactor(){return (S.sens||5)/5}
@@ -900,7 +908,7 @@ function makeDet(){
     if(n>0)add(n,true);
     var hi=D.hi/D.sens;
     $('vlevel').style.width=Math.min(100,D.phase==='noise'?0:D.env/(hi*2)*100)+'%';
-    $('vlevel').style.background=D.inWord?'#e6c36a':'#4fd1a0';
+    $('vlevel').style.background=D.inWord?'#e6c36a':'#5fcfa6';
     $('vstatus').textContent=D.phase==='noise'?'Stay quiet for a second…':D.phase==='learn'?'Now say Astaghfirullah 3 times ('+D.learn.length+'/3). These count too.':'🎙 Listening to your voice… keep saying Astaghfirullah';
   }
   function vstartAny(){
