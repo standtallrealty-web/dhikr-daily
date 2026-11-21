@@ -214,6 +214,9 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   .qcv{font-size:11px;color:var(--muted);margin-top:12px}
   .qcard .qar{font-size:21px;line-height:2}.qcard .qen{font-size:14.5px}.qcard details.qset{margin-top:12px;border-top:1px solid var(--line);padding-top:10px;text-align:left}.qcard summary{font-size:14px;font-weight:600;color:var(--text)}
   .qcard .set{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0}.qcard select{background:var(--inset2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px}
+.adov{position:fixed;inset:0;z-index:99999;background:#0b3d2e;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+.adov .at{font-size:22px;font-weight:700;margin-bottom:6px}.adov .as{font-size:14px;opacity:.85;margin-bottom:28px;max-width:320px}
+.adov button{background:#c0392b;color:#fff;border:0;border-radius:50%;width:190px;height:190px;font-size:30px;font-weight:800;box-shadow:0 8px 30px rgba(0,0,0,.45)}
 </style>
 </head>
 <body>
@@ -906,7 +909,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     var have=DL.count>0;
     h+='<div class="hcard" style="cursor:default"><div class="hrow"><span>📥 Use without internet</span><small>'+(have?'✓ '+DL.count+' files · '+(DL.bytes/1048576).toFixed(1)+' MB':'Not downloaded')+'</small></div><div class="hs" style="margin:8px 0;line-height:1.5">The app itself already opens offline. Download the audio once (about 20 to 30 MB) to listen and learn offline. '+arabicVoiceInfo()+'. Counting by voice needs internet; offline it counts any sound.</div><div style="display:flex;gap:8px"><button class="aud big" data-act="dlall" style="flex:1">'+(DL.busy?'Downloading…':(have?'📥 Update download':'📥 Download audio'))+'</button>'+(have?'<button class="rst" data-act="dlclear" style="padding:0 14px;border:1px solid var(--line);background:none;color:#c9d9d2;border-radius:12px">Delete</button>':'')+'</div><div class="astat" id="dlstat" style="margin-top:8px">'+DL.msg+'</div></div>';
     h+='<div id="syncst" class="syncst">'+(SY&&SY.st?SY.st.replace(/</g,'&lt;'):'☁ Sync · tap to sync now')+'</div>';
-    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v39</div><div style="text-align:center;margin:6px 0 14px"><button id="updbtn" style="background:none;border:1px solid var(--line);color:var(--acc);border-radius:16px;padding:8px 16px;font-size:13px">🔄 Update app</button></div>';
+    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v40</div><div style="text-align:center;margin:6px 0 14px"><button id="updbtn" style="background:none;border:1px solid var(--line);color:var(--acc);border-radius:16px;padding:8px 16px;font-size:13px">🔄 Update app</button></div>';
     v.innerHTML=h;
   }
   function aBar(){
@@ -1070,6 +1073,7 @@ function distKm(lat,lon){var R=6371,p1=pzR(lat),p2=pzR(KAABA.lat),dp=p2-p1,dl=pz
     h+='<div class="set"><span>Notify at adhan<br><small style="color:var(--muted)">Works while the app is open or in the background</small></span><button class="'+(pm.on?'tgl on':'tgl')+'" data-pr="notif">'+(pm.on?'ON':'OFF')+'</button></div>';
     h+='<div class="set"><span>Alert before</span><select id="prlead">'+[0,5,10,15].map(function(m){return'<option value="'+m+'"'+(pm.lead===m?' selected':'')+'>'+(m?m+' min before':'At adhan time')+'</option>'}).join('')+'</select></div>';
     h+='<div class="set" style="flex-wrap:wrap;gap:6px"><span style="width:100%">Alert for</span>'+P5.map(function(x){return'<button class="chk'+(pm.pr[x[0]]?' on':'')+'" data-prc="'+x[0]+'">'+(pm.pr[x[0]]?'✓ ':'')+x[1]+'</button>'}).join('')+'</div>';
+    h+='<div class="set"><span>Play adhan sound<br><small style="color:var(--muted)">Plays the adhan at prayer time for the prayers ticked under “Alert for”. Stops when you press the side button, tap STOP, or leave the app</small></span><button class="'+(pm.ad?'tgl on':'tgl')+'" data-ad="tgl">'+(pm.ad?'ON':'OFF')+'</button></div><button class="bigbtn" data-ad="test">▶ Test adhan now</button>';
     h+='<div class="set"><span>Phone calendar alerts<br><small style="color:var(--muted)">Adds the next 30 days to your calendar app, so it rings even when this app is closed</small></span></div><button class="bigbtn" data-pr="ics">📅 Download calendar file (30 days)</button>';
     h+='<div class="set"><span>Calculation method</span><select id="prmeth">'+Object.keys(METHODS).map(function(k){return'<option value="'+k+'"'+(pm.method===k?' selected':'')+'>'+METHODS[k].n+'</option>'}).join('')+'</select></div>';
     h+='<div class="set"><span>Asr time</span><select id="prasr"><option value="1"'+(pm.asr===1?' selected':'')+'>Standard: shadow = 1× (Shafi‘i, Maliki, Hanbali, Ahl-e-Hadith)</option><option value="2"'+(pm.asr===2?' selected':'')+'>Hanafi: shadow = 2×</option></select></div>';
@@ -1114,6 +1118,32 @@ function distKm(lat,lon){var R=6371,p1=pzR(lat),p2=pzR(KAABA.lat),dp=p2-p1,dl=pz
   function notifyNow(title,body){try{if(window.Notification&&Notification.permission==='granted'){var o={body:body,icon:'/icon-192.png',tag:'adhan-'+title,vibrate:[200,100,200]};if(navigator.serviceWorker&&navigator.serviceWorker.getRegistration){navigator.serviceWorker.getRegistration().then(function(r){if(r)r.showNotification(title,o);else new Notification(title,o)})}else new Notification(title,o)}}catch(e){}}
   setInterval(function(){var pm=S&&PM();if(!pm||!pm.on)return;var now=Date.now(),t=PTd(new Date());
     P5.forEach(function(x){if(!pm.pr[x[0]])return;var at=t[x[0]]-pm.lead*6e4,id=key()+x[0]+pm.lead;if(now>=at&&now<at+120000&&!FIRED[id]){FIRED[id]=1;notifyNow(x[1]+(pm.lead?' in '+pm.lead+' min':' — time for prayer'),fm(t[x[0]])+(LOC().name?' · '+LOC().name:''))}})},15000);
+
+  // ---- adhan sound ----
+  var ADH={au:null,on:false,t0:0,p:'',fb:false};
+  function adSrc(p){return p==='fajr'?'/audio/adhan/fajr.mp3':'/audio/adhan/adhan.mp3'}
+  function adOv(txt,sub,showStop){var o=$('adov');if(!o){o=document.createElement('div');o.id='adov';o.className='adov';document.body.appendChild(o)}
+    o.innerHTML='<div class="at"></div><div class="as"></div>'+(showStop?'<button id="adstop">STOP</button>':'<button id="adstop" style="width:auto;height:auto;border-radius:12px;padding:14px 28px;font-size:18px">Close</button>');
+    o.firstChild.textContent=txt;o.children[1].textContent=sub;$('adstop').onclick=adStop}
+  function adStop(){ADH.on=false;try{if(ADH.au){ADH.au.onended=null;ADH.au.onerror=null;ADH.au.pause();ADH.au.src=''}}catch(e){}ADH.au=null;var o=$('adov');if(o)o.remove();
+    try{if(navigator.mediaSession){navigator.mediaSession.playbackState='none'}}catch(e){}}
+  function adPlay(p,test){adStop();ADH.p=p;ADH.fb=false;ADH.t0=Date.now();
+    var nm=(P5.filter(function(x){return x[0]===p})[0]||[0,'Prayer'])[1];
+    var a=new Audio(adSrc(p));a.preload='auto';a.volume=1;ADH.au=a;ADH.on=true;
+    adOv('Adhan — '+nm+(test?' (test)':''),'Press STOP, or press the side button, to silence.',true);
+    try{if(navigator.mediaSession){navigator.mediaSession.metadata=new MediaMetadata({title:'Adhan — '+nm,artist:'Dhikr Daily'});navigator.mediaSession.playbackState='playing';['pause','stop'].forEach(function(k){try{navigator.mediaSession.setActionHandler(k,adStop)}catch(e){}})}}catch(e){}
+    a.onended=adStop;
+    a.onerror=function(){if(p==='fajr'&&!ADH.fb){ADH.fb=true;a.src='/audio/adhan/adhan.mp3';a.play().catch(function(){});return}
+      ADH.on=false;adOv('Adhan sound file is not added yet','Ask Claude to add the adhan recording (adhan.mp3). Until then you only get the notification.',false)};
+    var pr=a.play();if(pr&&pr.catch)pr.catch(function(e){if(ADH.au!==a)return;if(e&&e.name==='NotAllowedError'){ADH.on=false;adOv('Tap to play the adhan — '+nm,'Your phone blocked automatic sound. Turn the adhan switch OFF and ON again in the app to allow it.',false);var b=$('adstop');if(b){b.textContent='▶ Play';b.onclick=function(){ADH.on=true;ADH.t0=Date.now();a.play().then(function(){adOv('Adhan — '+nm,'Press STOP to silence.',true)}).catch(function(){})}}}})}
+  document.addEventListener('visibilitychange',function(){if(ADH.on&&Date.now()-ADH.t0>1500)adStop()});
+  function adUnlock(){try{var a=new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=');a.volume=0.01;var r=a.play();if(r&&r.catch)r.catch(function(){})}catch(e){}}
+  setInterval(function(){var pm=S&&PM();if(!pm||!pm.ad)return;var now=Date.now(),t=PTd(new Date());
+    P5.forEach(function(x){if(!pm.pr[x[0]])return;var at=t[x[0]],id='ad'+key()+x[0];if(now>=at&&now<at+90000&&!FIRED[id]){FIRED[id]=1;adPlay(x[0],false)}})},4000);
+  $('v2').addEventListener('click',function(e){var b=e.target.closest('[data-ad]');if(!b)return;var pm=PM();
+    if(b.dataset.ad==='tgl'){if(pm.ad){pm.ad=false;save();PS.open=true;renderPrayer()}else{adUnlock();pm.ad=true;save();PS.open=true;
+      if(window.Notification&&Notification.permission==='default')Notification.requestPermission().catch(function(){});renderPrayer()}}
+    else if(b.dataset.ad==='test'){adUnlock();var n=nextPrayer(new Date());adPlay(n&&n.k?n.k:'dhuhr',true)}});
   function buildIcs(){
     var pm=PM(),l=LOC(),now=new Date(),o=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Dhikr Daily//Prayer times//EN','CALSCALE:GREGORIAN','X-WR-CALNAME:Prayer times'];
     function p2(n){return n<10?'0'+n:''+n}
