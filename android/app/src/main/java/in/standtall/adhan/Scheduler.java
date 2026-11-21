@@ -52,13 +52,22 @@ final class Scheduler {
         long[] n = next(c);
         if (n == null) return;
         int idx = (int) n[0];
-        am.setAlarmClock(new AlarmManager.AlarmClockInfo(n[1], showPi(c)), pi(c, 1, idx, n[1], false));
+        try {
+            am.setAlarmClock(new AlarmManager.AlarmClockInfo(n[1], showPi(c)), pi(c, 1, idx, n[1], false));
+        } catch (SecurityException e) {
+            // exact-alarm permission missing: fall back to the closest allowed alarm
+            am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, n[1], pi(c, 1, idx, n[1], false));
+        }
     }
 
     /** One-off test alarm in the given number of milliseconds. */
     static void scheduleTest(Context c, int idx, long delayMs) {
         AlarmManager am = (AlarmManager) c.getSystemService(Context.ALARM_SERVICE);
         long at = System.currentTimeMillis() + delayMs;
-        am.setAlarmClock(new AlarmManager.AlarmClockInfo(at, showPi(c)), pi(c, 2, idx, at, true));
+        try {
+            am.setAlarmClock(new AlarmManager.AlarmClockInfo(at, showPi(c)), pi(c, 2, idx, at, true));
+        } catch (SecurityException e) {
+            am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pi(c, 2, idx, at, true));
+        }
     }
 }
