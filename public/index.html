@@ -877,7 +877,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     });
     var have=DL.count>0;
     h+='<div class="hcard" style="cursor:default"><div class="hrow"><span>📥 Use without internet</span><small>'+(have?'✓ '+DL.count+' files · '+(DL.bytes/1048576).toFixed(1)+' MB':'Not downloaded')+'</small></div><div class="hs" style="margin:8px 0;line-height:1.5">The app itself already opens offline. Download the audio once (about 20 to 30 MB) to listen and learn offline. '+arabicVoiceInfo()+'. Counting by voice needs internet; offline it counts any sound.</div><div style="display:flex;gap:8px"><button class="aud big" data-act="dlall" style="flex:1">'+(DL.busy?'Downloading…':(have?'📥 Update download':'📥 Download audio'))+'</button>'+(have?'<button class="rst" data-act="dlclear" style="padding:0 14px;border:1px solid var(--line);background:none;color:#c9d9d2;border-radius:12px">Delete</button>':'')+'</div><div class="astat" id="dlstat" style="margin-top:8px">'+DL.msg+'</div></div>';
-    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v29</div><div style="text-align:center;margin:6px 0 14px"><button id="updbtn" style="background:none;border:1px solid var(--line);color:var(--acc);border-radius:16px;padding:8px 16px;font-size:13px">🔄 Update app</button></div>';
+    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v30</div><div style="text-align:center;margin:6px 0 14px"><button id="updbtn" style="background:none;border:1px solid var(--line);color:var(--acc);border-radius:16px;padding:8px 16px;font-size:13px">🔄 Update app</button></div>';
     v.innerHTML=h;
   }
   function aBar(){
@@ -1315,6 +1315,7 @@ function makeDet(){
   $('themeBtn').onclick=function(){S.theme=S.theme==='dark'?'light':'dark';save();applyTheme()};
   load();if(!S.vm2){S.vmode='any';S.vm2=1;save()}
   today=dayKey();
+  if(!S.t10){if(S.target===20000)S.target=10000;Object.keys(S.days).forEach(function(k){if(S.days[k]&&S.days[k].t===20000)S.days[k].t=10000});S.t10=1;save()}
   try{if(navigator.permissions&&navigator.permissions.query)navigator.permissions.query({name:'geolocation'}).then(function(r){if(r.state==='granted')getLoc(true)}).catch(function(){})}catch(e){}
   applyTheme();window.__ex=1;render();setWake();showTab('h');
 })();
