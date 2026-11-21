@@ -147,6 +147,15 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   .card{padding:16px}
   .card .ct{letter-spacing:.2px}
   header{border-bottom:1px solid var(--line);margin-bottom:4px}
+  #profBtn{background:var(--acc);color:var(--ong);border:0;width:36px;height:36px;border-radius:50%;font-size:16px;font-weight:700;margin-left:8px;touch-action:manipulation}
+  #profov{display:none;position:fixed;inset:0;background:rgba(20,30,26,.55);z-index:50;align-items:center;justify-content:center;padding:24px}
+  #profov.show{display:flex}
+  #profov .bx{background:var(--card);border-radius:20px;padding:20px;width:100%;max-width:340px;box-shadow:0 20px 50px rgba(0,0,0,.35)}
+  #profov h3{margin:0 0 4px;font-size:18px;color:var(--text)}#profov p{margin:0 0 14px;font-size:13px;color:var(--muted);line-height:1.5}
+  #profov button.pp{display:flex;align-items:center;gap:12px;width:100%;background:var(--inset2);border:2px solid var(--line);color:var(--text);border-radius:14px;padding:14px;font-size:17px;font-weight:600;margin-bottom:10px;touch-action:manipulation}
+  #profov button.pp.cur{border-color:var(--acc)}
+  #profov button.pp i{font-style:normal;width:38px;height:38px;border-radius:50%;background:var(--acc);color:var(--ong);display:flex;align-items:center;justify-content:center;font-weight:700}
+  #profov .cl{background:none;border:0;color:var(--muted);width:100%;padding:8px;font-size:14px}
   #themeBtn{background:var(--card);border:1px solid var(--line);color:var(--text);width:36px;height:36px;border-radius:50%;font-size:17px;margin-left:8px;touch-action:manipulation}
   .hcard:active{background:var(--press)}
   .hello{font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:600}
@@ -162,7 +171,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
 <body>
 <header>
   <div><div style="font-size:17px;font-weight:700;color:var(--gold)">Dhikr Daily</div><div class="date" id="date"></div></div>
-  <div style="display:flex;align-items:center"><div class="streak" id="streak">🔥 0 day streak</div><button id="themeBtn" aria-label="Switch light or dark theme">🌙</button></div>
+  <div style="display:flex;align-items:center"><div class="streak" id="streak">🔥 0 day streak</div><button id="profBtn" aria-label="Switch person"></button><button id="themeBtn" aria-label="Switch light or dark theme">🌙</button></div>
 </header>
 <div id="v1" class="view">
 <div class="arabic">أَسْتَغْفِرُ اللَّهَ</div>
@@ -232,6 +241,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
 </div>
 <div id="v2" class="view"></div>
 <div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b></div></div>
+<div id="profov"><div class="bx"><h3>Who is reading?</h3><p>Each person has their own count, streak and history. Nothing is shared.</p><div id="proflist"></div><button class="cl" id="profcl">Close</button></div></div>
 <nav class="bottomnav">
   <button id="nav_h" class="act"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg><span>Today</span></button>
   <button id="nav_i"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg><span>Istighfar</span></button>
@@ -242,7 +252,9 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
 <div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;align-items:center;justify-content:center;padding:24px"><div style="background:#14261f;border:1px solid var(--line);border-radius:18px;padding:20px;max-width:320px;width:100%;text-align:center"><div id="mtext" style="font-size:16px;line-height:1.5;margin-bottom:16px"></div><div style="display:flex;gap:10px"><button id="mno" style="flex:1;background:none;border:1px solid var(--line);color:#f3f1e7;border-radius:12px;padding:12px;font-size:15px">Cancel</button><button id="myes" style="flex:1;background:#b3392f;border:0;color:#fff;border-radius:12px;padding:12px;font-size:15px;font-weight:700">Yes, reset</button></div></div></div>
 <script>
 (function(){
-  var KEY='istighfar_v1';
+  var PROFS={k:{n:'Kafil',key:'istighfar_v1'},h:{n:'Humera',key:'istighfar_v1_humera'}};
+  var PID='k';try{var _p=localStorage.getItem('dhikr_profile');if(_p&&PROFS[_p])PID=_p}catch(e){}
+  var KEY=PROFS[PID].key;
   var DEF={target:10000,vib:true,wake:false,days:{}};
   var S;
   function load(){try{var r=localStorage.getItem(KEY);S=r?JSON.parse(r):null}catch(e){S=null}
@@ -801,7 +813,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     it.forEach(function(x){var q=Math.min(1,(st[c+':'+x.id]||0)/x.n);got+=q;if(q>=1)d++});
     return {d:d,t:it.length,p:got/it.length}}
   function renderHome(){
-    var v=$('v2'),h='<div class="hello">Assalamu alaikum</div><div class="hsub">What would you like to do today? Tap a section to begin.</div>';
+    var v=$('v2'),h='<div class="hello">Assalamu alaikum, '+PROFS[PID].n+'</div><div class="hsub">What would you like to do today? Tap a section to begin.</div>';
     ['i','t','m','e','s','b','d'].forEach(function(c){
       var d,t,p,lab;
       if(c==='i'){var n=cur().n;p=Math.min(1,n/S.target);lab=fmt(n)+' / '+fmt(S.target)}
@@ -811,7 +823,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     });
     var have=DL.count>0;
     h+='<div class="hcard" style="cursor:default"><div class="hrow"><span>📥 Use without internet</span><small>'+(have?'✓ '+DL.count+' files · '+(DL.bytes/1048576).toFixed(1)+' MB':'Not downloaded')+'</small></div><div class="hs" style="margin:8px 0;line-height:1.5">The app itself already opens offline. Download the audio once (about 20 to 30 MB) to listen and learn offline. '+arabicVoiceInfo()+'. Counting by voice needs internet; offline it counts any sound.</div><div style="display:flex;gap:8px"><button class="aud big" data-act="dlall" style="flex:1">'+(DL.busy?'Downloading…':(have?'📥 Update download':'📥 Download audio'))+'</button>'+(have?'<button class="rst" data-act="dlclear" style="padding:0 14px;border:1px solid var(--line);background:none;color:#c9d9d2;border-radius:12px">Delete</button>':'')+'</div><div class="astat" id="dlstat" style="margin-top:8px">'+DL.msg+'</div></div>';
-    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v22</div>';
+    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v23</div>';
     v.innerHTML=h;
   }
   function aBar(){
@@ -1033,6 +1045,19 @@ function makeDet(){
   var _r=render;render=function(){_r();$('sens').value=S.sens||5;$('sensv').textContent=S.sens||5;$('vmode').value=S.vmode||'any';$('vlang').value=S.vlang||'ar-SA'};
   if('serviceWorker' in navigator&&/^https?:/.test(location.protocol)){try{navigator.serviceWorker.register('/sw.js')}catch(e){}}
   loadOff().then(function(){applyFont();if(tab==='h')renderAd()});
+  function showProf(){
+    var h='';Object.keys(PROFS).forEach(function(k){h+='<button class="pp'+(k===PID?' cur':'')+'" data-p="'+k+'"><i>'+PROFS[k].n.charAt(0)+'</i>'+PROFS[k].n+(k===PID?' <small style="margin-left:auto;color:var(--acc)">✓ current</small>':'')+'</button>'});
+    $('proflist').innerHTML=h;$('profov').classList.add('show');
+  }
+  $('profBtn').textContent=PROFS[PID].n.charAt(0);
+  $('profBtn').onclick=showProf;$('profcl').onclick=function(){$('profov').classList.remove('show')};
+  $('profov').addEventListener('click',function(e){
+    if(e.target===$('profov')){$('profov').classList.remove('show');return}
+    var b=e.target.closest('[data-p]');if(!b)return;
+    if(b.dataset.p===PID){$('profov').classList.remove('show');return}
+    try{localStorage.setItem('dhikr_profile',b.dataset.p)}catch(x){}
+    location.reload();
+  });
   function applyTheme(){var t=S.theme==='dark'?'dark':'light';document.documentElement.setAttribute('data-theme',t);$('themeBtn').textContent=t==='dark'?'☀️':'🌙';var m=document.querySelector('meta[name=theme-color]');if(m)m.setAttribute('content',t==='dark'?'#0a1612':'#f8f4ea')}
   $('themeBtn').onclick=function(){S.theme=S.theme==='dark'?'light':'dark';save();applyTheme()};
   load();if(!S.vm2){S.vmode='any';S.vm2=1;save()}
