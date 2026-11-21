@@ -27,9 +27,56 @@ public class MainActivity extends Activity {
     private LinearLayout root;
     private boolean building;
 
+    private static String trace(Throwable t) {
+        java.io.StringWriter sw = new java.io.StringWriter();
+        t.printStackTrace(new java.io.PrintWriter(sw));
+        return sw.toString();
+    }
+
+    private void showError(String title, final String err) {
+        ScrollView sv = new ScrollView(this);
+        LinearLayout l = new LinearLayout(this);
+        l.setOrientation(LinearLayout.VERTICAL);
+        l.setPadding(dp(14), dp(30), dp(14), dp(20));
+        TextView h = new TextView(this);
+        h.setText(title);
+        h.setTextSize(18);
+        h.setTextColor(Color.RED);
+        TextView e = new TextView(this);
+        e.setText(err.length() > 2500 ? err.substring(0, 2500) : err);
+        e.setTextSize(11);
+        e.setTextIsSelectable(true);
+        l.addView(h);
+        l.addView(e);
+        sv.addView(l);
+        setContentView(sv);
+    }
+
     @Override
     protected void onCreate(Bundle b) {
         super.onCreate(b);
+        final android.content.SharedPreferences cp = getSharedPreferences("crash", Context.MODE_PRIVATE);
+        final Thread.UncaughtExceptionHandler old = Thread.getDefaultUncaughtExceptionHandler();
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override public void uncaughtException(Thread t, Throwable e) {
+                cp.edit().putString("last", trace(e)).commit();
+                if (old != null) old.uncaughtException(t, e);
+            }
+        });
+        String last = cp.getString("last", null);
+        if (last != null) {
+            cp.edit().remove("last").commit();
+            showError("The app crashed last time. Please send a screenshot of this to Claude:", last);
+            return;
+        }
+        try {
+            init();
+        } catch (Throwable e) {
+            showError("Startup error. Please send a screenshot of this to Claude:", trace(e));
+        }
+    }
+
+    private void init() {
         if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1);
         }
@@ -40,7 +87,11 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        build();
+        try {
+            if (root != null) build();
+        } catch (Throwable e) {
+            showError("Error. Please send a screenshot of this to Claude:", trace(e));
+        }
     }
 
     private int dp(int v) { return (int) (v * getResources().getDisplayMetrics().density); }
