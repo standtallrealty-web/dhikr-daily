@@ -23,6 +23,10 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   body{display:flex;flex-direction:column;padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom)}
   header{display:flex;justify-content:space-between;align-items:center;padding:14px 4px 4px}
   header .date{font-size:14px;color:var(--muted)}
+  .dstrip{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:8px 6px 10px;border-bottom:1px solid var(--line);margin-bottom:4px}
+  .dstrip b{display:block;font-size:14px;font-weight:700;color:var(--text);line-height:1.3}.dstrip span{display:block;font-size:12.5px;color:var(--muted);margin-top:1px}
+  .dstrip .dl{white-space:nowrap;flex-shrink:0}.dstrip .dl b{font-size:13.5px}.dstrip .dr b{font-size:13.5px}
+  .dstrip .dr{text-align:right;cursor:pointer}.dstrip .dr b{color:var(--gold)}
   header .streak{font-size:14px;background:var(--card);border:1px solid var(--line);padding:6px 12px;border-radius:20px}
   .arabic{text-align:center;font-size:34px;color:var(--gold);margin:6px 0 0;font-family:"Amiri","Noto Naskh Arabic","Traditional Arabic",serif}
   .sub{text-align:center;font-size:13px;color:var(--muted);margin-bottom:6px}
@@ -214,9 +218,10 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
 </head>
 <body>
 <header>
-  <div><div style="font-size:17px;font-weight:700;color:var(--gold)">Dhikr Daily</div><div class="date" id="date"></div></div>
+  <div><div style="font-size:17px;font-weight:700;color:var(--gold)">Dhikr Daily</div></div>
   <div style="display:flex;align-items:center"><div class="streak" id="streak">🔥 0 day streak</div><button id="profBtn" aria-label="Switch person"></button><button id="themeBtn" aria-label="Switch light or dark theme">🌙</button></div>
 </header>
+<div class="dstrip"><div class="dl"><b id="gdt"></b><span id="gtm"></span></div><div class="dr" id="hbox" role="button" tabindex="0"><b id="hdt"></b><span id="hsb"></span></div></div>
 <div id="v1" class="view">
 <div id="cdsel" class="cdsel"></div>
 <div class="arabic">أَسْتَغْفِرُ اللَّهَ</div>
@@ -353,7 +358,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
       if(showPrev)h='<button data-pick="'+pk+'" class="'+(sel===pk?'on':'')+'"><small>Yesterday\'s target · '+(pe.n>=tt?'complete':'incomplete')+'</small><b>'+dlabel(pk)+' · '+fmt(tt)+'</b><span>'+fmt(pe.n)+' done'+(pe.n>=tt?' ✓':' · '+fmt(tt-pe.n)+' pending')+'</span></button>'+h;
       else h+='<button data-addprev="1" style="border-style:dashed"><small>Missed yesterday?</small><b>+ Add yesterday\'s count</b><span>'+dlabel(pk)+'</span></button>';
       $('cdsel').innerHTML=h;$('cdsel').style.display='flex'})();
-    $('date').textContent=dnow().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})+(today!==key()?' 🌙':'');
+    tickDate();
     var st=streak();$('streak').textContent='🔥 '+st+(st===1?' day':' days')+' streak';
     // last 7 days
     var h='',max=1,arr=[];
@@ -901,7 +906,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     var have=DL.count>0;
     h+='<div class="hcard" style="cursor:default"><div class="hrow"><span>📥 Use without internet</span><small>'+(have?'✓ '+DL.count+' files · '+(DL.bytes/1048576).toFixed(1)+' MB':'Not downloaded')+'</small></div><div class="hs" style="margin:8px 0;line-height:1.5">The app itself already opens offline. Download the audio once (about 20 to 30 MB) to listen and learn offline. '+arabicVoiceInfo()+'. Counting by voice needs internet; offline it counts any sound.</div><div style="display:flex;gap:8px"><button class="aud big" data-act="dlall" style="flex:1">'+(DL.busy?'Downloading…':(have?'📥 Update download':'📥 Download audio'))+'</button>'+(have?'<button class="rst" data-act="dlclear" style="padding:0 14px;border:1px solid var(--line);background:none;color:#c9d9d2;border-radius:12px">Delete</button>':'')+'</div><div class="astat" id="dlstat" style="margin-top:8px">'+DL.msg+'</div></div>';
     h+='<div id="syncst" class="syncst">'+(SY&&SY.st?SY.st.replace(/</g,'&lt;'):'☁ Sync · tap to sync now')+'</div>';
-    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v38</div><div style="text-align:center;margin:6px 0 14px"><button id="updbtn" style="background:none;border:1px solid var(--line);color:var(--acc);border-radius:16px;padding:8px 16px;font-size:13px">🔄 Update app</button></div>';
+    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v39</div><div style="text-align:center;margin:6px 0 14px"><button id="updbtn" style="background:none;border:1px solid var(--line);color:var(--acc);border-radius:16px;padding:8px 16px;font-size:13px">🔄 Update app</button></div>';
     v.innerHTML=h;
   }
   function aBar(){
@@ -1069,6 +1074,7 @@ function distKm(lat,lon){var R=6371,p1=pzR(lat),p2=pzR(KAABA.lat),dp=p2-p1,dl=pz
     h+='<div class="set"><span>Calculation method</span><select id="prmeth">'+Object.keys(METHODS).map(function(k){return'<option value="'+k+'"'+(pm.method===k?' selected':'')+'>'+METHODS[k].n+'</option>'}).join('')+'</select></div>';
     h+='<div class="set"><span>Asr time</span><select id="prasr"><option value="1"'+(pm.asr===1?' selected':'')+'>Standard: shadow = 1× (Shafi‘i, Maliki, Hanbali, Ahl-e-Hadith)</option><option value="2"'+(pm.asr===2?' selected':'')+'>Hanafi: shadow = 2×</option></select></div>';
     h+='<div class="set"><span>Daily count resets at</span><select id="prday"><option value="maghrib"'+(S.dayMode!=='midnight'?' selected':'')+'>Maghrib (Islamic day)</option><option value="midnight"'+(S.dayMode==='midnight'?' selected':'')+'>Midnight</option></select></div>';
+    h+='<div class="set"><span>Islamic date<br><small style="color:var(--muted)">Match what your masjid announced for the start of the month</small></span><select id="prhadj">'+[[-1,'1 day after Saudi (India usual)'],[0,'Saudi Umm al-Qura'],[1,'2 days after Saudi'],[-2,'1 day before Saudi']].map(function(o){var cur=S.hadj==null?-1:S.hadj;return'<option value="'+o[0]+'"'+(cur===o[0]?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></div>';
     h+='<div class="set" style="flex-wrap:wrap"><span style="width:100%">Adjust minutes (to match your masjid)</span>'+P5.map(function(x){return'<div class="adj"><small>'+x[1]+'</small><button data-pa="'+x[0]+'" data-d="-1">−</button><b>'+(pm.adj[x[0]]>0?'+':'')+pm.adj[x[0]]+'</b><button data-pa="'+x[0]+'" data-d="1">+</button></div>'}).join('')+'</div>';
     h+='</details>';
     v.innerHTML=h;
@@ -1132,7 +1138,7 @@ function distKm(lat,lon){var R=6371,p1=pzR(lat),p2=pzR(KAABA.lat),dp=p2-p1,dl=pz
     if(b=t.closest('[data-pa]')){var p2=PM(),k2=b.dataset.pa;p2.adj[k2]=Math.max(-30,Math.min(30,(p2.adj[k2]||0)+parseInt(b.dataset.d,10)));save();PS.open=true;renderPrayer();checkDay();return}
   });
   $('v2').addEventListener('change',function(e){var id=e.target.id,pm=PM();
-    if(id==='prlead'){pm.lead=parseInt(e.target.value,10)}else if(id==='prmeth'){pm.method=e.target.value}else if(id==='prasr'){pm.asr=parseInt(e.target.value,10)}else if(id==='prday'){S.dayMode=e.target.value}else return;
+    if(id==='prlead'){pm.lead=parseInt(e.target.value,10)}else if(id==='prmeth'){pm.method=e.target.value}else if(id==='prasr'){pm.asr=parseInt(e.target.value,10)}else if(id==='prday'){S.dayMode=e.target.value}else if(id==='prhadj'){S.hadj=parseInt(e.target.value,10)}else return;
     save();PS.open=true;checkDay();renderPrayer()});
 
 var QUOTES=[
@@ -1530,6 +1536,28 @@ function makeDet(){
   window.addEventListener('pagehide',syncFlush);
   window.addEventListener('online',function(){syncNow()});
   setInterval(function(){if(document.visibilityState==='visible')syncNow()},60000);
+
+  // ---------- Header: real English date/time + Islamic date ----------
+  var HMN=['Muharram','Safar','Rabi‘ al-Awwal','Rabi‘ al-Thani','Jumada al-Awwal','Jumada al-Akhirah','Rajab','Sha‘ban','Ramadan','Shawwal','Dhul-Qa‘dah','Dhul-Hijjah'];
+  function hCivil(y,m,d){var jd=Math.floor(Date.UTC(y,m,d)/864e5)+2440588,l=jd-1948440+10632,n=Math.floor((l-1)/10631);l=l-10631*n+354;
+    var j=Math.floor((10985-l)/5316)*Math.floor((50*l)/17719)+Math.floor(l/5670)*Math.floor((43*l)/15238);
+    l=l-Math.floor((30-j)/15)*Math.floor((17719*j)/50)-Math.floor(j/16)*Math.floor((15238*j)/43)+29;
+    var mo=Math.floor((24*l)/709),dd=l-Math.floor((709*mo)/24);return{d:dd,m:mo,y:30*n+j-30}}
+  function hijriNow(){
+    var n=new Date(),t=PTd(n),after=isFinite(t.maghrib)&&n.getTime()>=t.maghrib;
+    var sh=(S.hadj==null?-1:S.hadj)+(after?1:0),g=new Date(n.getFullYear(),n.getMonth(),n.getDate()+sh,12,0,0),r=null;
+    try{var o={};new Intl.DateTimeFormat('en-u-ca-islamic-umalqura',{day:'numeric',month:'numeric',year:'numeric'}).formatToParts(g).forEach(function(x){if(x.type==='day'||x.type==='month'||x.type==='year')o[x.type]=parseInt(x.value,10)});
+      if(o.day>0&&o.month>0&&o.year>1300)r={d:o.day,m:o.month,y:o.year}}catch(e){}
+    if(!r)r=hCivil(g.getFullYear(),g.getMonth(),g.getDate());
+    r.after=after;return r}
+  function tickDate(){
+    var n=new Date(),a=$('gdt');if(!a)return;
+    a.textContent=n.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'}).replace(',','');
+    $('gtm').textContent=n.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
+    var h=hijriNow();$('hdt').textContent=h.d+' '+HMN[h.m-1]+' '+h.y+' AH';
+    $('hsb').textContent=(S.hadj==null||S.hadj===-1?'India moon sighting':S.hadj===0?'Saudi (Umm al-Qura)':'Adjusted '+(S.hadj>0?'+':'')+S.hadj)+' · tap to change'}
+  $('hbox').onclick=function(){PS.open=true;showTab('p')};
+  setInterval(tickDate,15000);document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')tickDate()});
   function applyTheme(){var t=S.theme==='dark'?'dark':'light';document.documentElement.setAttribute('data-theme',t);$('themeBtn').textContent=t==='dark'?'☀️':'🌙';var m=document.querySelector('meta[name=theme-color]');if(m)m.setAttribute('content',t==='dark'?'#0a1612':'#f8f4ea')}
   $('themeBtn').onclick=function(){S.theme=S.theme==='dark'?'light':'dark';save();applyTheme()};
   load();if(!S.vm2){S.vmode='any';S.vm2=1;save()}
