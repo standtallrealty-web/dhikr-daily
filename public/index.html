@@ -197,6 +197,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   .qmsg{margin:6px 0;font-size:16px;font-weight:600;color:var(--muted);min-height:24px}.qmsg.ok{color:var(--ok)}
   .cdsel{display:none;gap:8px;margin:2px 0 10px}.cdsel button{flex:1;background:var(--card);border:2px solid var(--line);color:var(--text);border-radius:14px;padding:9px 8px;display:flex;flex-direction:column;gap:2px;text-align:left;touch-action:manipulation}
   .cdsel button.on{border-color:var(--acc);box-shadow:var(--shadow)}.cdsel small{font-size:11px;color:var(--muted);letter-spacing:.3px}.cdsel b{font-size:14px}.cdsel span{font-size:13px;color:var(--acc);font-weight:700}
+  #updbar{position:fixed;left:12px;right:12px;top:10px;z-index:200;background:var(--acc);color:var(--ong);padding:13px 14px;border-radius:14px;text-align:center;font-size:15px;box-shadow:0 8px 24px rgba(0,0,0,.3)}
 </style>
 </head>
 <body>
@@ -876,7 +877,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     });
     var have=DL.count>0;
     h+='<div class="hcard" style="cursor:default"><div class="hrow"><span>📥 Use without internet</span><small>'+(have?'✓ '+DL.count+' files · '+(DL.bytes/1048576).toFixed(1)+' MB':'Not downloaded')+'</small></div><div class="hs" style="margin:8px 0;line-height:1.5">The app itself already opens offline. Download the audio once (about 20 to 30 MB) to listen and learn offline. '+arabicVoiceInfo()+'. Counting by voice needs internet; offline it counts any sound.</div><div style="display:flex;gap:8px"><button class="aud big" data-act="dlall" style="flex:1">'+(DL.busy?'Downloading…':(have?'📥 Update download':'📥 Download audio'))+'</button>'+(have?'<button class="rst" data-act="dlclear" style="padding:0 14px;border:1px solid var(--line);background:none;color:#c9d9d2;border-radius:12px">Delete</button>':'')+'</div><div class="astat" id="dlstat" style="margin-top:8px">'+DL.msg+'</div></div>';
-    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v28</div>';
+    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v29</div><div style="text-align:center;margin:6px 0 14px"><button id="updbtn" style="background:none;border:1px solid var(--line);color:var(--acc);border-radius:16px;padding:8px 16px;font-size:13px">🔄 Update app</button></div>';
     v.innerHTML=h;
   }
   function aBar(){
@@ -1264,6 +1265,20 @@ function makeDet(){
   $('sens').oninput=function(){S.sens=parseInt(this.value,10);$('sensv').textContent=S.sens;save()};
   var _r=render;render=function(){_r();$('sens').value=S.sens||5;$('sensv').textContent=S.sens||5;$('vmode').value=S.vmode||'any';$('vlang').value=S.vlang||'ar-SA'};
   if('serviceWorker' in navigator&&/^https?:/.test(location.protocol)){try{navigator.serviceWorker.register('/sw.js')}catch(e){}}
+  var APPV=29;
+  function hardUpdate(){
+    var done=function(){location.replace('/?u='+Date.now())};
+    try{(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations?navigator.serviceWorker.getRegistrations():Promise.resolve([])).then(function(rs){return Promise.all(rs.map(function(r){return r.unregister()}))}).then(function(){return window.caches?caches.keys():[]}).then(function(ks){return Promise.all(ks.filter(function(k){return k!=='dhikr-fonts'}).map(function(k){return caches.delete(k)}))}).then(done,done)}catch(e){done()}
+  }
+  function checkUpdate(){
+    if(!window.fetch)return;
+    fetch('/sw.js?c='+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
+      var m=/dhikr-v(\d+)/.exec(t);if(m&&parseInt(m[1],10)>APPV&&!$('updbar')){
+        var d=document.createElement('div');d.id='updbar';d.innerHTML='🔄 New version available. <b>Tap to update</b>';d.onclick=hardUpdate;document.body.appendChild(d)}
+    }).catch(function(){});
+  }
+  checkUpdate();document.addEventListener('visibilitychange',function(){if(!document.hidden)checkUpdate()});
+  $('v2').addEventListener('click',function(e){if(e.target.id==='updbtn')hardUpdate()});
   loadOff().then(function(){applyFont();if(tab==='h')renderAd()});
   function showProf(){
     var h='';Object.keys(PROFS).forEach(function(k){h+='<button class="pp'+(k===PID?' cur':'')+'" data-p="'+k+'"><i>'+PROFS[k].n.charAt(0)+'</i>'+PROFS[k].n+(k===PID?' <small style="margin-left:auto;color:var(--acc)">✓ current</small>':'')+'</button>'});
