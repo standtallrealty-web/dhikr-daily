@@ -240,6 +240,11 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   <button id="p100">+100</button>
   <button id="resetTop" style="border-color:#c9776f;color:#b3392f">⟲ Reset</button>
 </div>
+<div class="row">
+  <button id="setn">✎ Set today's count</button>
+  <button id="p1k">+1000</button>
+  <button id="t20">Target 20,000</button>
+</div>
 
 <div class="panel">
   <div class="days" id="days"></div>
@@ -421,6 +426,9 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   $('undo').onclick=function(){add(-1)};
   $('p10').onclick=function(){add(10)};
   $('p100').onclick=function(){add(100)};
+  $('p1k').onclick=function(){add(1000)};
+  $('setn').onclick=function(){var v=prompt("Enter today's Istighfar count so far",String(cur().n));if(v===null)return;v=parseInt(String(v).replace(/[^0-9]/g,''),10);if(isNaN(v))return;cur().n=Math.max(0,v);save();render();renderExtra()};
+  $('t20').onclick=function(){var big=S.target===20000;S.target=big?10000:20000;save();render();renderExtra();$('t20').textContent=S.target===20000?'Target: 20,000 ✓':'Target 20,000'};
   $('target').onchange=function(){var v=parseInt(this.value,10);if(v>0){S.target=v;save();render()}else render()};
   $('vib').onchange=function(){S.vib=this.checked;save()};
   var lock=null;
@@ -857,7 +865,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     });
     var have=DL.count>0;
     h+='<div class="hcard" style="cursor:default"><div class="hrow"><span>📥 Use without internet</span><small>'+(have?'✓ '+DL.count+' files · '+(DL.bytes/1048576).toFixed(1)+' MB':'Not downloaded')+'</small></div><div class="hs" style="margin:8px 0;line-height:1.5">The app itself already opens offline. Download the audio once (about 20 to 30 MB) to listen and learn offline. '+arabicVoiceInfo()+'. Counting by voice needs internet; offline it counts any sound.</div><div style="display:flex;gap:8px"><button class="aud big" data-act="dlall" style="flex:1">'+(DL.busy?'Downloading…':(have?'📥 Update download':'📥 Download audio'))+'</button>'+(have?'<button class="rst" data-act="dlclear" style="padding:0 14px;border:1px solid var(--line);background:none;color:#c9d9d2;border-radius:12px">Delete</button>':'')+'</div><div class="astat" id="dlstat" style="margin-top:8px">'+DL.msg+'</div></div>';
-    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v25</div>';
+    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v26</div>';
     v.innerHTML=h;
   }
   function aBar(){
