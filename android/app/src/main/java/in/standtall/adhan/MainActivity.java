@@ -124,8 +124,8 @@ public class MainActivity extends Activity {
         root.setPadding(dp(18), dp(28), dp(18), dp(28));
         sv.addView(root);
 
-        root.addView(text("Dhikr Adhan", 26, true, Color.parseColor("#256F5B")));
-        root.addView(text("Version 1.3 · Powered by Stand Tall Realty", 12, false, Color.parseColor("#7A6A3A")));
+        root.addView(text("Dhikr Daily", 26, true, Color.parseColor("#256F5B")));
+        root.addView(text("Version 1.4 · Powered by Stand Tall Realty", 12, false, Color.parseColor("#7A6A3A")));
 
         Switch master = new Switch(this);
         master.setText("Play adhan at prayer time");
