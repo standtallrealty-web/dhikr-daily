@@ -1,3 +1,4 @@
-Put the adhan recordings here:
-  adhan.mp3  - used for Dhuhr, Asr, Maghrib, Isha (and Fajr if fajr.mp3 is missing)
-  fajr.mp3   - Fajr adhan (includes "as-salatu khayrun minan-nawm")
+adhan.mp3 - Makkah (Al-Haram) adhan, used for Dhuhr, Asr, Maghrib, Isha
+fajr.mp3  - Fajr adhan by Mansour Al-Zahrani (includes "as-salatu khayrun minan-nawm"), used for Fajr
+Source: public GitHub collection github.com/mohsalvi/adhan-audio. Personal, non-commercial use.
+They will be removed if the reciter or rights holder asks.
