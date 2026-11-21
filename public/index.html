@@ -2,6 +2,21 @@
 <html data-theme="light" lang="en">
 <head>
 <meta charset="utf-8">
+<script>
+(function(){var A=window.AndroidAdhan;if(!A)return;
+  if(!window.Notification){var N=function(t,o){try{A.notify(String(t),String((o&&o.body)||''))}catch(e){}};N.permission='granted';N.requestPermission=function(){return Promise.resolve('granted')};window.Notification=N}
+  var cur=null;
+  function SR(){this.lang='ar-SA';this.continuous=false;this.interimResults=true;this.maxAlternatives=1;this.onstart=null;this.onresult=null;this.onerror=null;this.onend=null;this._on=false}
+  SR.prototype.start=function(){if(this._on)throw new Error('already started');cur=this;this._on=true;try{A.srStart(this.lang||'en-US')}catch(e){this._on=false}};
+  SR.prototype.stop=SR.prototype.abort=function(){if(!this._on)return;this._on=false;try{A.srStop()}catch(e){}};
+  window.__srCb=function(type,j){var r=cur;if(!r)return;var d={};try{d=JSON.parse(j||'{}')}catch(e){}
+    if(type==='start'){if(r.onstart)r.onstart({})}
+    else if(type==='partial'||type==='final'){if(!r._on)return;var alt=[{transcript:d.t||'',confidence:d.c||0}];alt.isFinal=(type==='final');if(r.onresult)r.onresult({resultIndex:0,results:[alt]})}
+    else if(type==='error'){if(r.onerror)r.onerror({error:d.e||'unknown'})}
+    else if(type==='end'){if(r._on){r._on=false;if(r.onend)r.onend({})}}};
+  window.SpeechRecognition=SR;window.webkitSpeechRecognition=SR;
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#f8f4ea">
 <script>
@@ -226,6 +241,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
 </header>
 <div class="dstrip"><div class="dl"><b id="gdt"></b><span id="gtm"></span></div><div class="dr" id="hbox" role="button" tabindex="0"><b id="hdt"></b><span id="hsb"></span></div></div>
 <div id="v1" class="view">
+<div id="abar1"></div>
 <div id="cdsel" class="cdsel"></div>
 <div class="arabic">أَسْتَغْفِرُ اللَّهَ</div>
 <div class="sub">Astaghfirullah</div>
@@ -244,6 +260,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   </button>
   <div id="msg"></div>
 </div>
+<div class="panel" id="goalbox"><div style="font-size:13px;font-weight:600;margin-bottom:6px">My daily goal</div><div class="chips" id="goalrow" style="padding:0"></div><div class="set" style="margin-top:6px"><span>Other number</span><span style="display:flex;gap:6px"><input id="goalin" type="number" min="1" step="1" placeholder="e.g. 2500" style="width:96px"><button id="goalset" style="padding:8px 12px">Set</button></span></div></div>
 
 <button id="voiceBtn">🎙 Start voice counting</button>
 <div id="vpanel">
@@ -305,7 +322,6 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
 <nav class="bottomnav">
   <button id="nav_h" class="act"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg><span>Today</span></button>
   <button id="nav_p"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg><span>Prayer</span></button>
-  <button id="nav_i"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg><span>Istighfar</span></button>
   <button id="nav_a"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5.5C5.5 4 9 4 12 6c3-2 6.5-2 9-.5V19c-2.5-1.5-6-1.5-9 .5-3-2-6.5-2-9-.5z"/><path d="M12 6v13.5"/></svg><span>Adhkar</span></button>
   <button id="nav_d"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span>Duas</span></button>
 </nav>
@@ -327,7 +343,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   function snapDays(){SNAP={};Object.keys(S.days||{}).forEach(function(k){var d=S.days[k];if(d)SNAP[k]=d.n+'|'+d.t})}
   function stampDays(){var now=Date.now();Object.keys(S.days||{}).forEach(function(k){var d=S.days[k];if(!d)return;var v=d.n+'|'+d.t;if(SNAP[k]!==v){d.u=now;SNAP[k]=v}})}
   var _noTs=false;
-  function save(){try{if(!_noTs){stampDays();S.ts=Math.max(Date.now(),(S.ts||0)+1)}localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(!_noTs)syncQ()}
+  function save(){try{if(!_noTs){stampDays();S.ts=Math.max(Date.now(),(S.ts||0)+1)}localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(!_noTs){syncQ();syncNQ()}}
   function key(d){d=d||new Date();var m=d.getMonth()+1,dd=d.getDate();return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(dd<10?'0':'')+dd}
   var today=key();
   function tgt(){return S.target}
@@ -471,6 +487,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   $('vib').onchange=function(){S.vib=this.checked;save()};
   var lock=null;
   function setWake(){
+    if(window.AndroidAdhan){try{AndroidAdhan.keepAwake(!!(S.wake||V.on||(typeof R!=='undefined'&&R.on)))}catch(e){}}
     if(!('wakeLock' in navigator))return;
     if((S.wake||V.on||(typeof R!=='undefined'&&R.on))&&document.visibilityState==='visible'){navigator.wakeLock.request('screen').then(function(l){lock=l}).catch(function(){})}
     else if(lock){lock.release().catch(function(){});lock=null}
@@ -916,12 +933,12 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     var have=DL.count>0;
     h+='<div class="hcard" style="cursor:default"><div class="hrow"><span>📥 Use without internet</span><small>'+(have?'✓ '+DL.count+' files · '+(DL.bytes/1048576).toFixed(1)+' MB':'Not downloaded')+'</small></div><div class="hs" style="margin:8px 0;line-height:1.5">The app itself already opens offline. Download the audio once (about 20 to 30 MB) to listen and learn offline. '+arabicVoiceInfo()+'. Counting by voice needs internet; offline it counts any sound.</div><div style="display:flex;gap:8px"><button class="aud big" data-act="dlall" style="flex:1">'+(DL.busy?'Downloading…':(have?'📥 Update download':'📥 Download audio'))+'</button>'+(have?'<button class="rst" data-act="dlclear" style="padding:0 14px;border:1px solid var(--line);background:none;color:#c9d9d2;border-radius:12px">Delete</button>':'')+'</div><div class="astat" id="dlstat" style="margin-top:8px">'+DL.msg+'</div></div>';
     h+='<div id="syncst" class="syncst">'+(SY&&SY.st?SY.st.replace(/</g,'&lt;'):'☁ Sync · tap to sync now')+'</div>';
-    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v44</div><div style="text-align:center;margin:6px 0 14px"><button id="updbtn" style="background:none;border:1px solid var(--line);color:var(--acc);border-radius:16px;padding:8px 16px;font-size:13px">🔄 Update app</button></div>';
+    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v46</div><div style="text-align:center;margin:6px 0 14px"><button id="updbtn" style="background:none;border:1px solid var(--line);color:var(--acc);border-radius:16px;padding:8px 16px;font-size:13px">🔄 Update app</button></div>';
     v.innerHTML=h;
   }
   function aBar(){
     var h='<div class="chips" style="padding-top:4px">';
-    [['m','🌅 Morning'],['e','🌇 Evening'],['s','🕌 After salah'],['j','📣 Adhan reply'],['b','🌙 Sleep'],['t','📿 Tasbih']].forEach(function(x){h+='<button data-ta="'+x[0]+'" class="'+(tab===x[0]?'on':'')+'">'+x[1]+'</button>'});
+    [['m','🌅 Morning'],['e','🌇 Evening'],['s','🕌 After salah'],['j','📣 Adhan reply'],['b','🌙 Sleep'],['i','📿 Astaghfirullah'],['t','📿 Tasbih']].forEach(function(x){h+='<button data-ta="'+x[0]+'" class="'+(tab===x[0]?'on':'')+'">'+x[1]+'</button>'});
     return h+'</div>';
   }
   function spBar(st,it){var c=curSP(),h='<div class="chips sp" style="padding-top:0">';
@@ -972,19 +989,28 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   var _dqt=null;
   $('v2').addEventListener('input',function(e){if(e.target.id!=='dq')return;var val=e.target.value;clearTimeout(_dqt);_dqt=setTimeout(function(){S.dq=val;save();renderAd();var q=$('dq');if(q){q.focus();try{q.setSelectionRange(val.length,val.length)}catch(x){}}},250)});
   $('v2').addEventListener('change',function(e){if(e.target.id==='gapsel'){S.gapf=parseFloat(e.target.value);save()}if(e.target.id==='plsel'){S.plen=e.target.value;save()}});
+  function goalRender(){var t=S.target,pre=[100,500,1000,3000,5000,10000],h='';
+    pre.forEach(function(v){h+='<button data-goal="'+v+'" class="'+(t===v?'on':'')+'">'+fmt(v)+'</button>'});
+    if(pre.indexOf(t)<0)h+='<button data-goal="'+t+'" class="on">'+fmt(t)+'</button>';
+    $('goalrow').innerHTML=h;$('abar1').innerHTML=aBar()}
+  function setGoal(v){v=parseInt(v,10);if(!(v>0)||v>10000000)return;S.target=v;save();render();goalRender()}
+  $('goalrow').addEventListener('click',function(e){var b=e.target.closest('[data-goal]');if(b)setGoal(b.dataset.goal)});
+  $('goalset').onclick=function(){var i=$('goalin');setGoal(i.value);i.value=''};
+  $('abar1').addEventListener('click',function(e){var b=e.target.closest('[data-ta]');if(b)showTab(b.dataset.ta)});
   var lastA='m';
   function showTab(t){
     stopPlay();tab=t;
-    if('tmesbj'.indexOf(t)>=0)lastA=t;
-    var nv={h:'h',p:'p',i:'i',t:'a',m:'a',e:'a',s:'a',b:'a',j:'a',d:'d'}[t];
+    if('timesbj'.indexOf(t)>=0)lastA=t;
+    var nv={h:'h',p:'p',i:'a',t:'a',m:'a',e:'a',s:'a',b:'a',j:'a',d:'d'}[t];
     if(t!=='p')stopCompass();
     if(t==='p'&&!S.loc&&!PS.asked){PS.asked=1;getLoc(false)}
-    ['h','p','i','a','d'].forEach(function(k){$('nav_'+k).classList.toggle('act',k===nv)});
+    ['h','p','a','d'].forEach(function(k){$('nav_'+k).classList.toggle('act',k===nv)});
     $('v1').style.display=t==='i'?'block':'none';
     $('v2').style.display=t==='i'?'none':'block';
+    if(t==='i')goalRender();
     if(t!=='i'){renderAd();$('v2').scrollTop=0}
   }
-  $('nav_h').onclick=function(){showTab('h')};$('nav_p').onclick=function(){showTab('p')};$('nav_i').onclick=function(){showTab('i')};$('nav_a').onclick=function(){showTab(lastA)};$('nav_d').onclick=function(){showTab('d')};
+  $('nav_h').onclick=function(){showTab('h')};$('nav_p').onclick=function(){showTab('p')};$('nav_a').onclick=function(){showTab(lastA)};$('nav_d').onclick=function(){showTab('d')};
 //PT-START
 var KAABA={lat:21.422487,lon:39.826206};
 var METHODS={karachi:{n:'Karachi (18° / 18°) · common in India',f:18,i:18},mwl:{n:'Muslim World League (18° / 17°)',f:18,i:17},isna:{n:'ISNA (15° / 15°)',f:15,i:15},egypt:{n:'Egypt (19.5° / 17.5°)',f:19.5,i:17.5},makkah:{n:'Umm al-Qura, Makkah (18.5°, Isha +90 min)',f:18.5,im:90}};
@@ -1021,7 +1047,7 @@ function distKm(lat,lon){var R=6371,p1=pzR(lat),p2=pzR(KAABA.lat),dp=p2-p1,dl=pz
 //PT-END
 
   // ---------- Prayer times, Qibla, alerts, Islamic day ----------
-  function PM(){if(!S.pm)S.pm={};var p=S.pm;if(!p.method)p.method='karachi';if(!p.asr)p.asr=1;if(!p.adj)p.adj={fajr:0,dhuhr:1,asr:0,maghrib:1,isha:0};if(!p.pr)p.pr={fajr:1,dhuhr:1,asr:1,maghrib:1,isha:1};if(p.lead==null)p.lead=0;return p}
+  function PM(){if(!S.pm)S.pm={};var p=S.pm;if(!p.method)p.method='karachi';if(!p.asr)p.asr=1;if(!p.adj)p.adj={fajr:0,dhuhr:1,asr:0,maghrib:1,isha:0};if(!p.pr)p.pr={fajr:1,dhuhr:1,asr:1,maghrib:1,isha:1};if(p.lead==null)p.lead=0;if(window.AndroidAdhan&&p.ad===undefined)p.ad=true;return p}
   function LOC(){var l=S&&S.loc;return(l&&l.lat!=null)?l:{lat:18.5204,lon:73.8567,def:true,name:'Pune'}}
   function PTd(d){var l=LOC();return prayerTimes(d||new Date(),l.lat,l.lon,PM())}
   function dayKey(){var n=new Date();if(S&&S.dayMode==='midnight')return key(n);var t=PTd(n);if(isFinite(t.maghrib)&&n.getTime()>=t.maghrib)return key(new Date(n.getFullYear(),n.getMonth(),n.getDate()+1));return key(n)}
@@ -1077,11 +1103,11 @@ function distKm(lat,lon){var R=6371,p1=pzR(lat),p2=pzR(KAABA.lat),dp=p2-p1,dl=pz
     h+='</div>';
     h+='<div class="note" style="margin:8px 2px">Also: no voluntary prayer after Fajr until the sun rises, and after Asr until sunset (Bukhari 586, Muslim 825), except prayers with a reason. Times are calculated from your location; compare with your local masjid and adjust below if needed.</div>';
     h+='<details id="prset"'+(PS.open?' open':'')+' class="card"><summary>🔔 Alerts and ⚙ settings</summary>';
-    h+='<div class="set"><span>Notify at adhan<br><small style="color:var(--muted)">Works while the app is open or in the background</small></span><button class="'+(pm.on?'tgl on':'tgl')+'" data-pr="notif">'+(pm.on?'ON':'OFF')+'</button></div>';
-    h+='<div class="set"><span>Alert before</span><select id="prlead">'+[0,5,10,15].map(function(m){return'<option value="'+m+'"'+(pm.lead===m?' selected':'')+'>'+(m?m+' min before':'At adhan time')+'</option>'}).join('')+'</select></div>';
-    h+='<div class="set" style="flex-wrap:wrap;gap:6px"><span style="width:100%">Alert for</span>'+P5.map(function(x){return'<button class="chk'+(pm.pr[x[0]]?' on':'')+'" data-prc="'+x[0]+'">'+(pm.pr[x[0]]?'✓ ':'')+x[1]+'</button>'}).join('')+'</div>';
-    h+='<div class="set"><span>Play adhan sound<br><small style="color:var(--muted)">Plays the adhan by itself at prayer time (even when locked) for the prayers ticked under “Alert for”. Tap STOP, or press the side button, to silence it</small></span><button class="'+(pm.ad?'tgl on':'tgl')+'" data-ad="tgl">'+(pm.ad?'ON':'OFF')+'</button></div><div class="note" style="margin:4px 2px">'+(typeof ADH!=='undefined'&&ADH.armed?'✅ Adhan is armed. It will play at prayer time, even when the phone is locked. Do not swipe the app away from recent apps.':(pm.ad?'⚠ Not armed yet. Tap anywhere in the app once.':'Turn the switch ON to arm the adhan.'))+'</div><div class="set"><span>Work when phone is locked<br><small style="color:var(--muted)">Plays a silent sound in the background so the adhan can start by itself on a locked phone. Turn OFF if you hear any ticking</small></span><button class="'+(pm.lk!==false?'tgl on':'tgl')+'" data-ad="lk">'+(pm.lk!==false?'ON':'OFF')+'</button></div><button class="bigbtn" data-ad="test">▶ Test adhan now</button><button class="bigbtn" data-ad="test1">⏱ Test in 1 minute (lock your phone)</button>';
-    h+='<div class="set"><span>Phone calendar alerts<br><small style="color:var(--muted)">Adds the next 30 days to your calendar app, so it rings even when this app is closed</small></span></div><button class="bigbtn" data-pr="ics">📅 Download calendar file (30 days)</button>';
+    h+=adhanTop(pm);
+
+    h+='<div class="set" style="flex-wrap:wrap;gap:6px"><span style="width:100%">Adhan for</span>'+P5.map(function(x){return'<button class="chk'+(pm.pr[x[0]]?' on':'')+'" data-prc="'+x[0]+'">'+(pm.pr[x[0]]?'✓ ':'')+x[1]+'</button>'}).join('')+'</div>';
+    h+=adhanBottom(pm);
+
     h+='<div class="set"><span>Calculation method</span><select id="prmeth">'+Object.keys(METHODS).map(function(k){return'<option value="'+k+'"'+(pm.method===k?' selected':'')+'>'+METHODS[k].n+'</option>'}).join('')+'</select></div>';
     h+='<div class="set"><span>Asr time</span><select id="prasr"><option value="1"'+(pm.asr===1?' selected':'')+'>Standard: shadow = 1× (Shafi‘i, Maliki, Hanbali, Ahl-e-Hadith)</option><option value="2"'+(pm.asr===2?' selected':'')+'>Hanafi: shadow = 2×</option></select></div>';
     h+='<div class="set"><span>Daily count resets at</span><select id="prday"><option value="maghrib"'+(S.dayMode!=='midnight'?' selected':'')+'>Maghrib (Islamic day)</option><option value="midnight"'+(S.dayMode==='midnight'?' selected':'')+'>Midnight</option></select></div>';
@@ -1123,57 +1149,29 @@ function distKm(lat,lon){var R=6371,p1=pzR(lat),p2=pzR(KAABA.lat),dp=p2-p1,dl=pz
   function stopCompass(){CP.on=false;CP.h=null;window.removeEventListener('deviceorientationabsolute',onOri,true);window.removeEventListener('deviceorientation',onOri,true)}
   // ---- alerts ----
   function notifyNow(title,body){try{if(window.Notification&&Notification.permission==='granted'){var o={body:body,icon:'/icon-192.png',tag:'adhan-'+title,vibrate:[200,100,200]};if(navigator.serviceWorker&&navigator.serviceWorker.getRegistration){navigator.serviceWorker.getRegistration().then(function(r){if(r)r.showNotification(title,o);else new Notification(title,o)})}else new Notification(title,o)}}catch(e){}}
-  setInterval(function(){var pm=S&&PM();if(!pm||!pm.on)return;var now=Date.now(),t=PTd(new Date());
+  setInterval(function(){var pm=S&&PM();if(!pm||!pm.on||window.AndroidAdhan)return;var now=Date.now(),t=PTd(new Date());
     P5.forEach(function(x){if(!pm.pr[x[0]])return;var at=t[x[0]]-pm.lead*6e4,id=key()+x[0]+pm.lead;if(now>=at&&now<at+120000&&!FIRED[id]){FIRED[id]=1;notifyNow(x[1]+(pm.lead?' in '+pm.lead+' min':' — time for prayer'),fm(t[x[0]])+(LOC().name?' · '+LOC().name:''))}})},15000);
 
-  // ---- adhan sound ----
-  // One shared audio element. While "Play adhan sound" is ON it loops a silent sound ("guard"), which keeps the app alive
-  // in the background and when the phone is locked, so the adhan can start by itself at prayer time.
-  var ADH={on:false,t0:0,p:'',fb:false,armed:false,tAt:0,sil:'',ev:0},GA=new Audio();GA.preload='auto';
-  function mkSil(){var n=8000*20,b=new Uint8Array(44+n*2),d=new DataView(b.buffer),i;function w(o,t){for(var k=0;k<t.length;k++)b[o+k]=t.charCodeAt(k)}
-    w(0,'RIFF');d.setUint32(4,36+n*2,true);w(8,'WAVEfmt ');d.setUint32(16,16,true);d.setUint16(20,1,true);d.setUint16(22,1,true);d.setUint32(24,8000,true);d.setUint32(28,16000,true);d.setUint16(32,2,true);d.setUint16(34,16,true);w(36,'data');d.setUint32(40,n*2,true);
-    for(i=100;i<n-100;i++)d.setInt16(44+i*2,0,true);return URL.createObjectURL(new Blob([b],{type:'audio/wav'}))}
-  function gOn(){var pm=S&&PM();return !!(pm&&pm.ad&&pm.lk!==false)}
-  function adSrc(p){return p==='fajr'?'/audio/adhan/fajr.mp3':'/audio/adhan/adhan.mp3'}
-  function adMeta(t,a){try{if(navigator.mediaSession){navigator.mediaSession.metadata=new MediaMetadata({title:t,artist:a||'Dhikr Daily'});navigator.mediaSession.playbackState='playing';
-    ['pause','stop'].forEach(function(k){try{navigator.mediaSession.setActionHandler(k,function(){if(ADH.on)adStop();else adGuard(false)})}catch(e){}})}}catch(e){}}
-  function adBar(){var o=$('adarm'),pm=S&&PM(),need=pm&&gOn()&&!ADH.armed&&!ADH.on;
-    if(need&&!o){o=document.createElement('div');o.id='adarm';o.style.cssText='position:fixed;left:8px;right:8px;bottom:70px;z-index:9998;background:#7a4b00;color:#fff;border-radius:12px;padding:10px 14px;font-size:13px;text-align:center;box-shadow:0 4px 14px rgba(0,0,0,.35)';o.textContent='Adhan is not armed. Tap here to arm it.';o.onclick=function(){adGuard(true)};document.body.appendChild(o)}
-    else if(!need&&o)o.remove()}
-  function adGuard(on){ADH.armed=false;
-    if(!on){try{GA.pause()}catch(e){}adBar();if($('prset')&&tab==='p')renderPrayer();return}
-    try{if(!ADH.sil)ADH.sil=mkSil();GA.onended=null;GA.onerror=null;GA.src=ADH.sil;GA.loop=true;GA.volume=1;
-      var r=GA.play();var ok=function(){ADH.armed=true;adMeta('Adhan is armed','Dhikr Daily · keep this running');adBar();if($('prset')&&tab==='p'&&!PS.busy)renderPrayer()};
-      if(r&&r.then)r.then(ok).catch(function(){ADH.armed=false;adBar()});else ok()}catch(e){adBar()}}
-  function adOv(txt,sub,showStop){var o=$('adov');if(!o){o=document.createElement('div');o.id='adov';o.className='adov';document.body.appendChild(o)}
-    o.innerHTML='<div class="at"></div><div class="as"></div>'+(showStop?'<button id="adstop">STOP</button>':'<button id="adstop" style="width:auto;height:auto;border-radius:12px;padding:14px 28px;font-size:18px">Close</button>');
-    o.firstChild.textContent=txt;o.children[1].textContent=sub;$('adstop').onclick=adStop}
-  function adStop(){var was=ADH.on;ADH.on=false;GA.onended=null;GA.onerror=null;var o=$('adov');if(o)o.remove();
-    try{GA.pause()}catch(e){}
-    if(gOn())adGuard(true);else{try{if(navigator.mediaSession)navigator.mediaSession.playbackState='none'}catch(e){}}}
-  function adPlay(p,test){var nm=(P5.filter(function(x){return x[0]===p})[0]||[0,'Prayer'])[1];
-    ADH.p=p;ADH.fb=false;ADH.t0=Date.now();ADH.on=true;
-    adOv('Adhan — '+nm+(test?' (test)':''),'Repeat after the muadhin (Hayya ‘alas-salah / Hayya ‘alal-falah: La hawla wa la quwwata illa billah). Press STOP, or the side button, to silence.',true);
-    adMeta('Adhan — '+nm,'Press pause to stop');
-    GA.loop=false;GA.volume=1;GA.src=adSrc(p);GA.onended=adStop;
-    GA.onerror=function(){if(p==='fajr'&&!ADH.fb){ADH.fb=true;GA.src='/audio/adhan/adhan.mp3';GA.play().catch(function(){});return}
-      ADH.on=false;adOv('Adhan sound file is missing','The adhan recording could not be loaded. You only get the notification.',false)};
-    var pr=GA.play();if(pr&&pr.catch)pr.catch(function(e){if(!ADH.on)return;if(e&&e.name==='NotAllowedError'){ADH.on=false;ADH.armed=false;adOv('Tap to play the adhan — '+nm,'Your phone blocked automatic sound because the app was not armed. Tap Play, and keep “Play adhan sound” ON.',false);var b=$('adstop');if(b){b.textContent='▶ Play';b.onclick=function(){ADH.on=true;ADH.t0=Date.now();GA.play().then(function(){adOv('Adhan — '+nm,'Press STOP to silence.',true)}).catch(function(){})}}}})}
-  // Side button / screen off while the adhan is playing = stop. If the adhan started while the phone was already locked, waking the screen stops it.
-  function adVis(){if(ADH.on&&Date.now()-ADH.t0>1500)adStop()}
-  document.addEventListener('visibilitychange',adVis);window.addEventListener('pageshow',function(){if(gOn()&&!ADH.on&&!ADH.armed)adGuard(true)});
-  document.addEventListener('pointerdown',function(){var pm=S&&PM();if(pm&&gOn()&&!ADH.armed&&!ADH.on)adGuard(true)},true);
-  setTimeout(function(){if(gOn())adGuard(true)},1200);
-  setInterval(function(){var pm=S&&PM();if(!pm||!pm.ad)return;var now=Date.now(),t=PTd(new Date());
-    if(ADH.tAt&&now>=ADH.tAt){ADH.tAt=0;var nx=nextPrayer(new Date());adPlay(nx&&nx.k?nx.k:'dhuhr',true);return}
-    if(ADH.armed&&GA.paused&&!ADH.on)adGuard(true);
-    P5.forEach(function(x){if(!pm.pr[x[0]])return;var at=t[x[0]],id='ad'+key()+x[0];if(now>=at&&now<at+90000&&!FIRED[id]){FIRED[id]=1;adPlay(x[0],false)}});adBar()},3000);
-  $('v2').addEventListener('click',function(e){var b=e.target.closest('[data-ad]');if(!b)return;var pm=PM();
-    if(b.dataset.ad==='tgl'){if(pm.ad){pm.ad=false;save();adGuard(false);PS.open=true;renderPrayer()}else{pm.ad=true;save();if(gOn())adGuard(true);PS.open=true;
-      if(window.Notification&&Notification.permission==='default')Notification.requestPermission().catch(function(){});renderPrayer()}}
-    else if(b.dataset.ad==='lk'){pm.lk=(pm.lk===false);save();if(gOn())adGuard(true);else adGuard(false);PS.open=true;renderPrayer()}
-    else if(b.dataset.ad==='test'){var n=nextPrayer(new Date());adPlay(n&&n.k?n.k:'dhuhr',true)}
-    else if(b.dataset.ad==='test1'){if(!pm.ad){pm.ad=true;save();if(gOn())adGuard(true)}ADH.tAt=Date.now()+60000;PS.open=true;PS.msg='Adhan test will play in 1 minute. Lock your phone now and wait.';renderPrayer()}});
+  // ---- adhan: the Android app plays it with the phone's alarm; this part only tells the app the times ----
+  function adhanTop(pm){var A=window.AndroidAdhan;
+    if(!A)return '<div class="note" style="margin:6px 2px">🔔 The adhan alarm is in the Dhikr Daily Android app. Install the app to hear the adhan at every prayer time.</div>';
+    var st={};try{st=JSON.parse(A.status())}catch(e){}
+    return '<div class="set"><span>Play adhan at prayer time<br><small style="color:var(--muted)">Your phone’s own alarm plays the adhan at full volume, even when the phone is locked or the app is closed. Tap STOP in the notification, or press the side button, to silence it</small></span><button class="'+(pm.ad?'tgl on':'tgl')+'" data-ad="tgl">'+(pm.ad?'ON':'OFF')+'</button></div>'
+      +'<div class="note" style="margin:4px 2px">'+(pm.ad?(st.next?'✅ Next adhan: '+st.next:'No prayer is ticked below.'):'The adhan is OFF.')+'</div>'}
+  function adhanBottom(pm){if(!window.AndroidAdhan)return '';
+    return '<button class="bigbtn" data-ad="test">▶ Test adhan now</button><button class="bigbtn" data-ad="test1">⏱ Test in 1 minute (lock your phone)</button><button class="bigbtn" data-ad="bg">🔋 Allow background running (recommended)</button>'}
+  var _snt=null;
+  function syncNQ(){if(!window.AndroidAdhan)return;clearTimeout(_snt);_snt=setTimeout(syncNative,1500)}
+  function syncNative(){var A=window.AndroidAdhan;if(!A)return;
+    try{var pm=PM(),t=[],n=new Date();
+      for(var i=0;i<8;i++){var r=PTd(new Date(n.getFullYear(),n.getMonth(),n.getDate()+i,12));t.push([r.fajr,r.dhuhr,r.asr,r.maghrib,r.isha].map(function(x){return Math.round(x)}))}
+      A.setSchedule(JSON.stringify({on:!!pm.ad,p:P5.map(function(x){return pm.pr[x[0]]?1:0}),t:t}))}catch(e){}}
+  if(window.AndroidAdhan){setTimeout(syncNative,2500);document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')syncNative()})}
+  $('v2').addEventListener('click',function(e){var b=e.target.closest('[data-ad]');if(!b)return;var A=window.AndroidAdhan;if(!A)return;var pm=PM(),k=b.dataset.ad;
+    if(k==='tgl'){pm.ad=!pm.ad;save();syncNative();PS.open=true;renderPrayer()}
+    else if(k==='test'){syncNative();A.testNow()}
+    else if(k==='test1'){syncNative();A.testIn(60);PS.open=true;PS.msg='Adhan will play in 1 minute. Lock your phone now and wait.';renderPrayer()}
+    else if(k==='bg'){A.openBattery()}});
   function buildIcs(){
     var pm=PM(),l=LOC(),now=new Date(),o=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Dhikr Daily//Prayer times//EN','CALSCALE:GREGORIAN','X-WR-CALNAME:Prayer times'];
     function p2(n){return n<10?'0'+n:''+n}
@@ -1626,6 +1624,7 @@ function makeDet(){
   if(PID==='k'&&!S.r3400){var d21=S.days['2026-11-21']||(S.days['2026-11-21']={n:0,t:10000});if(d21.n<3400)d21.n=3400;d21.t=10000;S.r3400=1;save()}
   if(PID==='k'&&!S.r6000){var d6=S.days['2026-11-21']||(S.days['2026-11-21']={n:0,t:10000});if(d6.n<6000)d6.n=6000;d6.t=10000;S.r6000=1;save()}
   if(PID==='k'&&!S.r22){var d22=S.days['2026-11-22'];if(d22&&d22.n===1){d22.n=0}S.r22=1;save()}
+  if(PID==='k'&&!S.r10k){var d10=S.days['2026-11-21']||(S.days['2026-11-21']={n:0,t:10000});if(d10.n<10000)d10.n=10000;d10.t=10000;S.r10k=1;save()}
   if(!S.t10){if(S.target===20000)S.target=10000;Object.keys(S.days).forEach(function(k){if(S.days[k]&&S.days[k].t===20000)S.days[k].t=10000});S.t10=1;save()}
   try{if(navigator.permissions&&navigator.permissions.query)navigator.permissions.query({name:'geolocation'}).then(function(r){if(r.state==='granted')getLoc(true)}).catch(function(){})}catch(e){}
   try{if(!getTok()&&sessionStorage.getItem('unl')===PID){sessionStorage.removeItem('unl');$('lock').style.display=''}}catch(e){}

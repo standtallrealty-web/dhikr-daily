@@ -35,6 +35,27 @@ final class Scheduler {
     /** Next enabled prayer after now, or null. Returns {idx, atMillis}. */
     static long[] next(Context c) {
         long now = System.currentTimeMillis() + 1000;
+        // 1) times pushed by the Dhikr Daily screens (same settings, method and adjustments as the app)
+        try {
+            String js = Prefs.sched(c);
+            if (js.length() > 0) {
+                org.json.JSONObject o = new org.json.JSONObject(js);
+                org.json.JSONArray flags = o.getJSONArray("p");
+                org.json.JSONArray days = o.getJSONArray("t");
+                long best = Long.MAX_VALUE;
+                int bi = -1;
+                for (int d = 0; d < days.length(); d++) {
+                    org.json.JSONArray row = days.getJSONArray(d);
+                    for (int i = 0; i < 5 && i < row.length(); i++) {
+                        if (flags.optInt(i, 1) != 1) continue;
+                        long t = row.getLong(i);
+                        if (t > now && t < best) { best = t; bi = i; }
+                    }
+                }
+                if (bi >= 0) return new long[]{bi, best};
+            }
+        } catch (Exception e) { }
+        // 2) fallback: own calculation (Karachi, Pune or saved location)
         for (int d = 0; d <= 2; d++) {
             long[] t = day(c, d);
             for (int i = 0; i < 5; i++) {
