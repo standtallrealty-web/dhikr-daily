@@ -195,6 +195,8 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   .qn{fill:#b3392f;font-size:18px;font-weight:700;text-anchor:middle}.qc{fill:var(--muted);font-size:13px;text-anchor:middle}.qline{stroke:var(--acc);stroke-width:3;stroke-linecap:round}.qk{font-size:22px;text-anchor:middle}
   .qptr{fill:var(--gold)}.qdot{fill:var(--acc)}.qinfo b{display:block;font-size:20px;color:var(--text)}.qinfo small{color:var(--muted);font-size:13px}
   .qmsg{margin:6px 0;font-size:16px;font-weight:600;color:var(--muted);min-height:24px}.qmsg.ok{color:var(--ok)}
+  .cdsel{display:none;gap:8px;margin:2px 0 10px}.cdsel button{flex:1;background:var(--card);border:2px solid var(--line);color:var(--text);border-radius:14px;padding:9px 8px;display:flex;flex-direction:column;gap:2px;text-align:left;touch-action:manipulation}
+  .cdsel button.on{border-color:var(--acc);box-shadow:var(--shadow)}.cdsel small{font-size:11px;color:var(--muted);letter-spacing:.3px}.cdsel b{font-size:14px}.cdsel span{font-size:13px;color:var(--acc);font-weight:700}
 </style>
 </head>
 <body>
@@ -203,6 +205,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   <div style="display:flex;align-items:center"><div class="streak" id="streak">🔥 0 day streak</div><button id="profBtn" aria-label="Switch person"></button><button id="themeBtn" aria-label="Switch light or dark theme">🌙</button></div>
 </header>
 <div id="v1" class="view">
+<div id="cdsel" class="cdsel"></div>
 <div class="arabic">أَسْتَغْفِرُ اللَّهَ</div>
 <div class="sub">Astaghfirullah</div>
 
@@ -241,9 +244,8 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   <button id="resetTop" style="border-color:#c9776f;color:#b3392f">⟲ Reset</button>
 </div>
 <div class="row">
-  <button id="setn">✎ Set today's count</button>
+  <button id="setn">✎ Set count</button>
   <button id="p1k">+1000</button>
-  <button id="t20">20,000 for today only</button>
 </div>
 
 <div class="panel">
@@ -302,8 +304,11 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
   function key(d){d=d||new Date();var m=d.getMonth()+1,dd=d.getDate();return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(dd<10?'0':'')+dd}
   var today=key();
-  function tgt(){return(S.tOver&&S.tOver[today])||S.target}
-  function cur(){if(!S.days[today])S.days[today]={n:0,t:S.target};return S.days[today]}
+  function tgt(){return S.target}
+  function pdKey(){var d=dnow();d.setDate(d.getDate()-1);return key(d)}
+  function cdKey(){return(S.pick&&S.pick<today)?S.pick:today}
+  function dlabel(k){var p=k.split('-');return new Date(+p[0],+p[1]-1,+p[2]).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})}
+  function cur(){var k=cdKey();if(!S.days[k])S.days[k]={n:0,t:S.target};return S.days[k]}
   function fmt(n){return n.toLocaleString('en-IN')}
   var $=function(id){return document.getElementById(id)};
   function ask(msg,cb){$('mtext').textContent=msg;$('modal').style.display='flex';$('mno').onclick=function(){$('modal').style.display='none'};$('myes').onclick=function(){$('modal').style.display='none';cb()}}
@@ -324,13 +329,12 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     $('pct').textContent=Math.floor(p*100)+'%';
     $('prog').style.strokeDashoffset=C*(1-p);
     $('msg').textContent=c.n>=t?'🌙 MashaAllah! Today\'s goal complete':fmt(t-c.n)+' remaining';
-    var ov=S.tOver&&S.tOver[today]===20000;$('t20').textContent=ov?'✓ 20,000 for today (tap to undo)':'20,000 for today only';
-    if(ov){var nowD=new Date();
-      if(key(nowD)!==today){/* after Maghrib: the calendar date is still before the Islamic date */}
-      var ms=$('msg').textContent;
-      if(c.n<10000&&nowD.getHours()>=0&&key(nowD)<today)$('msg').textContent=ms+' · '+fmt(10000-c.n)+' more to reach 10,000 before midnight';
-      else if(c.n>=10000&&key(nowD)<today)$('msg').textContent='✓ 10,000 done before midnight · '+fmt(t-c.n)+' to 20,000'}
-    $('date').textContent=dnow().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})+(today!==key()?' · from Maghrib':'');
+    (function(){var pk=pdKey(),pe=S.days[pk]||{n:0},ce=S.days[today]||{n:0},sel=cdKey(),tt=S.target;
+      var showPrev=pe.n>0||sel===pk;
+      var h='<button data-pick="cur" class="'+(sel===today?'on':'')+'"><small>Current day</small><b>'+dlabel(today)+(S.dayMode==='midnight'?'':' · from Maghrib')+'</b><span>'+fmt(ce.n)+' / '+fmt(tt)+(ce.n>=tt?' ✓':'')+'</span></button>';
+      if(showPrev)h='<button data-pick="'+pk+'" class="'+(sel===pk?'on':'')+'"><small>Previous day'+(pe.n<tt?' · pending '+fmt(tt-pe.n):'')+'</small><b>'+dlabel(pk)+'</b><span>'+fmt(pe.n)+' / '+fmt(tt)+(pe.n>=tt?' ✓':'')+'</span></button>'+h;
+      $('cdsel').innerHTML=h;$('cdsel').style.display=showPrev?'flex':'none'})();
+    $('date').textContent=dnow().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})+(today!==key()?' 🌙':'');
     var st=streak();$('streak').textContent='🔥 '+st+(st===1?' day':' days')+' streak';
     // last 7 days
     var h='',max=1,arr=[];
@@ -434,9 +438,9 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   $('p10').onclick=function(){add(10)};
   $('p100').onclick=function(){add(100)};
   $('p1k').onclick=function(){add(1000)};
-  $('setn').onclick=function(){var v=prompt("Enter today's Istighfar count so far",String(cur().n));if(v===null)return;v=parseInt(String(v).replace(/[^0-9]/g,''),10);if(isNaN(v))return;cur().n=Math.max(0,v);save();render();renderExtra()};
-  $('t20').onclick=function(){if(!S.tOver)S.tOver={};if(S.tOver[today]===20000)delete S.tOver[today];else S.tOver[today]=20000;save();render();renderExtra()};
-  $('target').onchange=function(){var v=parseInt(this.value,10);if(v>0){S.target=v;save();render()}else render()};
+  $('cdsel').onclick=function(e){var b=e.target.closest('[data-pick]');if(!b)return;S.pick=b.dataset.pick==='cur'?null:b.dataset.pick;save();render();renderExtra()};
+  $('setn').onclick=function(){var v=prompt("Enter the Istighfar count so far for "+dlabel(cdKey()),String(cur().n));if(v===null)return;v=parseInt(String(v).replace(/[^0-9]/g,''),10);if(isNaN(v))return;cur().n=Math.max(0,v);save();render();renderExtra()};
+    $('target').onchange=function(){var v=parseInt(this.value,10);if(v>0){S.target=v;save();render()}else render()};
   $('vib').onchange=function(){S.vib=this.checked;save()};
   var lock=null;
   function setWake(){
@@ -445,7 +449,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     else if(lock){lock.release().catch(function(){});lock=null}
   }
   $('wake').onchange=function(){S.wake=this.checked;save();setWake()};
-  function resetToday(){ask("Reset today's Istighfar count to 0?",function(){cur().n=0;save();render()})}
+  function resetToday(){ask('Reset the Istighfar count for '+dlabel(cdKey())+' to 0?',function(){cur().n=0;save();render()})}
   $('reset').onclick=resetToday;$('resetTop').onclick=resetToday;
   document.addEventListener('visibilitychange',function(){checkDay();setWake()});
   setInterval(checkDay,30000);
@@ -865,14 +869,14 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     var np0=nextPrayer(new Date());h+='<div class="hcard" data-go="p"><div class="hrow"><span>🕌 Next prayer</span><small id="hnext">'+np0.n+' '+fm(np0.t)+' · in '+dur(np0.t-Date.now())+'</small></div></div>';
     ['i','t','m','e','s','b','d'].forEach(function(c){
       var d,t,p,lab;
-      if(c==='i'){var n=cur().n;p=Math.min(1,n/tgt());lab=fmt(n)+' / '+fmt(tgt())}
+      if(c==='i'){var n=cur().n;p=Math.min(1,n/tgt());lab=fmt(n)+' / '+fmt(tgt());var pe0=S.days[pdKey()];if(pe0&&pe0.n>0&&pe0.n<tgt())lab+=' · previous day pending '+fmt(tgt()-pe0.n)}
       else if(c==='d'){p=0;lab=DUA.items.length+' duas'}
       else{var r=secProg(c);p=r.p;lab=r.d+' / '+r.t+' done'}
       h+='<div class="hcard'+(p>=1?' ok':'')+'" data-go="'+c+'"><div class="hrow"><span>'+SEC[c][0]+' '+SEC[c][1]+'</span><small>'+(p>=1?'✓ Complete':lab)+'</small></div><div class="pbar"><div style="width:'+Math.round(p*100)+'%"></div></div><div class="hs">'+SEC[c][2]+'</div></div>';
     });
     var have=DL.count>0;
     h+='<div class="hcard" style="cursor:default"><div class="hrow"><span>📥 Use without internet</span><small>'+(have?'✓ '+DL.count+' files · '+(DL.bytes/1048576).toFixed(1)+' MB':'Not downloaded')+'</small></div><div class="hs" style="margin:8px 0;line-height:1.5">The app itself already opens offline. Download the audio once (about 20 to 30 MB) to listen and learn offline. '+arabicVoiceInfo()+'. Counting by voice needs internet; offline it counts any sound.</div><div style="display:flex;gap:8px"><button class="aud big" data-act="dlall" style="flex:1">'+(DL.busy?'Downloading…':(have?'📥 Update download':'📥 Download audio'))+'</button>'+(have?'<button class="rst" data-act="dlclear" style="padding:0 14px;border:1px solid var(--line);background:none;color:#c9d9d2;border-radius:12px">Delete</button>':'')+'</div><div class="astat" id="dlstat" style="margin-top:8px">'+DL.msg+'</div></div>';
-    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v27</div>';
+    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v28</div>';
     v.innerHTML=h;
   }
   function aBar(){
