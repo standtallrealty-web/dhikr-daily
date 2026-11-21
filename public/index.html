@@ -313,10 +313,13 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   var S;
   function load(){try{var r=localStorage.getItem(KEY);S=r?JSON.parse(r):null}catch(e){S=null}
     if(!S||typeof S!=='object')S=JSON.parse(JSON.stringify(DEF));
-    if(!S.days)S.days={};if(!S.target)S.target=10000;}
+    if(!S.days)S.days={};if(!S.target)S.target=10000;snapDays()}
   var mem=false;
+  var SNAP={};
+  function snapDays(){SNAP={};Object.keys(S.days||{}).forEach(function(k){var d=S.days[k];if(d)SNAP[k]=d.n+'|'+d.t})}
+  function stampDays(){var now=Date.now();Object.keys(S.days||{}).forEach(function(k){var d=S.days[k];if(!d)return;var v=d.n+'|'+d.t;if(SNAP[k]!==v){d.u=now;SNAP[k]=v}})}
   var _noTs=false;
-  function save(){try{if(!_noTs)S.ts=Math.max(Date.now(),(S.ts||0)+1);localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(!_noTs)syncQ()}
+  function save(){try{if(!_noTs){stampDays();S.ts=Math.max(Date.now(),(S.ts||0)+1)}localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(!_noTs)syncQ()}
   function key(d){d=d||new Date();var m=d.getMonth()+1,dd=d.getDate();return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(dd<10?'0':'')+dd}
   var today=key();
   function tgt(){return S.target}
@@ -898,7 +901,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     var have=DL.count>0;
     h+='<div class="hcard" style="cursor:default"><div class="hrow"><span>📥 Use without internet</span><small>'+(have?'✓ '+DL.count+' files · '+(DL.bytes/1048576).toFixed(1)+' MB':'Not downloaded')+'</small></div><div class="hs" style="margin:8px 0;line-height:1.5">The app itself already opens offline. Download the audio once (about 20 to 30 MB) to listen and learn offline. '+arabicVoiceInfo()+'. Counting by voice needs internet; offline it counts any sound.</div><div style="display:flex;gap:8px"><button class="aud big" data-act="dlall" style="flex:1">'+(DL.busy?'Downloading…':(have?'📥 Update download':'📥 Download audio'))+'</button>'+(have?'<button class="rst" data-act="dlclear" style="padding:0 14px;border:1px solid var(--line);background:none;color:#c9d9d2;border-radius:12px">Delete</button>':'')+'</div><div class="astat" id="dlstat" style="margin-top:8px">'+DL.msg+'</div></div>';
     h+='<div id="syncst" class="syncst">'+(SY&&SY.st?SY.st.replace(/</g,'&lt;'):'☁ Sync · tap to sync now')+'</div>';
-    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v37</div><div style="text-align:center;margin:6px 0 14px"><button id="updbtn" style="background:none;border:1px solid var(--line);color:var(--acc);border-radius:16px;padding:8px 16px;font-size:13px">🔄 Update app</button></div>';
+    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v38</div><div style="text-align:center;margin:6px 0 14px"><button id="updbtn" style="background:none;border:1px solid var(--line);color:var(--acc);border-radius:16px;padding:8px 16px;font-size:13px">🔄 Update app</button></div>';
     v.innerHTML=h;
   }
   function aBar(){
@@ -1477,20 +1480,28 @@ function makeDet(){
   function startSync(pin){try{sha256hex('dhikr-sync|'+PID+'|'+pin).then(function(t){try{localStorage.setItem(tokKey(),t)}catch(e){}SY.stopped=false;syncNow()}).catch(function(){})}catch(e){}}
   function syncUI(m){SY.st=m;var e=document.getElementById('syncst');if(e)e.textContent=m}
   function hhmm(){var d=new Date(),h=d.getHours(),m=d.getMinutes();return(h%12||12)+':'+(m<10?'0':'')+m+' '+(h<12?'AM':'PM')}
-  function syncQ(){if(!SY||!getTok())return;SY.dirty=true;if(SY.timer)return;var w=Math.max(4000,60000-(Date.now()-SY.pushAt));SY.timer=setTimeout(function(){SY.timer=null;syncNow()},w)}
+  function syncQ(){if(!SY||!getTok())return;SY.dirty=true;if(SY.timer)return;var w=Math.max(5000,30000-(Date.now()-SY.pushAt));SY.timer=setTimeout(function(){SY.timer=null;syncNow()},w)}
   function syncPayload(){var d=JSON.parse(JSON.stringify(S));delete d.qseen;return d}
-  function syncApply(m,ts){m.days=m.days||{};if(!m.target)m.target=10000;m.sync=1;m.qseen=S.qseen;m.ts=ts;_noTs=true;S=m;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}_noTs=false;today=dayKey();applyTheme();render();renderExtra()}
+  function keepBackup(){try{var b2=localStorage.getItem(KEY+'_bk2');if(b2)localStorage.setItem(KEY+'_bk3',b2);var b1=localStorage.getItem(KEY+'_bk1');if(b1)localStorage.setItem(KEY+'_bk2',b1);localStorage.setItem(KEY+'_bk1',JSON.stringify(S))}catch(e){}}
+  function syncApply(m,ts){keepBackup();m.days=m.days||{};if(!m.target)m.target=10000;m.sync=1;m.qseen=S.qseen;m.ts=ts;_noTs=true;S=m;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}_noTs=false;snapDays();today=dayKey();applyTheme();render();renderExtra()}
+  function pickDay(a,b){if(!a)return b;if(!b)return a;var au=a.u||0,bu=b.u||0;
+    if(!au||!bu)return a.n>=b.n?a:b;
+    if(au===bu)return a.n>=b.n?a:b;
+    return au>bu?a:b}
+  function syncMerge(rd,rts){
+    var lts=S.ts||0,base=JSON.parse(JSON.stringify(lts>=rts?S:rd)),A=S.days||{},B=rd.days||{},days={};
+    Object.keys(A).concat(Object.keys(B)).forEach(function(k){if(!days[k]){var d=pickDay(A[k],B[k]);if(d)days[k]=JSON.parse(JSON.stringify(d))}});
+    var AA=S.ad||{},BB=rd.ad||{},ad={};
+    Object.keys(AA).concat(Object.keys(BB)).forEach(function(k){if(!ad[k]){var x=AA[k],y=BB[k];ad[k]=JSON.parse(JSON.stringify(!x?y:!y?x:(lts>=rts?x:y)))}});
+    base.days=days;base.ad=ad;return base}
   function syncDecide(rm){
     if(!rm){S.sync=1;return'push'}
-    var rd=rm.data||{};
-    if(!S.sync){
-      try{localStorage.setItem(KEY+'_bk',JSON.stringify(S))}catch(e){}
-      var m=JSON.parse(JSON.stringify(rd));m.days=m.days||{};
-      Object.keys(S.days).forEach(function(k){var a=S.days[k],b=m.days[k];if(a&&(!b||a.n>b.n))m.days[k]=a});
-      syncApply(m,Math.max(rm.ts+1,Date.now()));return'push'}
-    if(rm.ts>(S.ts||0)){syncApply(JSON.parse(JSON.stringify(rd)),rm.ts);return'pulled'}
-    if((S.ts||0)>rm.ts)return'push';
-    return'none'}
+    var rd=rm.data||{},lts=S.ts||0;
+    if(S.sync&&rm.ts===lts)return'none';
+    var m=syncMerge(rd,rm.ts);
+    var needPush=lts>rm.ts||!S.sync||JSON.stringify(m.days)!==JSON.stringify(rd.days||{})||JSON.stringify(m.ad)!==JSON.stringify(rd.ad||{});
+    syncApply(m,needPush?Math.max(rm.ts,lts)+1:rm.ts);
+    return needPush?'push':'pulled'}
   function syncPush(){
     SY.pushAt=Date.now();var sent=S.ts||Date.now();if(!S.ts)S.ts=sent;
     return fetch('/api/sync?p='+PID,{method:'PUT',headers:{'x-tok':getTok(),'content-type':'application/json'},body:JSON.stringify({ts:sent,data:syncPayload()}),keepalive:true}).then(function(r){
@@ -1512,7 +1523,11 @@ function makeDet(){
       return r.json()}).then(function(rm){var a=syncDecide(rm);return a==='push'?syncPush():0}).then(function(){syncUI('☁ Synced · '+hhmm()+' · tap to sync now')}).catch(function(e){
       syncUI(e==='auth'?'☁ Sync paused. Tap “Not you? Switch person” and enter the PIN again.':e==='locked'?'☁ Too many wrong tries. Try again in 15 minutes.':'☁ Sync problem · tap to retry')}).then(function(){SY.busy=false;if(SY.dirty)syncQ()})}
   document.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('#syncst')){SY.stopped=false;SY.pushAt=0;syncNow()}});
-  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')syncNow();else if(SY.dirty&&getTok()){SY.pushAt=0;syncNow()}});
+  function syncFlush(){var tok=getTok();if(!tok||!SY.dirty||SY.stopped||!S.sync)return;try{if(sessionStorage.getItem('unl')!==PID)return}catch(e){}
+    var body=JSON.stringify({ts:S.ts||Date.now(),data:syncPayload()});SY.dirty=false;SY.pushAt=Date.now();
+    try{fetch('/api/sync?p='+PID,{method:'PUT',keepalive:body.length<60000,headers:{'x-tok':tok,'content-type':'application/json'},body:body}).catch(function(){SY.dirty=true})}catch(e){SY.dirty=true}}
+  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')syncNow();else syncFlush()});
+  window.addEventListener('pagehide',syncFlush);
   window.addEventListener('online',function(){syncNow()});
   setInterval(function(){if(document.visibilityState==='visible')syncNow()},60000);
   function applyTheme(){var t=S.theme==='dark'?'dark':'light';document.documentElement.setAttribute('data-theme',t);$('themeBtn').textContent=t==='dark'?'☀️':'🌙';var m=document.querySelector('meta[name=theme-color]');if(m)m.setAttribute('content',t==='dark'?'#0a1612':'#f8f4ea')}
@@ -1521,6 +1536,8 @@ function makeDet(){
   today=dayKey();
   setTimeout(maybeQuote,700);
   if(PID==='k'&&!S.r3400){var d21=S.days['2026-11-21']||(S.days['2026-11-21']={n:0,t:10000});if(d21.n<3400)d21.n=3400;d21.t=10000;S.r3400=1;save()}
+  if(PID==='k'&&!S.r6000){var d6=S.days['2026-11-21']||(S.days['2026-11-21']={n:0,t:10000});if(d6.n<6000)d6.n=6000;d6.t=10000;S.r6000=1;save()}
+  if(PID==='k'&&!S.r22){var d22=S.days['2026-11-22'];if(d22&&d22.n===1){d22.n=0}S.r22=1;save()}
   if(!S.t10){if(S.target===20000)S.target=10000;Object.keys(S.days).forEach(function(k){if(S.days[k]&&S.days[k].t===20000)S.days[k].t=10000});S.t10=1;save()}
   try{if(navigator.permissions&&navigator.permissions.query)navigator.permissions.query({name:'geolocation'}).then(function(r){if(r.state==='granted')getLoc(true)}).catch(function(){})}catch(e){}
   try{if(!getTok()&&sessionStorage.getItem('unl')===PID){sessionStorage.removeItem('unl');$('lock').style.display=''}}catch(e){}
