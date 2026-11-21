@@ -876,9 +876,13 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     return q.split(/\s+/).every(function(w){return hay.indexOf(w)>=0});
   }
   function adItems(){return AD.filter(function(x){return x.c.indexOf(tab)>=0&&(tab!=='d'||dMatch(x))})}
-  var SEC={t:['🔢','Tasbih','Full text with meaning, listen and learn'],i:['📿','Istighfar','Say Astaghfirullah through the day'],m:['🌅','Morning adhkar','After Fajr until sunrise'],e:['🌇','Evening adhkar','After Asr until sunset'],s:['🕌','After Salah','After every obligatory prayer'],b:['🌙','Before sleep','When you lie down to sleep'],d:['🤲','Duas','Authentic duas for debt, illness, worry, travel and more']};
+  var SEC={t:['🔢','Tasbih','Full text with meaning, listen and learn'],i:['📿','Istighfar','Say Astaghfirullah through the day'],m:['🌅','Morning adhkar','After Fajr until sunrise'],e:['🌇','Evening adhkar','After Asr until sunset'],s:['🕌','After Salah','Opens on the current prayer. Each prayer has its own tick'],b:['🌙','Before sleep','When you lie down to sleep'],d:['🤲','Duas','Authentic duas for debt, illness, worry, travel and more']};
+  var SPN={fajr:'Fajr',dhuhr:'Dhuhr',asr:'Asr',maghrib:'Maghrib',isha:'Isha'},SPO=['fajr','dhuhr','asr','maghrib','isha'];
+  function spAuto(){var n=Date.now(),t=PTd(new Date()),r='isha';SPO.forEach(function(p){if(isFinite(t[p])&&n>=t[p])r=p});return r}
+  function curSP(){var a=spAuto();return(S.sp&&S.sp.a===a&&SPN[S.sp.p])?S.sp.p:a}
+  function adKey(c,id,p){return c==='s'?'s@'+(p||curSP())+':'+id:c+':'+id}
   function secProg(c){var st=adState(),it=AD.filter(function(x){return x.c.indexOf(c)>=0}),got=0,d=0;
-    it.forEach(function(x){var q=Math.min(1,(st[c+':'+x.id]||0)/x.n);got+=q;if(q>=1)d++});
+    it.forEach(function(x){var q=Math.min(1,(st[adKey(c,x.id)]||0)/x.n);got+=q;if(q>=1)d++});
     return {d:d,t:it.length,p:got/it.length}}
   function renderHome(){
     var v=$('v2'),h='<div class="hello">Assalamu alaikum, '+PROFS[PID].n+'</div><div class="hsub">What would you like to do today? Tap a section to begin.</div>';
@@ -888,13 +892,13 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
       var d,t,p,lab;
       if(c==='i'){var n=cur().n;p=Math.min(1,n/tgt());lab=fmt(n)+' / '+fmt(tgt());var pe0=S.days[pdKey()];if(pe0&&pe0.n>0&&pe0.n<tgt())lab+=' · previous day pending '+fmt(tgt()-pe0.n)}
       else if(c==='d'){p=0;lab=DUA.items.length+' duas'}
-      else{var r=secProg(c);p=r.p;lab=r.d+' / '+r.t+' done'}
+      else{var r=secProg(c);p=r.p;lab=(c==='s'?SPN[curSP()]+': ':'')+r.d+' / '+r.t+' done'}
       h+='<div class="hcard'+(p>=1?' ok':'')+'" data-go="'+c+'"><div class="hrow"><span>'+SEC[c][0]+' '+SEC[c][1]+'</span><small>'+(p>=1?'✓ Complete':lab)+'</small></div><div class="pbar"><div style="width:'+Math.round(p*100)+'%"></div></div><div class="hs">'+SEC[c][2]+'</div></div>';
     });
     var have=DL.count>0;
     h+='<div class="hcard" style="cursor:default"><div class="hrow"><span>📥 Use without internet</span><small>'+(have?'✓ '+DL.count+' files · '+(DL.bytes/1048576).toFixed(1)+' MB':'Not downloaded')+'</small></div><div class="hs" style="margin:8px 0;line-height:1.5">The app itself already opens offline. Download the audio once (about 20 to 30 MB) to listen and learn offline. '+arabicVoiceInfo()+'. Counting by voice needs internet; offline it counts any sound.</div><div style="display:flex;gap:8px"><button class="aud big" data-act="dlall" style="flex:1">'+(DL.busy?'Downloading…':(have?'📥 Update download':'📥 Download audio'))+'</button>'+(have?'<button class="rst" data-act="dlclear" style="padding:0 14px;border:1px solid var(--line);background:none;color:#c9d9d2;border-radius:12px">Delete</button>':'')+'</div><div class="astat" id="dlstat" style="margin-top:8px">'+DL.msg+'</div></div>';
     h+='<div id="syncst" class="syncst">'+(SY&&SY.st?SY.st.replace(/</g,'&lt;'):'☁ Sync · tap to sync now')+'</div>';
-    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v36</div><div style="text-align:center;margin:6px 0 14px"><button id="updbtn" style="background:none;border:1px solid var(--line);color:var(--acc);border-radius:16px;padding:8px 16px;font-size:13px">🔄 Update app</button></div>';
+    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v37</div><div style="text-align:center;margin:6px 0 14px"><button id="updbtn" style="background:none;border:1px solid var(--line);color:var(--acc);border-radius:16px;padding:8px 16px;font-size:13px">🔄 Update app</button></div>';
     v.innerHTML=h;
   }
   function aBar(){
@@ -902,6 +906,9 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     [['m','🌅 Morning'],['e','🌇 Evening'],['s','🕌 After salah'],['b','🌙 Sleep'],['t','📿 Tasbih']].forEach(function(x){h+='<button data-ta="'+x[0]+'" class="'+(tab===x[0]?'on':'')+'">'+x[1]+'</button>'});
     return h+'</div>';
   }
+  function spBar(st,it){var c=curSP(),h='<div class="chips sp" style="padding-top:0">';
+    SPO.forEach(function(p){var all=it.length&&it.every(function(x){return(st[adKey('s',x.id,p)]||0)>=x.n});h+='<button data-sp="'+p+'" class="'+(c===p?'on':'')+'">'+SPN[p]+(all?' ✓':'')+'</button>'});
+    return h+'</div><div class="note" style="margin:0 0 6px">Opens on the prayer that is current now. Each prayer keeps its own count, so tap another prayer if you are catching up.</div>'}
   function dHead(n){
     var h='<div class="adhead"><span>🤲 '+n+(n===1?' dua':' duas')+'</span></div><input id="dq" type="search" placeholder="Search: debt, illness, travel, anxiety…" value="'+(S.dq||'').replace(/"/g,'&quot;')+'" autocomplete="off"><div class="chips">';
     h+='<button data-dg="all" class="'+((!S.dg||S.dg==='all')?'on':'')+'">All</button>';
@@ -910,11 +917,11 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   }
   function renderAd(){if(tab==='p'){renderPrayer();return}
     if(tab==='h'){renderHome();return}
-    var v=$('v2'),top=v.scrollTop,st=adState(),it=adItems(),done=0,h='tmesb'.indexOf(tab)>=0?aBar():'';
-    it.forEach(function(x){var k=tab+':'+x.id;if((st[k]||0)>=x.n)done++});
-    h+=(tab==='d'?dHead(it.length):'<div class="adhead"><span>'+CATN[tab]+' · '+done+'/'+it.length+' done</span><button data-act="resetall">Reset section</button></div>')+'<div class="ppanel"><div class="seg"><button data-m="listen" class="'+(pmode()==='listen'?'on':'')+'">▶ Listen<small>full recitation</small></button><button data-m="learn" class="'+(pmode()==='learn'?'on':'')+'">🎓 Learn<small>repeat after me</small></button></div>'+(pmode()==='learn'?'<div class="popts"><span>Phrase length</span><select id="plsel"><option value="short"'+(plen()==='short'?' selected':'')+'>Short</option><option value="med"'+(plen()==='med'?' selected':'')+'>Medium</option><option value="long"'+(plen()==='long'?' selected':'')+'>Long</option></select></div><div class="popts"><span>Your pause</span><select id="gapsel"><option value="0.8"'+(gf()===0.8?' selected':'')+'>Short</option><option value="1.2"'+(gf()===1.2?' selected':'')+'>Normal</option><option value="2"'+(gf()===2?' selected':'')+'>Long</option></select></div>':'')+'<button class="aud big'+(P.all?' on':'')+'" data-act="playall">'+(P.all?'⏹ Stop':'▶ Play all '+(pmode()==='learn'?'(learn)':'(listen)'))+'</button></div>';
+    var v=$('v2'),top=v.scrollTop,st=adState(),it=adItems(),done=0,h='tmesb'.indexOf(tab)>=0?aBar()+(tab==='s'?spBar(st,it):''):'';
+    it.forEach(function(x){var k=adKey(tab,x.id);if((st[k]||0)>=x.n)done++});
+    h+=(tab==='d'?dHead(it.length):'<div class="adhead"><span>'+(tab==='s'?'After '+SPN[curSP()]+' prayer':CATN[tab])+' · '+done+'/'+it.length+' done</span><button data-act="resetall">Reset section</button></div>')+'<div class="ppanel"><div class="seg"><button data-m="listen" class="'+(pmode()==='listen'?'on':'')+'">▶ Listen<small>full recitation</small></button><button data-m="learn" class="'+(pmode()==='learn'?'on':'')+'">🎓 Learn<small>repeat after me</small></button></div>'+(pmode()==='learn'?'<div class="popts"><span>Phrase length</span><select id="plsel"><option value="short"'+(plen()==='short'?' selected':'')+'>Short</option><option value="med"'+(plen()==='med'?' selected':'')+'>Medium</option><option value="long"'+(plen()==='long'?' selected':'')+'>Long</option></select></div><div class="popts"><span>Your pause</span><select id="gapsel"><option value="0.8"'+(gf()===0.8?' selected':'')+'>Short</option><option value="1.2"'+(gf()===1.2?' selected':'')+'>Normal</option><option value="2"'+(gf()===2?' selected':'')+'>Long</option></select></div>':'')+'<button class="aud big'+(P.all?' on':'')+'" data-act="playall">'+(P.all?'⏹ Stop':'▶ Play all '+(pmode()==='learn'?'(learn)':'(listen)'))+'</button></div>';
     it.forEach(function(x){
-      var k=tab+':'+x.id,c=st[k]||0,d=c>=x.n;
+      var k=adKey(tab,x.id),c=st[k]||0,d=c>=x.n;
       h+='<div class="card'+(d?' done':'')+'"><div class="ct">'+x.t+'</div><div class="reps"><span>Recite: <b>'+(x.n===1?'once':x.n+' times')+'</b></span>'+(x.n>1?'<button class="mini'+(d?' dn':'')+'" data-k="'+k+'" data-n="'+x.n+'" aria-label="Count"><b>'+(d?'✓':c)+'</b><small>/ '+x.n+'</small></button>':'')+'</div><div class="ar2" dir="rtl" lang="ar">'+x.ar.replace(/\n/g,'<br>')+'</div>'+(x.when?'<div class="when"><b>When and how many:</b> '+x.when+'</div>':'')+(S.trOff?'':(trOf(x)?'<div class="tr"><small>Read in English letters</small>'+trOf(x).replace(/\n/g,'<br>')+'</div>':''))+'<div class="en">'+x.en+'</div>'+(benOf(x)?'<div class="ben"><b>✨ Benefit</b><br>'+benOf(x)+'</div>':'')+'<div class="ref">'+x.ref+'</div><div class="audrow"><button class="aud'+(P.key===k?' on':'')+'" data-a="'+k+'" data-id="'+x.id+'">'+(P.key===k?'⏹ Stop':(pmode()==='learn'?'🎓 Learn this':'🔊 Listen'))+'</button><span class="astat" data-stat="'+k+'">'+(P.msg[k]||'')+'</span></div><div class="asrc">'+(QAUD[x.id]?'Recitation: Mishary Alafasy (saved offline after Download)':(OFF['u_'+x.id+'_'+x.c]?'Your own recording ✓':(x.aud?'Recitation: '+x.who+(OFF['du'+x.aud]?' · saved offline ✓':''):alfOf(x)?'Recitation: Mishary Alafasy'+(OFF['af'+alfOf(x)]?' · saved offline ✓':''):hsOf(x)?'Recitation: Hamad al-Dreihem (Hisn al-Muslim)'+(OFF['hc'+hsOf(x)]?' · saved offline ✓':''):'Device voice, not a qari. Use it only to follow the rhythm.')))+(QAUD[x.id]?'':' <button class="rec" data-rec="'+x.id+'_'+x.c+'">'+(OFF['u_'+x.id+'_'+x.c]?'Remove recording':'📎 Add recording')+'</button>')+'</div><div class="acts"><button class="cnt" data-k="'+k+'" data-n="'+x.n+'">'+(d?'✓ Done':c+' / '+x.n+' · tap')+'</button><button class="rst" data-r="'+k+'">↺</button></div></div>';
     });
     h+='<div class="powered" style="margin-top:10px">Powered by <b>Stand Tall Realty</b></div><div class="note">'+TIPS[tab]+'<br>Sources: Sahih al-Bukhari, Sahih Muslim, Abu Dawud, Tirmidhi, an-Nasa\'i, Ahmad, with gradings of Shaykh al-Albani as compiled by IslamQA and Hisn al-Muslim. Please verify the Arabic once against a printed Hisn al-Muslim or with your scholar.</div>';
@@ -926,6 +933,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   $('v2').addEventListener('click',function(e){
     var g=e.target.closest('[data-go]');if(g){showTab(g.dataset.go);return}
     var ta=e.target.closest('[data-ta]');if(ta){showTab(ta.dataset.ta);return}
+    var sp=e.target.closest('[data-sp]');if(sp){S.sp={p:sp.dataset.sp,a:spAuto()};save();renderAd();return}
     var dg=e.target.closest('[data-dg]');if(dg){S.dg=dg.dataset.dg;save();renderAd();var cb=document.querySelector('.chips button.on');if(cb&&cb.scrollIntoView)cb.scrollIntoView({inline:'center',block:'nearest'});return}
     var mb=e.target.closest('[data-m]');if(mb){stopPlay();S.pmode=mb.dataset.m;save();renderAd();return}
     var pa=e.target.closest('[data-act="playall"]');if(pa){runAll();return}
@@ -940,7 +948,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     if(b.dataset.k){var n=parseInt(b.dataset.n,10);st[b.dataset.k]=Math.min(n,(st[b.dataset.k]||0)+1);
       if(st[b.dataset.k]>=n)buzz(60);else buzz(8);}
     else if(b.dataset.r){delete st[b.dataset.r]}
-    else if(b.dataset.act==='resetall'){ask('Reset this section for today?',function(){adItems().forEach(function(x){delete st[tab+':'+x.id]});save();renderAd()});return}
+    else if(b.dataset.act==='resetall'){ask('Reset this section for today?',function(){adItems().forEach(function(x){delete st[adKey(tab,x.id)]});save();renderAd()});return}
     save();renderAd();
   });
   var _dqt=null;
