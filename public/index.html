@@ -147,6 +147,16 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   .card{padding:16px}
   .card .ct{letter-spacing:.2px}
   header{border-bottom:1px solid var(--line);margin-bottom:4px}
+  #lock{position:fixed;inset:0;z-index:100;background:linear-gradient(180deg,var(--bg),var(--bg2));display:flex;align-items:center;justify-content:center;padding:24px}
+  #lock .lk{width:100%;max-width:320px;text-align:center}
+  #lock .lkav{width:72px;height:72px;border-radius:50%;background:var(--acc);color:var(--ong);font-size:30px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
+  #lock h3{margin:0;font-family:Georgia,serif;font-size:24px;color:var(--text)}#lock p{margin:6px 0 18px;font-size:14px;color:var(--muted);min-height:20px}
+  #lock .dots{display:flex;gap:14px;justify-content:center;margin-bottom:22px}#lock .dots i{width:14px;height:14px;border-radius:50%;border:2px solid var(--acc);display:block}#lock .dots i.f{background:var(--acc)}
+  #lock .pad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  #lock .pad button{width:72px;height:72px;justify-self:center;border-radius:50%;background:var(--card);border:1px solid var(--line);color:var(--text);font-size:24px;font-weight:600;box-shadow:var(--shadow);touch-action:manipulation}
+  #lock .pad button:active{background:var(--press)}#lock .pad button.e{visibility:hidden}
+  #lock .lkalt{margin-top:20px;background:none;border:0;color:var(--acc);font-size:14px}
+  @keyframes shk{0%,100%{transform:translateX(0)}25%{transform:translateX(-9px)}75%{transform:translateX(9px)}}#lock .dots.bad{animation:shk .3s}
   #profBtn{background:var(--acc);color:var(--ong);border:0;width:36px;height:36px;border-radius:50%;font-size:16px;font-weight:700;margin-left:8px;touch-action:manipulation}
   #profov{display:none;position:fixed;inset:0;background:rgba(20,30,26,.55);z-index:50;align-items:center;justify-content:center;padding:24px}
   #profov.show{display:flex}
@@ -241,6 +251,8 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
 </div>
 <div id="v2" class="view"></div>
 <div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b></div></div>
+<div id="lock"><div class="lk"><div class="lkav" id="lkav"></div><h3 id="lkname"></h3><p id="lkmsg">Enter your 4-digit PIN</p><div class="dots" id="lkdots"><i></i><i></i><i></i><i></i></div><div class="pad" id="lkpad"></div><button class="lkalt" id="lkswitch">Not you? Switch person</button></div></div>
+<script>try{if(sessionStorage.getItem('unl')===(localStorage.getItem('dhikr_profile')||'k'))document.getElementById('lock').style.display='none'}catch(e){}</script>
 <div id="profov"><div class="bx"><h3>Who is reading?</h3><p>Each person has their own count, streak and history. Nothing is shared.</p><div id="proflist"></div><button class="cl" id="profcl">Close</button></div></div>
 <nav class="bottomnav">
   <button id="nav_h" class="act"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg><span>Today</span></button>
@@ -252,7 +264,8 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
 <div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;align-items:center;justify-content:center;padding:24px"><div style="background:#14261f;border:1px solid var(--line);border-radius:18px;padding:20px;max-width:320px;width:100%;text-align:center"><div id="mtext" style="font-size:16px;line-height:1.5;margin-bottom:16px"></div><div style="display:flex;gap:10px"><button id="mno" style="flex:1;background:none;border:1px solid var(--line);color:#f3f1e7;border-radius:12px;padding:12px;font-size:15px">Cancel</button><button id="myes" style="flex:1;background:#b3392f;border:0;color:#fff;border-radius:12px;padding:12px;font-size:15px;font-weight:700">Yes, reset</button></div></div></div>
 <script>
 (function(){
-  var PROFS={k:{n:'Kafil',key:'istighfar_v1'},h:{n:'Humera',key:'istighfar_v1_humera'}};
+  var PROFS={k:{n:'Kafil',key:'istighfar_v1',ph:'1d0kozugq0w'},h:{n:'Humera',key:'istighfar_v1_humera',ph:'2fgl7vztcwd'}};
+  function h53(str,seed){seed=seed||0;var h1=0xdeadbeef^seed,h2=0x41c6ce57^seed;for(var i=0,ch;i<str.length;i++){ch=str.charCodeAt(i);h1=Math.imul(h1^ch,2654435761);h2=Math.imul(h2^ch,1597334677)}h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);return (4294967296*(2097151&h2)+(h1>>>0)).toString(36)}
   var PID='k';try{var _p=localStorage.getItem('dhikr_profile');if(_p&&PROFS[_p])PID=_p}catch(e){}
   var KEY=PROFS[PID].key;
   var DEF={target:10000,vib:true,wake:false,days:{}};
@@ -823,7 +836,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     });
     var have=DL.count>0;
     h+='<div class="hcard" style="cursor:default"><div class="hrow"><span>📥 Use without internet</span><small>'+(have?'✓ '+DL.count+' files · '+(DL.bytes/1048576).toFixed(1)+' MB':'Not downloaded')+'</small></div><div class="hs" style="margin:8px 0;line-height:1.5">The app itself already opens offline. Download the audio once (about 20 to 30 MB) to listen and learn offline. '+arabicVoiceInfo()+'. Counting by voice needs internet; offline it counts any sound.</div><div style="display:flex;gap:8px"><button class="aud big" data-act="dlall" style="flex:1">'+(DL.busy?'Downloading…':(have?'📥 Update download':'📥 Download audio'))+'</button>'+(have?'<button class="rst" data-act="dlclear" style="padding:0 14px;border:1px solid var(--line);background:none;color:#c9d9d2;border-radius:12px">Delete</button>':'')+'</div><div class="astat" id="dlstat" style="margin-top:8px">'+DL.msg+'</div></div>';
-    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v23</div>';
+    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v24</div>';
     v.innerHTML=h;
   }
   function aBar(){
@@ -1055,9 +1068,27 @@ function makeDet(){
     if(e.target===$('profov')){$('profov').classList.remove('show');return}
     var b=e.target.closest('[data-p]');if(!b)return;
     if(b.dataset.p===PID){$('profov').classList.remove('show');return}
-    try{localStorage.setItem('dhikr_profile',b.dataset.p)}catch(x){}
+    try{sessionStorage.removeItem('unl');localStorage.setItem('dhikr_profile',b.dataset.p)}catch(x){}
     location.reload();
   });
+  (function(){
+    var buf='',fails=0,until=0;
+    var pad='';[1,2,3,4,5,6,7,8,9,'',0,'⌫'].forEach(function(k){pad+='<button '+(k===''?'class="e" ':'')+'data-k="'+k+'">'+k+'</button>'});
+    $('lkpad').innerHTML=pad;$('lkav').textContent=PROFS[PID].n.charAt(0);$('lkname').textContent=PROFS[PID].n;
+    function dots(bad){var d=$('lkdots').children;for(var i=0;i<4;i++)d[i].className=i<buf.length?'f':'';if(bad){$('lkdots').classList.add('bad');setTimeout(function(){$('lkdots').classList.remove('bad')},320)}}
+    function check(){
+      if(h53('dhikr|'+PID+'|'+buf,7)===PROFS[PID].ph){try{sessionStorage.setItem('unl',PID)}catch(e){}$('lock').style.display='none';buf='';dots();return}
+      fails++;buf='';dots(true);
+      if(fails>=5){until=Date.now()+30000;fails=0;$('lkmsg').textContent='Too many tries. Wait 30 seconds.'}else $('lkmsg').textContent='Wrong PIN, try again';
+    }
+    $('lkpad').addEventListener('click',function(e){
+      var b=e.target.closest('button[data-k]');if(!b||b.className==='e')return;
+      if(Date.now()<until){$('lkmsg').textContent='Too many tries. Wait '+Math.ceil((until-Date.now())/1000)+' seconds.';return}
+      var k=b.dataset.k;if(k==='⌫'){buf=buf.slice(0,-1);dots();return}
+      if(buf.length<4){buf+=k;dots();if(buf.length===4)setTimeout(check,120)}
+    });
+    $('lkswitch').onclick=function(){var o=PID==='k'?'h':'k';try{sessionStorage.removeItem('unl');localStorage.setItem('dhikr_profile',o)}catch(e){}location.reload()};
+  })();
   function applyTheme(){var t=S.theme==='dark'?'dark':'light';document.documentElement.setAttribute('data-theme',t);$('themeBtn').textContent=t==='dark'?'☀️':'🌙';var m=document.querySelector('meta[name=theme-color]');if(m)m.setAttribute('content',t==='dark'?'#0a1612':'#f8f4ea')}
   $('themeBtn').onclick=function(){S.theme=S.theme==='dark'?'light':'dark';save();applyTheme()};
   load();if(!S.vm2){S.vmode='any';S.vm2=1;save()}
