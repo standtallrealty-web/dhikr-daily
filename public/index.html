@@ -203,6 +203,9 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   .qbx>small{display:block;color:var(--gold);font-weight:700;letter-spacing:.8px;text-transform:uppercase;font-size:12px;margin-bottom:12px}
   .qar{font-size:25px;line-height:2.1;color:var(--arab);margin:4px 0 10px}.qen{font-size:16px;line-height:1.55;color:var(--text);margin:6px 0}.qrf{font-size:13px;color:var(--gold);font-weight:600;margin-top:8px}
   .qbt{display:flex;gap:10px;margin-top:16px}.qbt button{flex:1;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--inset2);color:var(--text);font-size:15px;font-weight:600}.qbt button.pri{background:var(--acc);color:var(--ong);border-color:var(--acc)}
+  .qsay{margin-top:14px;padding:12px 12px 10px;border-radius:14px;background:rgba(127,127,127,.09);text-align:center}.qsay b{display:block;font-size:12px;letter-spacing:.5px;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+  .qsar{font-size:20px;line-height:2;color:var(--arab)}.qstr{font-size:13.5px;font-style:italic;color:var(--muted);margin:0 0 4px}.qsen{font-size:14px;line-height:1.5;color:var(--text);margin:4px 0}.qsrf{font-size:11.5px;color:var(--muted);margin-top:4px}
+  details.qclose{margin-top:10px;text-align:center}details.qclose summary{font-size:13px;color:var(--muted);cursor:pointer}details.qclose[open]{padding-top:4px}
   .qcv{font-size:11px;color:var(--muted);margin-top:12px}
   .qcard .qar{font-size:21px;line-height:2}.qcard .qen{font-size:14.5px}.qcard details.qset{margin-top:12px;border-top:1px solid var(--line);padding-top:10px;text-align:left}.qcard summary{font-size:14px;font-weight:600;color:var(--text)}
   .qcard .set{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0}.qcard select{background:var(--inset2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px}
@@ -887,7 +890,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     });
     var have=DL.count>0;
     h+='<div class="hcard" style="cursor:default"><div class="hrow"><span>📥 Use without internet</span><small>'+(have?'✓ '+DL.count+' files · '+(DL.bytes/1048576).toFixed(1)+' MB':'Not downloaded')+'</small></div><div class="hs" style="margin:8px 0;line-height:1.5">The app itself already opens offline. Download the audio once (about 20 to 30 MB) to listen and learn offline. '+arabicVoiceInfo()+'. Counting by voice needs internet; offline it counts any sound.</div><div style="display:flex;gap:8px"><button class="aud big" data-act="dlall" style="flex:1">'+(DL.busy?'Downloading…':(have?'📥 Update download':'📥 Download audio'))+'</button>'+(have?'<button class="rst" data-act="dlclear" style="padding:0 14px;border:1px solid var(--line);background:none;color:#c9d9d2;border-radius:12px">Delete</button>':'')+'</div><div class="astat" id="dlstat" style="margin-top:8px">'+DL.msg+'</div></div>';
-    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v33</div><div style="text-align:center;margin:6px 0 14px"><button id="updbtn" style="background:none;border:1px solid var(--line);color:var(--acc);border-radius:16px;padding:8px 16px;font-size:13px">🔄 Update app</button></div>';
+    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v34</div><div style="text-align:center;margin:6px 0 14px"><button id="updbtn" style="background:none;border:1px solid var(--line);color:var(--acc);border-radius:16px;padding:8px 16px;font-size:13px">🔄 Update app</button></div>';
     v.innerHTML=h;
   }
   function aBar(){
@@ -1204,15 +1207,27 @@ var QUOTES=[
   function qOf(d){return QUOTES[qIdx(d)]}
   function qText(q){return(q[1]?q[1]+'\n':'')+q[2]+'\n— '+q[3]}
   function qBody(q){return(q[1]?'<div class="qar">'+q[1]+'</div>':'')+'<div class="qen">'+q[2]+'</div><div class="qrf">'+(q[0]==='Q'?'📖 ':'📜 ')+q[3]+'</div>'}
+  var QCAT={28:'dua',29:'dua',30:'dua',31:'dua',7:'ask',10:'ask',11:'ask',23:'ask',24:'ask',12:'warn',22:'warn',5:'obey',8:'obey',9:'obey',14:'obey',16:'obey',17:'obey',20:'obey',21:'obey'};
+  var QSAY={
+   dua:{h:'Make it your own dua',ar:'آمِين',tr:'Āmīn',en:'Read it once more as a request to Allah, then say Āmīn (“O Allah, accept”).',rf:'Āmīn after a dua is the normal practice. It is not a specific command for this verse.'},
+   ask:{h:'Ask Allah now',en:'The Prophet ﷺ would stop at a verse of mercy and ask Allah for it. Ask Allah now for forgiveness, mercy or what you need, in your own words.',rf:'Sahih Muslim 772'},
+   warn:{h:'Seek Allah’s refuge',en:'The Prophet ﷺ would stop at a verse of warning and seek Allah’s refuge from it. Do the same now, in your own words.',rf:'Sahih Muslim 772'},
+   obey:{h:'The believers’ response',ar:'سَمِعْنَا وَأَطَعْنَا',tr:'Sami‘nā wa aṭa‘nā',en:'“We hear and we obey.” This is how the Qur’an describes the believers when they are called to Allah’s word. Then act on it today.',rf:'Qur’an 24:51, 2:285'},
+   plain:{h:'After reading',en:'No special words are reported for this verse. Reflect on it and act on it today.'},
+   sal:{h:'Send blessings on the Prophet ﷺ',ar:'صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ',tr:'Ṣallallāhu ‘alayhi wa sallam',en:'He ﷺ said: the miser is the one in whose presence he is mentioned and who does not send blessings on him.',rf:'Tirmidhi 3546 (sahih, al-Albani)'}
+  };
+  function qSay(q){var i=QUOTES.indexOf(q),c=q[0]==='H'?'sal':(QCAT[i]||'plain'),x=QSAY[c];
+    return '<div class="qsay"><b>'+x.h+'</b>'+(x.ar?'<div class="qsar">'+x.ar+'</div>':'')+(x.tr?'<div class="qstr">'+x.tr+'</div>':'')+'<div class="qsen">'+x.en+'</div>'+(x.rf?'<div class="qsrf">'+x.rf+'</div>':'')+'</div>'
+    +'<details class="qclose"><summary>When you finish reading (optional)</summary><div class="qsar">سُبْحَانَكَ اللَّهُمَّ وَبِحَمْدِكَ، أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا أَنْتَ، أَسْتَغْفِرُكَ وَأَتُوبُ إِلَيْكَ</div><div class="qstr">Subḥānaka Allāhumma wa bi-ḥamdika, ash-hadu an lā ilāha illā anta, astaghfiruka wa atūbu ilayk.</div><div class="qsen">Glory and praise to You, O Allah. I bear witness that none has the right to be worshipped but You. I seek Your forgiveness and turn to You in repentance.</div><div class="qsrf">Aisha (RA): the Prophet ﷺ ended a gathering, a Qur’an recitation or a prayer with these words. Nasa’i, ‘Amal al-Yawm wal-Layla 308; al-Albani, Silsila Sahiha 3164; also Tirmidhi 3433.</div></details>'}
   function qShare(q){var t=qText(q)+'\n\nDhikr Daily';if(navigator.share){navigator.share({text:t}).catch(function(){})}else window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank')}
   function qModal(){
     var q=qOf(),m=$('qmodal');
-    m.innerHTML='<div class="qbx"><small>🌅 Today’s reminder</small>'+qBody(q)+'<div class="qbt"><button data-qa="share">Share</button><button data-qa="close" class="pri">Alhamdulillah ✓</button></div><div class="qcv">Please verify wording and references against a trusted printed source.</div></div>';
+    m.innerHTML='<div class="qbx"><small>🌅 Today’s reminder</small>'+qBody(q)+qSay(q)+'<div class="qbt"><button data-qa="share">Share</button><button data-qa="close" class="pri">Done ✓</button></div><div class="qcv">Please verify wording and references against a trusted printed source.</div></div>';
     m.classList.add('show')}
   function maybeQuote(){var k=qDate();if(S&&S.qseen!==k&&$('lock').style.display==='none'){S.qseen=k;save();qModal()}}
   function qCard(){
     var q=qOf(),on=S.qon;
-    return '<div class="hcard qcard"><div class="hrow"><span>💡 Today’s reminder</span></div>'+qBody(q)+'<div class="qbt"><button data-qa="share">Share</button><button data-qa="more">Show another</button></div>'
+    return '<div class="hcard qcard"><div class="hrow"><span>💡 Today’s reminder</span></div>'+qBody(q)+qSay(q)+'<div class="qbt"><button data-qa="share">Share</button><button data-qa="more">Show another</button></div>'
       +'<details class="qset"><summary>🔔 Daily reminder notification</summary><div class="set"><span>Time</span><select id="qtsel">'+[['fajr','15 min after Fajr'],['6','6:00 AM'],['7','7:00 AM'],['8','8:00 AM']].map(function(o){return'<option value="'+o[0]+'"'+((S.qt||'fajr')===o[0]?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></div>'
       +'<div class="set"><span>Notify while app is open</span><button class="tgl'+(on?' on':'')+'" data-qa="notif">'+(on?'ON':'OFF')+'</button></div>'
       +'<div class="note">To get it even when the app is closed, add the next 60 days to your phone calendar. Each morning your phone shows that day’s reminder as a notification.</div>'
