@@ -125,7 +125,7 @@ public class MainActivity extends Activity {
         sv.addView(root);
 
         root.addView(text("Dhikr Adhan", 26, true, Color.parseColor("#256F5B")));
-        root.addView(text("Powered by Stand Tall Realty", 12, false, Color.parseColor("#7A6A3A")));
+        root.addView(text("Version 1.2 · Powered by Stand Tall Realty", 12, false, Color.parseColor("#7A6A3A")));
 
         Switch master = new Switch(this);
         master.setText("Play adhan at prayer time");
