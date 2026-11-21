@@ -176,6 +176,25 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   html[data-theme=light] .ben{border-left-color:var(--gold)}
   html[data-theme=light] .mini.dn,html[data-theme=light] .card.done .cnt{background:#2f9a78}
   html[data-theme=light] #tap .in{box-shadow:0 10px 26px rgba(37,111,91,.35),inset 0 2px 6px rgba(255,255,255,.2)}
+  .sec{font-size:13px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.8px;margin:14px 4px 6px}
+  .card.pl{padding:4px 14px}.card.pl .pr{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}.card.pl .pr:last-child{border-bottom:0}
+  .pr .pn{display:flex;flex-direction:column;min-width:0}.pr .pn b{font-size:16px;color:var(--text)}.pr .pn small{font-size:12px;color:var(--muted);line-height:1.35;margin-top:2px}
+  .pr .pt{text-align:right;font-size:17px;font-weight:700;color:var(--text);white-space:nowrap}.pr .pt small{display:block;font-size:11px;font-weight:500;color:var(--muted)}
+  .pr.nx{background:var(--inset2);margin:0 -14px;padding-left:14px;padding-right:14px;border-radius:12px;border-bottom-color:transparent}.pr.nx .pn b,.pr.nx .pt{color:var(--acc)}
+  .card.warn .pn b{color:#b3392f}.card.warn .pt{color:#b3392f}
+  .nextc{text-align:center;background:var(--acc);color:var(--ong);border-color:var(--acc)}.nextc small{opacity:.85;font-size:12px;letter-spacing:.8px;text-transform:uppercase}.nextc .nx{font-size:15px;margin-top:4px}.nextc .nx b{font-size:28px;display:block;font-family:Georgia,serif}
+  .bigbtn{display:block;width:100%;background:var(--acc);color:var(--ong);border:0;border-radius:12px;padding:13px;font-size:15px;font-weight:700;margin:10px 0 2px;touch-action:manipulation}
+  .note{font-size:12.5px;color:var(--muted);line-height:1.5}
+  details.card summary{font-weight:700;font-size:15px;cursor:pointer;color:var(--text)}details.card[open] summary{margin-bottom:6px}
+  details.card .set{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:14px;color:var(--text)}
+  details.card select{max-width:58%;background:var(--inset2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:9px;font-size:13px}
+  .tgl{border:1px solid var(--line);background:var(--inset2);color:var(--muted);border-radius:16px;padding:8px 16px;font-weight:700}.tgl.on{background:var(--acc);color:var(--ong);border-color:var(--acc)}
+  .chk{border:1px solid var(--line);background:var(--inset2);color:var(--muted);border-radius:16px;padding:7px 12px;font-size:13px}.chk.on{background:var(--acc);color:var(--ong);border-color:var(--acc);font-weight:700}
+  .adj{display:flex;align-items:center;gap:6px;background:var(--inset2);border-radius:12px;padding:4px 8px}.adj small{width:56px;color:var(--muted);font-size:12px}.adj b{min-width:28px;text-align:center}.adj button{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--text);font-size:16px}
+  .qsvg{width:100%;max-width:300px;margin:10px auto 0;display:block}.qring{fill:var(--inset2);stroke:var(--line);stroke-width:2}.qtk{stroke:var(--muted);stroke-width:1}
+  .qn{fill:#b3392f;font-size:18px;font-weight:700;text-anchor:middle}.qc{fill:var(--muted);font-size:13px;text-anchor:middle}.qline{stroke:var(--acc);stroke-width:3;stroke-linecap:round}.qk{font-size:22px;text-anchor:middle}
+  .qptr{fill:var(--gold)}.qdot{fill:var(--acc)}.qinfo b{display:block;font-size:20px;color:var(--text)}.qinfo small{color:var(--muted);font-size:13px}
+  .qmsg{margin:6px 0;font-size:16px;font-weight:600;color:var(--muted);min-height:24px}.qmsg.ok{color:var(--ok)}
 </style>
 </head>
 <body>
@@ -256,6 +275,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
 <div id="profov"><div class="bx"><h3>Who is reading?</h3><p>Each person has their own count, streak and history. Nothing is shared.</p><div id="proflist"></div><button class="cl" id="profcl">Close</button></div></div>
 <nav class="bottomnav">
   <button id="nav_h" class="act"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg><span>Today</span></button>
+  <button id="nav_p"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg><span>Prayer</span></button>
   <button id="nav_i"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg><span>Istighfar</span></button>
   <button id="nav_a"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5.5C5.5 4 9 4 12 6c3-2 6.5-2 9-.5V19c-2.5-1.5-6-1.5-9 .5-3-2-6.5-2-9-.5z"/><path d="M12 6v13.5"/></svg><span>Adhkar</span></button>
   <button id="nav_d"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span>Duas</span></button>
@@ -284,7 +304,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   var C=2*Math.PI*92;
 
   function streak(){
-    var s=0,d=new Date();
+    var s=0,d=dnow();
     var t=S.days[key(d)];
     if(!(t&&t.n>=t.t))d.setDate(d.getDate()-1);
     for(;;){var e=S.days[key(d)];if(e&&e.n>=e.t){s++;d.setDate(d.getDate()-1)}else break}
@@ -298,11 +318,11 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     $('pct').textContent=Math.floor(p*100)+'%';
     $('prog').style.strokeDashoffset=C*(1-p);
     $('msg').textContent=c.n>=t?'🌙 MashaAllah! Today\'s goal complete':fmt(t-c.n)+' remaining';
-    $('date').textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'});
+    $('date').textContent=dnow().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})+(today!==key()?' · from Maghrib':'');
     var st=streak();$('streak').textContent='🔥 '+st+(st===1?' day':' days')+' streak';
     // last 7 days
     var h='',max=1,arr=[];
-    for(var i=6;i>=0;i--){var d=new Date();d.setDate(d.getDate()-i);var e=S.days[key(d)]||{n:0,t:t};arr.push({d:d,e:e});max=Math.max(max,e.n,e.t)}
+    for(var i=6;i>=0;i--){var d=dnow();d.setDate(d.getDate()-i);var e=S.days[key(d)]||{n:0,t:t};arr.push({d:d,e:e});max=Math.max(max,e.n,e.t)}
     arr.forEach(function(x){
       var ht=Math.max(2,Math.round(x.e.n/max*52));
       h+='<div class="day"><div style="font-size:9px">'+(x.e.n?(x.e.n>=1000?(x.e.n/1000).toFixed(1)+'k':x.e.n):'')+'</div><div class="bar'+(x.e.n>=x.e.t?' done':'')+'" style="height:'+ht+'px"></div><div>'+x.d.toLocaleDateString('en-GB',{weekday:'narrow'})+'</div></div>';
@@ -321,7 +341,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     applyFs();
     var t=S.target,tot=0,n30=0,act=0,wk=0,hm='';
     for(var k in S.days)tot+=S.days[k].n;
-    for(var i=29;i>=0;i--){var d=new Date();d.setDate(d.getDate()-i);var e=S.days[key(d)]||{n:0,t:t};n30+=e.n;if(e.n>0)act++;if(i<7)wk+=e.n;
+    for(var i=29;i>=0;i--){var d=dnow();d.setDate(d.getDate()-i);var e=S.days[key(d)]||{n:0,t:t};n30+=e.n;if(e.n>0)act++;if(i<7)wk+=e.n;
       var r=Math.min(1,e.n/(e.t||t));hm+='<i title="'+key(d)+'" style="'+(e.n?'background:rgba(230,195,106,'+(0.2+0.8*r).toFixed(2)+')':'')+'"></i>'}
     var days=Object.keys(S.days).filter(function(k){return S.days[k].n>0}).length||1;
     $('stats').innerHTML='<div>Best streak<b>'+bestStreak()+' days</b></div><div>This week<b>'+fmt(wk)+'</b></div><div>Average per active day<b>'+fmt(Math.round(tot/days))+'</b></div><div>Active days (30)<b>'+act+' / 30</b></div>';
@@ -378,7 +398,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   $('offile').onchange=function(){var f=this.files&&this.files[0];if(!f)return;idbPut('u_font',f).then(loadOff).then(function(){OWNLOADED='';applyFont()}).catch(function(){alert('Could not save the font.')})};
   $('afont').onchange=function(){S.afont=this.value;save();applyFont()};
   $('trtog').onchange=function(){S.trOff=!this.checked;save();if(tab!=='i')renderAd()};
-  function checkDay(){var k=key();if(k!==today){today=k;render()}}
+  function checkDay(){var k=dayKey();if(k!==today){today=k;render();renderExtra();if(tab!=='i')renderAd()}}
   function buzz(ms){if(S.vib&&navigator.vibrate)try{navigator.vibrate(ms)}catch(e){}}
   function add(n,quiet){
     checkDay();
@@ -827,6 +847,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     return {d:d,t:it.length,p:got/it.length}}
   function renderHome(){
     var v=$('v2'),h='<div class="hello">Assalamu alaikum, '+PROFS[PID].n+'</div><div class="hsub">What would you like to do today? Tap a section to begin.</div>';
+    var np0=nextPrayer(new Date());h+='<div class="hcard" data-go="p"><div class="hrow"><span>🕌 Next prayer</span><small id="hnext">'+np0.n+' '+fm(np0.t)+' · in '+dur(np0.t-Date.now())+'</small></div></div>';
     ['i','t','m','e','s','b','d'].forEach(function(c){
       var d,t,p,lab;
       if(c==='i'){var n=cur().n;p=Math.min(1,n/S.target);lab=fmt(n)+' / '+fmt(S.target)}
@@ -836,7 +857,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     });
     var have=DL.count>0;
     h+='<div class="hcard" style="cursor:default"><div class="hrow"><span>📥 Use without internet</span><small>'+(have?'✓ '+DL.count+' files · '+(DL.bytes/1048576).toFixed(1)+' MB':'Not downloaded')+'</small></div><div class="hs" style="margin:8px 0;line-height:1.5">The app itself already opens offline. Download the audio once (about 20 to 30 MB) to listen and learn offline. '+arabicVoiceInfo()+'. Counting by voice needs internet; offline it counts any sound.</div><div style="display:flex;gap:8px"><button class="aud big" data-act="dlall" style="flex:1">'+(DL.busy?'Downloading…':(have?'📥 Update download':'📥 Download audio'))+'</button>'+(have?'<button class="rst" data-act="dlclear" style="padding:0 14px;border:1px solid var(--line);background:none;color:#c9d9d2;border-radius:12px">Delete</button>':'')+'</div><div class="astat" id="dlstat" style="margin-top:8px">'+DL.msg+'</div></div>';
-    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v24</div>';
+    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v25</div>';
     v.innerHTML=h;
   }
   function aBar(){
@@ -850,7 +871,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     DUA.groups.forEach(function(g){h+='<button data-dg="'+g[0]+'" class="'+(S.dg===g[0]?'on':'')+'">'+g[1]+'</button>'});
     return h+'</div>'+(n?'':'<div class="note">No dua found. Try another word, or tap All.</div>');
   }
-  function renderAd(){
+  function renderAd(){if(tab==='p'){renderPrayer();return}
     if(tab==='h'){renderHome();return}
     var v=$('v2'),top=v.scrollTop,st=adState(),it=adItems(),done=0,h='tmesb'.indexOf(tab)>=0?aBar():'';
     it.forEach(function(x){var k=tab+':'+x.id;if((st[k]||0)>=x.n)done++});
@@ -892,13 +913,180 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   function showTab(t){
     stopPlay();tab=t;
     if('tmesb'.indexOf(t)>=0)lastA=t;
-    var nv={h:'h',i:'i',t:'a',m:'a',e:'a',s:'a',b:'a',d:'d'}[t];
-    ['h','i','a','d'].forEach(function(k){$('nav_'+k).classList.toggle('act',k===nv)});
+    var nv={h:'h',p:'p',i:'i',t:'a',m:'a',e:'a',s:'a',b:'a',d:'d'}[t];
+    if(t!=='p')stopCompass();
+    if(t==='p'&&!S.loc&&!PS.asked){PS.asked=1;getLoc(false)}
+    ['h','p','i','a','d'].forEach(function(k){$('nav_'+k).classList.toggle('act',k===nv)});
     $('v1').style.display=t==='i'?'block':'none';
     $('v2').style.display=t==='i'?'none':'block';
     if(t!=='i'){renderAd();$('v2').scrollTop=0}
   }
-  $('nav_h').onclick=function(){showTab('h')};$('nav_i').onclick=function(){showTab('i')};$('nav_a').onclick=function(){showTab(lastA)};$('nav_d').onclick=function(){showTab('d')};
+  $('nav_h').onclick=function(){showTab('h')};$('nav_p').onclick=function(){showTab('p')};$('nav_i').onclick=function(){showTab('i')};$('nav_a').onclick=function(){showTab(lastA)};$('nav_d').onclick=function(){showTab('d')};
+//PT-START
+var KAABA={lat:21.422487,lon:39.826206};
+var METHODS={karachi:{n:'Karachi (18° / 18°) · common in India',f:18,i:18},mwl:{n:'Muslim World League (18° / 17°)',f:18,i:17},isna:{n:'ISNA (15° / 15°)',f:15,i:15},egypt:{n:'Egypt (19.5° / 17.5°)',f:19.5,i:17.5},makkah:{n:'Umm al-Qura, Makkah (18.5°, Isha +90 min)',f:18.5,im:90}};
+function pzR(d){return d*Math.PI/180}function pzD(r){return r*180/Math.PI}
+function pzFa(a){a=a-360*Math.floor(a/360);return a<0?a+360:a}
+function pzFh(h){h=h-24*Math.floor(h/24);return h<0?h+24:h}
+function pzJd(y,m,d){if(m<=2){y-=1;m+=12}var A=Math.floor(y/100),B=2-A+Math.floor(A/4);return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+d+B-1524.5}
+function pzSun(jd){var D=jd-2451545.0,g=pzFa(357.529+0.98560028*D),q=pzFa(280.459+0.98564736*D),L=pzFa(q+1.915*Math.sin(pzR(g))+0.020*Math.sin(pzR(2*g))),e=23.439-0.00000036*D;
+  var RA=pzD(Math.atan2(Math.cos(pzR(e))*Math.sin(pzR(L)),Math.cos(pzR(L))))/15;return{decl:pzD(Math.asin(Math.sin(pzR(e))*Math.sin(pzR(L)))),eqt:q/15-pzFh(RA)}}
+// returns hours (local clock) for a calendar date at lat/lon with tz offset hours
+function solarTimes(y,m,d,lat,lon,tz,fa,ia,asrF){
+  var jd=pzJd(y,m,d)-lon/(15*24);
+  function mid(t){return pzFh(12-pzSun(jd+t).eqt)}
+  function ang(a,t,ccw){var dc=pzSun(jd+t).decl,noon=mid(t),x=(-Math.sin(pzR(a))-Math.sin(pzR(dc))*Math.sin(pzR(lat)))/(Math.cos(pzR(dc))*Math.cos(pzR(lat)));if(x>1||x<-1)return NaN;var v=pzD(Math.acos(x))/15;return noon+(ccw?-v:v)}
+  function asr(f,t){var dc=pzSun(jd+t).decl,a=-pzD(Math.atan(1/(f+Math.tan(pzR(Math.abs(lat-dc))))));return ang(a,t,false)}
+  var T={fajr:5,sunrise:6,dhuhr:12,asr:13,sunset:18,isha:18};
+  for(var k=0;k<2;k++){T={fajr:ang(fa,T.fajr/24,true)||5,sunrise:ang(0.833,T.sunrise/24,true)||6,dhuhr:mid(T.dhuhr/24),asr:asr(asrF,T.asr/24)||13,sunset:ang(0.833,T.sunset/24,false)||18,isha:(ia?ang(ia,T.isha/24,false):0)||18}}
+  var adj=tz-lon/15,o={};for(var n in T)o[n]=T[n]+adj;return o}
+function prayerTimes(date,lat,lon,pm){
+  pm=pm||{};var M=METHODS[pm.method]||METHODS.karachi,asrF=pm.asr===2?2:1,tz=-date.getTimezoneOffset()/60;
+  var y=date.getFullYear(),mo=date.getMonth()+1,d=date.getDate();
+  function at(h){return new Date(y,mo-1,d,0,0,0,0).getTime()+h*3600000}
+  var s=solarTimes(y,mo,d,lat,lon,tz,M.f,M.i,asrF);
+  var a=pm.adj||{};
+  var r={fajr:at(s.fajr)+(a.fajr||0)*6e4,sunrise:at(s.sunrise),dhuhr:at(s.dhuhr)+(a.dhuhr||0)*6e4,asr:at(s.asr)+(a.asr||0)*6e4,sunset:at(s.sunset),maghrib:at(s.sunset)+(a.maghrib||0)*6e4};
+  r.isha=M.im?r.maghrib+M.im*6e4:at(s.isha)+(a.isha||0)*6e4;
+  r.ishraq=r.sunrise+15*6e4;r.zawal=r.dhuhr-10*6e4;r.duha=r.ishraq;
+  var nx=new Date(y,mo-1,d+1),s2=solarTimes(nx.getFullYear(),nx.getMonth()+1,nx.getDate(),lat,lon,-nx.getTimezoneOffset()/60,M.f,M.i,asrF);
+  var nf=new Date(nx.getFullYear(),nx.getMonth(),nx.getDate(),0,0,0,0).getTime()+s2.fajr*3600000+(a.fajr||0)*6e4;
+  var night=nf-r.maghrib;r.midnight=r.maghrib+night/2;r.tahajjud=r.maghrib+night*2/3;r.nextFajr=nf;
+  return r}
+function qiblaBearing(lat,lon){var p1=pzR(lat),p2=pzR(KAABA.lat),dl=pzR(KAABA.lon-lon);return pzFa(pzD(Math.atan2(Math.sin(dl),Math.cos(p1)*Math.tan(p2)-Math.sin(p1)*Math.cos(dl))))}
+function distKm(lat,lon){var R=6371,p1=pzR(lat),p2=pzR(KAABA.lat),dp=p2-p1,dl=pzR(KAABA.lon-lon),a=Math.sin(dp/2)*Math.sin(dp/2)+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)*Math.sin(dl/2);return 2*R*Math.asin(Math.sqrt(a))}
+//PT-END
+
+  // ---------- Prayer times, Qibla, alerts, Islamic day ----------
+  function PM(){if(!S.pm)S.pm={};var p=S.pm;if(!p.method)p.method='karachi';if(!p.asr)p.asr=1;if(!p.adj)p.adj={fajr:0,dhuhr:1,asr:0,maghrib:1,isha:0};if(!p.pr)p.pr={fajr:1,dhuhr:1,asr:1,maghrib:1,isha:1};if(p.lead==null)p.lead=0;return p}
+  function LOC(){var l=S&&S.loc;return(l&&l.lat!=null)?l:{lat:18.5204,lon:73.8567,def:true,name:'Pune'}}
+  function PTd(d){var l=LOC();return prayerTimes(d||new Date(),l.lat,l.lon,PM())}
+  function dayKey(){var n=new Date();if(S&&S.dayMode==='midnight')return key(n);var t=PTd(n);if(isFinite(t.maghrib)&&n.getTime()>=t.maghrib)return key(new Date(n.getFullYear(),n.getMonth(),n.getDate()+1));return key(n)}
+  function dnow(){var p=today.split('-');return new Date(+p[0],+p[1]-1,+p[2])}
+  function fm(t){if(!isFinite(t))return '—';var d=new Date(t),h=d.getHours(),m=d.getMinutes();return(h%12||12)+':'+(m<10?'0':'')+m+' '+(h<12?'AM':'PM')}
+  function dur(ms){var m=Math.max(0,Math.round(ms/60000)),h=Math.floor(m/60);return(h?h+'h ':'')+(m%60)+'m'}
+  function hav(a,b){var R=6371,r=Math.PI/180,dp=(b.lat-a.lat)*r,dl=(b.lon-a.lon)*r,x=Math.sin(dp/2)*Math.sin(dp/2)+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dl/2)*Math.sin(dl/2);return 2*R*Math.asin(Math.sqrt(x))}
+  var P5=[['fajr','Fajr'],['dhuhr','Dhuhr'],['asr','Asr'],['maghrib','Maghrib'],['isha','Isha']];
+  function nextPrayer(now){
+    var t=PTd(now),n=now.getTime();
+    for(var i=0;i<5;i++)if(t[P5[i][0]]>n)return{k:P5[i][0],n:P5[i][1],t:t[P5[i][0]]};
+    var tm=PTd(new Date(now.getFullYear(),now.getMonth(),now.getDate()+1));return{k:'fajr',n:'Fajr',t:tm.fajr}}
+  var PS={sub:'times',msg:'',open:false},FIRED={};
+  function locLabel(){var l=LOC();return l.def?'Pune (default) — tap “Use my location”':((l.name?l.name+' · ':'')+l.lat.toFixed(2)+', '+l.lon.toFixed(2))}
+  function getLoc(silent){
+    if(!navigator.geolocation){PS.msg='Location is not available on this device.';if(tab==='p')renderPrayer();return}
+    if(!silent){PS.msg='Finding your location…';if(tab==='p')renderPrayer()}
+    navigator.geolocation.getCurrentPosition(function(p){
+      var n={lat:+p.coords.latitude.toFixed(4),lon:+p.coords.longitude.toFixed(4)},o=S.loc,moved=!o||o.lat==null||hav(o,n)>5;
+      if(moved){S.loc={lat:n.lat,lon:n.lon,name:'',ts:Date.now()}}else{S.loc.ts=Date.now()}
+      save();PS.msg='';checkDay();if(tab==='p'||tab==='h')renderAd();geoName();
+    },function(e){if(!silent){PS.msg=e.code===1?'Location permission was denied. Allow Location for this app in Chrome site settings, then try again.':'Could not get your location. Try again outdoors or near a window.';if(tab==='p')renderPrayer()}},{enableHighAccuracy:false,timeout:15000,maximumAge:600000});
+  }
+  function geoName(){var l=S.loc;if(!l||l.name||!window.fetch)return;
+    fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=10&lat='+l.lat+'&lon='+l.lon).then(function(r){return r.json()}).then(function(j){var a=j.address||{};l.name=a.city||a.town||a.village||a.suburb||a.county||a.state_district||'';save();if(tab==='p'||tab==='h')renderAd()}).catch(function(){})}
+  function prRow(name,s,e,note,cls){return '<div class="pr '+(cls||'')+'"><div class="pn"><b>'+name+'</b>'+(note?'<small>'+note+'</small>':'')+'</div><div class="pt">'+fm(s)+(e?'<small>to '+fm(e)+'</small>':'')+'</div></div>'}
+  function renderPrayer(){
+    var v=$('v2'),pm=PM(),now=new Date(),h='<div class="chips" style="padding-top:4px"><button data-ps="times" class="'+(PS.sub==='times'?'on':'')+'">🕌 Prayer times</button><button data-ps="qibla" class="'+(PS.sub==='qibla'?'on':'')+'">🧭 Qibla</button></div>';
+    var l=LOC(),t=PTd(now);
+    h+='<div class="card"><div class="hrow"><span>📍 '+locLabel()+'</span></div><button class="bigbtn" data-pr="loc">📍 Use my location</button>'+(PS.msg?'<div class="note">'+PS.msg+'</div>':'')+'</div>';
+    if(PS.sub==='qibla'){v.innerHTML=h+qiblaHtml();var qb=$('qbtn');return}
+    var np=nextPrayer(now);
+    h+='<div class="card nextc"><small>Next prayer</small><div class="nx"><b>'+np.n+'</b> <span id="pnext">'+fm(np.t)+' · in '+dur(np.t-now.getTime())+'</span></div></div>';
+    var nextMg=t.maghrib>now.getTime()?t.maghrib:PTd(new Date(now.getFullYear(),now.getMonth(),now.getDate()+1)).maghrib;
+    h+='<div class="note" style="margin:2px 2px 10px">'+(S.dayMode==='midnight'?'Your daily counts reset at midnight.':'Your daily counts (Istighfar and adhkar) reset at <b>Maghrib</b>, the start of the Islamic day. Next reset: '+fm(nextMg)+'. Counting now for: <b>'+dnow().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})+'</b>.')+'</div>';
+    h+='<div class="sec">Five daily prayers</div><div class="card pl">';
+    var nk=np.k;
+    h+=prRow('Fajr',t.fajr,t.sunrise,'',nk==='fajr'?'nx':'');
+    h+=prRow('Dhuhr',t.dhuhr,t.asr,'',nk==='dhuhr'?'nx':'');
+    h+=prRow('Asr',t.asr,t.sunset,'Best before the sun turns yellow',nk==='asr'?'nx':'');
+    h+=prRow('Maghrib',t.maghrib,t.isha,'',nk==='maghrib'?'nx':'');
+    h+=prRow('Isha',t.isha,t.midnight,'Preferred until Islamic midnight; allowed until Fajr',nk==='isha'?'nx':'');
+    h+='</div><div class="sec">Other prayers</div><div class="card pl">';
+    h+=prRow('Tahajjud (last third of night)',t.tahajjud,t.nextFajr,'Allah descends in the last third (Bukhari 1145, Muslim 758)');
+    h+=prRow('Ishraq',t.ishraq,0,'About 15 min after sunrise: 2 rak‘ahs if you sat in dhikr after Fajr (Tirmidhi 586, hasan)');
+    var qd=t.sunrise+(t.sunset-t.sunrise)/4;
+    h+=prRow('Duha (Chasht)',t.ishraq,t.zawal,'Best about '+fm(qd)+', when the day has heated (Muslim 748)');
+    h+=prRow('Islamic midnight',t.midnight,0,'Halfway between Maghrib and Fajr');
+    h+='</div><div class="sec">Times when prayer is not started (approx.)</div><div class="card pl warn">';
+    h+=prRow('Sunrise',t.sunrise,t.ishraq,'From sunrise until the sun is a spear’s height (Muslim 831)');
+    h+=prRow('Zawal (sun at its peak)',t.zawal,t.dhuhr,'A few minutes before Dhuhr (Muslim 831); shown as a safe 10 min');
+    h+=prRow('Sunset',t.maghrib-15*6e4,t.maghrib,'As the sun is setting (Muslim 831)');
+    h+='</div>';
+    h+='<div class="note" style="margin:8px 2px">Also: no voluntary prayer after Fajr until the sun rises, and after Asr until sunset (Bukhari 586, Muslim 825), except prayers with a reason. Times are calculated from your location; compare with your local masjid and adjust below if needed.</div>';
+    h+='<details id="prset"'+(PS.open?' open':'')+' class="card"><summary>🔔 Alerts and ⚙ settings</summary>';
+    h+='<div class="set"><span>Notify at adhan<br><small style="color:var(--muted)">Works while the app is open or in the background</small></span><button class="'+(pm.on?'tgl on':'tgl')+'" data-pr="notif">'+(pm.on?'ON':'OFF')+'</button></div>';
+    h+='<div class="set"><span>Alert before</span><select id="prlead">'+[0,5,10,15].map(function(m){return'<option value="'+m+'"'+(pm.lead===m?' selected':'')+'>'+(m?m+' min before':'At adhan time')+'</option>'}).join('')+'</select></div>';
+    h+='<div class="set" style="flex-wrap:wrap;gap:6px"><span style="width:100%">Alert for</span>'+P5.map(function(x){return'<button class="chk'+(pm.pr[x[0]]?' on':'')+'" data-prc="'+x[0]+'">'+(pm.pr[x[0]]?'✓ ':'')+x[1]+'</button>'}).join('')+'</div>';
+    h+='<div class="set"><span>Phone calendar alerts<br><small style="color:var(--muted)">Adds the next 30 days to your calendar app, so it rings even when this app is closed</small></span></div><button class="bigbtn" data-pr="ics">📅 Download calendar file (30 days)</button>';
+    h+='<div class="set"><span>Calculation method</span><select id="prmeth">'+Object.keys(METHODS).map(function(k){return'<option value="'+k+'"'+(pm.method===k?' selected':'')+'>'+METHODS[k].n+'</option>'}).join('')+'</select></div>';
+    h+='<div class="set"><span>Asr time</span><select id="prasr"><option value="1"'+(pm.asr===1?' selected':'')+'>Standard: shadow = 1× (Shafi‘i, Maliki, Hanbali, Ahl-e-Hadith)</option><option value="2"'+(pm.asr===2?' selected':'')+'>Hanafi: shadow = 2×</option></select></div>';
+    h+='<div class="set"><span>Daily count resets at</span><select id="prday"><option value="maghrib"'+(S.dayMode!=='midnight'?' selected':'')+'>Maghrib (Islamic day)</option><option value="midnight"'+(S.dayMode==='midnight'?' selected':'')+'>Midnight</option></select></div>';
+    h+='<div class="set" style="flex-wrap:wrap"><span style="width:100%">Adjust minutes (to match your masjid)</span>'+P5.map(function(x){return'<div class="adj"><small>'+x[1]+'</small><button data-pa="'+x[0]+'" data-d="-1">−</button><b>'+(pm.adj[x[0]]>0?'+':'')+pm.adj[x[0]]+'</b><button data-pa="'+x[0]+'" data-d="1">+</button></div>'}).join('')+'</div>';
+    h+='</details>';
+    v.innerHTML=h;
+  }
+  // ---- Qibla compass ----
+  var CP={on:false,h:null,al:false,got:false};
+  function qiblaHtml(){
+    var l=LOC(),b=qiblaBearing(l.lat,l.lon),km=distKm(l.lat,l.lon);
+    var dirs=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'],dn=dirs[Math.round(b/22.5)%16];
+    var s='<div class="card" style="text-align:center"><div class="qinfo"><b>Qibla: '+b.toFixed(0)+'° '+dn+'</b><small>'+Math.round(km).toLocaleString('en-IN')+' km to the Kaaba, from '+(l.name||'your location')+'</small></div>';
+    s+='<svg id="qsvg" viewBox="-120 -125 240 240" class="qsvg"><g id="cdial"><circle r="100" class="qring"/>';
+    for(var i=0;i<72;i++){var a=i*5,L=i%9===0?12:(i%3===0?8:4);s+='<line x1="0" y1="-100" x2="0" y2="'+(-100+L)+'" transform="rotate('+a+')" class="qtk"/>'}
+    s+='<text y="-76" class="qn">N</text><text x="78" y="6" class="qc">E</text><text y="88" class="qc">S</text><text x="-78" y="6" class="qc">W</text>';
+    s+='<g transform="rotate('+b.toFixed(1)+')"><line x1="0" y1="0" x2="0" y2="-78" class="qline"/><text y="-84" class="qk">🕋</text></g></g>';
+    s+='<polygon points="0,-112 -8,-98 8,-98" class="qptr"/><circle r="4" class="qdot"/></svg>';
+    s+='<div id="qmsg" class="qmsg">Tap Start, then hold the phone flat</div><button class="bigbtn" id="qbtn" data-pr="compass">'+(CP.on?'Stop compass':'🧭 Start compass')+'</button>';
+    s+='<div class="note">Turn until the Kaaba 🕋 sits at the top arrow. Keep the phone flat and away from magnets, metal tables and cases. If it seems off, wave the phone in a figure 8 to calibrate. A phone compass can be a few degrees out, so confirm with the mihrab of a masjid if you can.</div></div>';
+    return s}
+  function onOri(e){
+    var hd=null;if(e.webkitCompassHeading!=null)hd=e.webkitCompassHeading;else if(e.alpha!=null&&(e.absolute||e.type==='deviceorientationabsolute'))hd=360-e.alpha;
+    if(hd==null)return;CP.got=true;var ang=(screen.orientation&&screen.orientation.angle)||0;hd=(hd+ang+360)%360;
+    if(CP.h==null)CP.h=hd;else{var d=((hd-CP.h+540)%360)-180;CP.h=(CP.h+d*0.3+360)%360}
+    qUpdate()}
+  function qUpdate(){
+    var dial=$('cdial');if(!dial||CP.h==null)return;var l=LOC(),b=qiblaBearing(l.lat,l.lon);
+    dial.setAttribute('transform','rotate('+(-CP.h).toFixed(1)+')');
+    var diff=((b-CP.h+540)%360)-180,ok=Math.abs(diff)<4,m=$('qmsg');
+    if(m){m.className='qmsg'+(ok?' ok':'');m.textContent=ok?'✓ You are facing the Qibla':'Turn '+(diff>0?'right':'left')+' '+Math.abs(Math.round(diff))+'°'}
+    if(ok&&!CP.al&&navigator.vibrate)navigator.vibrate(40);CP.al=ok}
+  function startCompass(){
+    var go=function(){CP.on=true;CP.got=false;window.addEventListener('deviceorientationabsolute',onOri,true);window.addEventListener('deviceorientation',onOri,true);
+      var m=$('qmsg');if(m)m.textContent='Hold the phone flat…';var b=$('qbtn');if(b)b.textContent='Stop compass';
+      setTimeout(function(){if(CP.on&&!CP.got){var m2=$('qmsg');if(m2)m2.textContent='No compass sensor found. Qibla is '+qiblaBearing(LOC().lat,LOC().lon).toFixed(0)+'° from North (clockwise).'}},2000)};
+    if(typeof DeviceOrientationEvent!=='undefined'&&DeviceOrientationEvent.requestPermission){DeviceOrientationEvent.requestPermission().then(function(r){if(r==='granted')go();else{var m=$('qmsg');if(m)m.textContent='Compass permission was denied.'}}).catch(function(){})}else go()}
+  function stopCompass(){CP.on=false;CP.h=null;window.removeEventListener('deviceorientationabsolute',onOri,true);window.removeEventListener('deviceorientation',onOri,true)}
+  // ---- alerts ----
+  function notifyNow(title,body){try{if(window.Notification&&Notification.permission==='granted'){var o={body:body,icon:'/icon-192.png',tag:'adhan-'+title,vibrate:[200,100,200]};if(navigator.serviceWorker&&navigator.serviceWorker.getRegistration){navigator.serviceWorker.getRegistration().then(function(r){if(r)r.showNotification(title,o);else new Notification(title,o)})}else new Notification(title,o)}}catch(e){}}
+  setInterval(function(){var pm=S&&PM();if(!pm||!pm.on)return;var now=Date.now(),t=PTd(new Date());
+    P5.forEach(function(x){if(!pm.pr[x[0]])return;var at=t[x[0]]-pm.lead*6e4,id=key()+x[0]+pm.lead;if(now>=at&&now<at+120000&&!FIRED[id]){FIRED[id]=1;notifyNow(x[1]+(pm.lead?' in '+pm.lead+' min':' — time for prayer'),fm(t[x[0]])+(LOC().name?' · '+LOC().name:''))}})},15000);
+  function buildIcs(){
+    var pm=PM(),l=LOC(),now=new Date(),o=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Dhikr Daily//Prayer times//EN','CALSCALE:GREGORIAN','X-WR-CALNAME:Prayer times'];
+    function p2(n){return n<10?'0'+n:''+n}
+    function z(t){var d=new Date(t);return d.getUTCFullYear()+p2(d.getUTCMonth()+1)+p2(d.getUTCDate())+'T'+p2(d.getUTCHours())+p2(d.getUTCMinutes())+'00Z'}
+    for(var i=0;i<30;i++){var dd=new Date(now.getFullYear(),now.getMonth(),now.getDate()+i),t=PTd(dd);
+      P5.forEach(function(x){if(!pm.pr[x[0]])return;var s=Math.round(t[x[0]]/6e4)*6e4;
+        o.push('BEGIN:VEVENT','UID:dhikr-'+key(dd)+'-'+x[0]+'@standtallrealty','DTSTAMP:'+z(Date.now()),'DTSTART:'+z(s),'DTEND:'+z(s+15*6e4),'SUMMARY:'+x[1]+' prayer','DESCRIPTION:Time for '+x[1]+' ('+(l.name||'your location')+')','BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+x[1]+' prayer','TRIGGER:-PT'+(pm.lead||0)+'M','END:VALARM','END:VEVENT')})}
+    o.push('END:VCALENDAR');return o.join('\r\n')}
+  function tickNext(){var now=new Date(),np=nextPrayer(now),a=$('pnext');if(a&&tab==='p'&&PS.sub==='times'){a.textContent=fm(np.t)+' · in '+dur(np.t-now.getTime());if(document.querySelector('.pr.nx')&&document.querySelector('.pr.nx b').textContent!==np.n)renderPrayer()}
+    var b=$('hnext');if(b)b.textContent=np.n+' '+fm(np.t)+' · in '+dur(np.t-now.getTime())}
+  setInterval(tickNext,20000);
+  $('v2').addEventListener('click',function(e){
+    var t=e.target,b;
+    if(b=t.closest('[data-ps]')){stopCompass();PS.sub=b.dataset.ps;renderPrayer();return}
+    if(b=t.closest('[data-pr]')){var a=b.dataset.pr;
+      if(a==='loc')getLoc(false);
+      else if(a==='compass'){if(CP.on){stopCompass();renderPrayer()}else startCompass()}
+      else if(a==='notif'){var pm=PM();if(pm.on){pm.on=false;save();PS.open=true;renderPrayer()}else if(window.Notification){Notification.requestPermission().then(function(r){if(r==='granted'){pm.on=true;save();notifyNow('Alerts are on','You will be notified at the adhan time.')}PS.open=true;renderPrayer()})}else{PS.msg='Notifications are not supported here. Use the calendar file instead.';renderPrayer()}}
+      else if(a==='ics'){var bl=new Blob([buildIcs()],{type:'text/calendar'}),u=URL.createObjectURL(bl),k=document.createElement('a');k.href=u;k.download='prayer-times.ics';document.body.appendChild(k);k.click();k.remove();setTimeout(function(){URL.revokeObjectURL(u)},4000)}
+      return}
+    if(b=t.closest('[data-prc]')){var p=PM();p.pr[b.dataset.prc]=p.pr[b.dataset.prc]?0:1;save();PS.open=true;renderPrayer();return}
+    if(b=t.closest('[data-pa]')){var p2=PM(),k2=b.dataset.pa;p2.adj[k2]=Math.max(-30,Math.min(30,(p2.adj[k2]||0)+parseInt(b.dataset.d,10)));save();PS.open=true;renderPrayer();checkDay();return}
+  });
+  $('v2').addEventListener('change',function(e){var id=e.target.id,pm=PM();
+    if(id==='prlead'){pm.lead=parseInt(e.target.value,10)}else if(id==='prmeth'){pm.method=e.target.value}else if(id==='prasr'){pm.asr=parseInt(e.target.value,10)}else if(id==='prday'){S.dayMode=e.target.value}else return;
+    save();PS.open=true;checkDay();renderPrayer()});
+
   // ---------- Voice counting (sound-burst detection, works offline) ----------
   var V={on:false,ctx:null,stream:null,an:null,buf:null,timer:null,env:0,floor:0.01,inWord:false,start:0,lastCount:0,t0:0,cal:0,calN:0};
   function sensFactor(){return (S.sens||5)/5}
@@ -1092,6 +1280,8 @@ function makeDet(){
   function applyTheme(){var t=S.theme==='dark'?'dark':'light';document.documentElement.setAttribute('data-theme',t);$('themeBtn').textContent=t==='dark'?'☀️':'🌙';var m=document.querySelector('meta[name=theme-color]');if(m)m.setAttribute('content',t==='dark'?'#0a1612':'#f8f4ea')}
   $('themeBtn').onclick=function(){S.theme=S.theme==='dark'?'light':'dark';save();applyTheme()};
   load();if(!S.vm2){S.vmode='any';S.vm2=1;save()}
+  today=dayKey();
+  try{if(navigator.permissions&&navigator.permissions.query)navigator.permissions.query({name:'geolocation'}).then(function(r){if(r.state==='granted')getLoc(true)}).catch(function(){})}catch(e){}
   applyTheme();window.__ex=1;render();setWake();showTab('h');
 })();
 </script>
