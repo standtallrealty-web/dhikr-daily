@@ -206,6 +206,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   .qsay{margin-top:14px;padding:12px 12px 10px;border-radius:14px;background:rgba(127,127,127,.09);text-align:center}.qsay b{display:block;font-size:12px;letter-spacing:.5px;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
   .qsar{font-size:20px;line-height:2;color:var(--arab)}.qstr{font-size:13.5px;font-style:italic;color:var(--muted);margin:0 0 4px}.qsen{font-size:14px;line-height:1.5;color:var(--text);margin:4px 0}.qsrf{font-size:11.5px;color:var(--muted);margin-top:4px}
   details.qclose{margin-top:10px;text-align:center}details.qclose summary{font-size:13px;color:var(--muted);cursor:pointer}details.qclose[open]{padding-top:4px}
+.syncst{text-align:center;font-size:12.5px;color:var(--muted);margin:12px 0 0;padding:6px;cursor:pointer}
   .qcv{font-size:11px;color:var(--muted);margin-top:12px}
   .qcard .qar{font-size:21px;line-height:2}.qcard .qen{font-size:14.5px}.qcard details.qset{margin-top:12px;border-top:1px solid var(--line);padding-top:10px;text-align:left}.qcard summary{font-size:14px;font-weight:600;color:var(--text)}
   .qcard .set{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0}.qcard select{background:var(--inset2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px}
@@ -314,7 +315,8 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     if(!S||typeof S!=='object')S=JSON.parse(JSON.stringify(DEF));
     if(!S.days)S.days={};if(!S.target)S.target=10000;}
   var mem=false;
-  function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+  var _noTs=false;
+  function save(){try{if(!_noTs)S.ts=Math.max(Date.now(),(S.ts||0)+1);localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(!_noTs)syncQ()}
   function key(d){d=d||new Date();var m=d.getMonth()+1,dd=d.getDate();return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(dd<10?'0':'')+dd}
   var today=key();
   function tgt(){return S.target}
@@ -346,7 +348,8 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
       var showPrev=pe.n>0||sel===pk;
       var h='<button data-pick="cur" class="'+(sel===today?'on':'')+'"><small>Today\'s target'+(S.dayMode==='midnight'?'':' · from Maghrib')+'</small><b>'+dlabel(today)+'</b><span>'+fmt(ce.n)+' done'+(ce.n>=tt?' ✓':' · '+fmt(tt-ce.n)+' left')+'</span></button>';
       if(showPrev)h='<button data-pick="'+pk+'" class="'+(sel===pk?'on':'')+'"><small>Yesterday\'s target · '+(pe.n>=tt?'complete':'incomplete')+'</small><b>'+dlabel(pk)+' · '+fmt(tt)+'</b><span>'+fmt(pe.n)+' done'+(pe.n>=tt?' ✓':' · '+fmt(tt-pe.n)+' pending')+'</span></button>'+h;
-      $('cdsel').innerHTML=h;$('cdsel').style.display=showPrev?'flex':'none'})();
+      else h+='<button data-addprev="1" style="border-style:dashed"><small>Missed yesterday?</small><b>+ Add yesterday\'s count</b><span>'+dlabel(pk)+'</span></button>';
+      $('cdsel').innerHTML=h;$('cdsel').style.display='flex'})();
     $('date').textContent=dnow().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})+(today!==key()?' 🌙':'');
     var st=streak();$('streak').textContent='🔥 '+st+(st===1?' day':' days')+' streak';
     // last 7 days
@@ -451,7 +454,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   $('p10').onclick=function(){add(10)};
   $('p100').onclick=function(){add(100)};
   $('p1k').onclick=function(){add(1000)};
-  $('cdsel').onclick=function(e){var b=e.target.closest('[data-pick]');if(!b)return;S.pick=b.dataset.pick==='cur'?null:b.dataset.pick;save();render();renderExtra()};
+  $('cdsel').onclick=function(e){var a=e.target.closest('[data-addprev]');if(a){var pk=pdKey(),v=prompt('How many Astaghfirullah did you complete yesterday ('+dlabel(pk)+')?','');if(v===null)return;v=parseInt(String(v).replace(/[^0-9]/g,''),10);if(!(v>0))return;var e0=S.days[pk]||(S.days[pk]={n:0,t:tgt()});if(e0.n>0&&!confirm('Yesterday already has '+fmt(e0.n)+'. Replace it with '+fmt(v)+'?'))return;e0.n=v;e0.t=tgt();S.pick=pk;save();render();renderExtra();return}var b=e.target.closest('[data-pick]');if(!b)return;S.pick=b.dataset.pick==='cur'?null:b.dataset.pick;save();render();renderExtra()};
   $('setn').onclick=function(){var v=prompt("Enter the Istighfar count so far for "+dlabel(cdKey()),String(cur().n));if(v===null)return;v=parseInt(String(v).replace(/[^0-9]/g,''),10);if(isNaN(v))return;cur().n=Math.max(0,v);save();render();renderExtra()};
     $('target').onchange=function(){var v=parseInt(this.value,10);if(v>0){S.target=v;save();render()}else render()};
   $('vib').onchange=function(){S.vib=this.checked;save()};
@@ -890,7 +893,8 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     });
     var have=DL.count>0;
     h+='<div class="hcard" style="cursor:default"><div class="hrow"><span>📥 Use without internet</span><small>'+(have?'✓ '+DL.count+' files · '+(DL.bytes/1048576).toFixed(1)+' MB':'Not downloaded')+'</small></div><div class="hs" style="margin:8px 0;line-height:1.5">The app itself already opens offline. Download the audio once (about 20 to 30 MB) to listen and learn offline. '+arabicVoiceInfo()+'. Counting by voice needs internet; offline it counts any sound.</div><div style="display:flex;gap:8px"><button class="aud big" data-act="dlall" style="flex:1">'+(DL.busy?'Downloading…':(have?'📥 Update download':'📥 Download audio'))+'</button>'+(have?'<button class="rst" data-act="dlclear" style="padding:0 14px;border:1px solid var(--line);background:none;color:#c9d9d2;border-radius:12px">Delete</button>':'')+'</div><div class="astat" id="dlstat" style="margin-top:8px">'+DL.msg+'</div></div>';
-    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v34</div><div style="text-align:center;margin:6px 0 14px"><button id="updbtn" style="background:none;border:1px solid var(--line);color:var(--acc);border-radius:16px;padding:8px 16px;font-size:13px">🔄 Update app</button></div>';
+    h+='<div id="syncst" class="syncst">'+(SY&&SY.st?SY.st.replace(/</g,'&lt;'):'☁ Sync · tap to sync now')+'</div>';
+    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v36</div><div style="text-align:center;margin:6px 0 14px"><button id="updbtn" style="background:none;border:1px solid var(--line);color:var(--acc);border-radius:16px;padding:8px 16px;font-size:13px">🔄 Update app</button></div>';
     v.innerHTML=h;
   }
   function aBar(){
@@ -1444,7 +1448,7 @@ function makeDet(){
     $('lkpad').innerHTML=pad;$('lkav').textContent=PROFS[PID].n.charAt(0);$('lkname').textContent=PROFS[PID].n;
     function dots(bad){var d=$('lkdots').children;for(var i=0;i<4;i++)d[i].className=i<buf.length?'f':'';if(bad){$('lkdots').classList.add('bad');setTimeout(function(){$('lkdots').classList.remove('bad')},320)}}
     function check(){
-      if(h53('dhikr|'+PID+'|'+buf,7)===PROFS[PID].ph){try{sessionStorage.setItem('unl',PID)}catch(e){}$('lock').style.display='none';buf='';dots();setTimeout(maybeQuote,300);return}
+      if(h53('dhikr|'+PID+'|'+buf,7)===PROFS[PID].ph){try{sessionStorage.setItem('unl',PID)}catch(e){}startSync(buf);$('lock').style.display='none';buf='';dots();setTimeout(maybeQuote,300);return}
       fails++;buf='';dots(true);
       if(fails>=5){until=Date.now()+30000;fails=0;$('lkmsg').textContent='Too many tries. Wait 30 seconds.'}else $('lkmsg').textContent='Wrong PIN, try again';
     }
@@ -1456,6 +1460,53 @@ function makeDet(){
     });
     $('lkswitch').onclick=function(){var o=PID==='k'?'h':'k';try{sessionStorage.removeItem('unl');localStorage.setItem('dhikr_profile',o)}catch(e){}location.reload()};
   })();
+
+  // ---------- Online sync (per person, PIN-protected) ----------
+  var SY={busy:false,pushAt:0,timer:null,st:'',dirty:false,stopped:false};
+  function tokKey(){return'dhikr_tok_'+PID}
+  function getTok(){try{return localStorage.getItem(tokKey())||''}catch(e){return''}}
+  function sha256hex(t){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)).then(function(b){return Array.prototype.map.call(new Uint8Array(b),function(x){return('0'+x.toString(16)).slice(-2)}).join('')})}
+  function startSync(pin){try{sha256hex('dhikr-sync|'+PID+'|'+pin).then(function(t){try{localStorage.setItem(tokKey(),t)}catch(e){}SY.stopped=false;syncNow()}).catch(function(){})}catch(e){}}
+  function syncUI(m){SY.st=m;var e=document.getElementById('syncst');if(e)e.textContent=m}
+  function hhmm(){var d=new Date(),h=d.getHours(),m=d.getMinutes();return(h%12||12)+':'+(m<10?'0':'')+m+' '+(h<12?'AM':'PM')}
+  function syncQ(){if(!SY||!getTok())return;SY.dirty=true;if(SY.timer)return;var w=Math.max(4000,60000-(Date.now()-SY.pushAt));SY.timer=setTimeout(function(){SY.timer=null;syncNow()},w)}
+  function syncPayload(){var d=JSON.parse(JSON.stringify(S));delete d.qseen;return d}
+  function syncApply(m,ts){m.days=m.days||{};if(!m.target)m.target=10000;m.sync=1;m.qseen=S.qseen;m.ts=ts;_noTs=true;S=m;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}_noTs=false;today=dayKey();applyTheme();render();renderExtra()}
+  function syncDecide(rm){
+    if(!rm){S.sync=1;return'push'}
+    var rd=rm.data||{};
+    if(!S.sync){
+      try{localStorage.setItem(KEY+'_bk',JSON.stringify(S))}catch(e){}
+      var m=JSON.parse(JSON.stringify(rd));m.days=m.days||{};
+      Object.keys(S.days).forEach(function(k){var a=S.days[k],b=m.days[k];if(a&&(!b||a.n>b.n))m.days[k]=a});
+      syncApply(m,Math.max(rm.ts+1,Date.now()));return'push'}
+    if(rm.ts>(S.ts||0)){syncApply(JSON.parse(JSON.stringify(rd)),rm.ts);return'pulled'}
+    if((S.ts||0)>rm.ts)return'push';
+    return'none'}
+  function syncPush(){
+    SY.pushAt=Date.now();var sent=S.ts||Date.now();if(!S.ts)S.ts=sent;
+    return fetch('/api/sync?p='+PID,{method:'PUT',headers:{'x-tok':getTok(),'content-type':'application/json'},body:JSON.stringify({ts:sent,data:syncPayload()}),keepalive:true}).then(function(r){
+      if(r.status===409)return r.json().then(function(rm){syncApply(rm.data||{},rm.ts)});
+      if(r.status===401){SY.stopped=true;throw'auth'}
+      if(r.status===429)throw'locked';
+      if(!r.ok)throw'srv';
+      if((S.ts||0)>sent)SY.dirty=true})}
+  function syncNow(){
+    var tok=getTok();if(!tok||SY.busy||SY.stopped)return;
+    try{if(sessionStorage.getItem('unl')!==PID)return}catch(e){}
+    if(!navigator.onLine){syncUI('☁ Offline · will sync when online');return}
+    SY.busy=true;SY.dirty=false;syncUI('☁ Syncing…');
+    fetch('/api/sync?p='+PID,{headers:{'x-tok':tok},cache:'no-store'}).then(function(r){
+      if(r.status===401){SY.stopped=true;throw'auth'}
+      if(r.status===429)throw'locked';
+      if(r.status===204)return null;
+      if(!r.ok)throw'srv';
+      return r.json()}).then(function(rm){var a=syncDecide(rm);return a==='push'?syncPush():0}).then(function(){syncUI('☁ Synced · '+hhmm()+' · tap to sync now')}).catch(function(e){
+      syncUI(e==='auth'?'☁ Sync paused. Tap “Not you? Switch person” and enter the PIN again.':e==='locked'?'☁ Too many wrong tries. Try again in 15 minutes.':'☁ Sync problem · tap to retry')}).then(function(){SY.busy=false;if(SY.dirty)syncQ()})}
+  document.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('#syncst')){SY.stopped=false;SY.pushAt=0;syncNow()}});
+  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')syncNow();else if(SY.dirty&&getTok()){SY.pushAt=0;syncNow()}});
+  window.addEventListener('online',function(){syncNow()});
+  setInterval(function(){if(document.visibilityState==='visible')syncNow()},60000);
   function applyTheme(){var t=S.theme==='dark'?'dark':'light';document.documentElement.setAttribute('data-theme',t);$('themeBtn').textContent=t==='dark'?'☀️':'🌙';var m=document.querySelector('meta[name=theme-color]');if(m)m.setAttribute('content',t==='dark'?'#0a1612':'#f8f4ea')}
   $('themeBtn').onclick=function(){S.theme=S.theme==='dark'?'light':'dark';save();applyTheme()};
   load();if(!S.vm2){S.vmode='any';S.vm2=1;save()}
@@ -1464,6 +1515,8 @@ function makeDet(){
   if(PID==='k'&&!S.r3400){var d21=S.days['2026-11-21']||(S.days['2026-11-21']={n:0,t:10000});if(d21.n<3400)d21.n=3400;d21.t=10000;S.r3400=1;save()}
   if(!S.t10){if(S.target===20000)S.target=10000;Object.keys(S.days).forEach(function(k){if(S.days[k]&&S.days[k].t===20000)S.days[k].t=10000});S.t10=1;save()}
   try{if(navigator.permissions&&navigator.permissions.query)navigator.permissions.query({name:'geolocation'}).then(function(r){if(r.state==='granted')getLoc(true)}).catch(function(){})}catch(e){}
+  try{if(!getTok()&&sessionStorage.getItem('unl')===PID){sessionStorage.removeItem('unl');$('lock').style.display=''}}catch(e){}
+  setTimeout(syncNow,900);
   applyTheme();window.__ex=1;render();setWake();showTab('h');
 })();
 </script>

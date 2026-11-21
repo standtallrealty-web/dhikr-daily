@@ -1,4 +1,4 @@
-var C='dhikr-v34',F='dhikr-fonts';
+var C='dhikr-v36',F='dhikr-fonts';
 self.addEventListener('install',function(e){
   self.skipWaiting();
   e.waitUntil(caches.open(C).then(function(c){
@@ -15,6 +15,7 @@ self.addEventListener('fetch',function(e){
       return m||fetch(r).then(function(res){if(res&&(res.ok||res.type==='opaque'))c.put(r,res.clone());return res}).catch(function(){return m})})}));
     return;
   }
+  if(u.pathname.indexOf('/api/')===0)return;
   // Only handle our own pages/files. Never touch audio or API requests to other sites.
   if(r.method!=='GET'||new URL(r.url).origin!==self.location.origin||r.headers.has('range'))return;
   e.respondWith(fetch(r).then(function(res){
