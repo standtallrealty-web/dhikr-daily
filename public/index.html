@@ -198,6 +198,14 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   .cdsel{display:none;gap:8px;margin:2px 0 10px}.cdsel button{flex:1;background:var(--card);border:2px solid var(--line);color:var(--text);border-radius:14px;padding:9px 8px;display:flex;flex-direction:column;gap:2px;text-align:left;touch-action:manipulation}
   .cdsel button.on{border-color:var(--acc);box-shadow:var(--shadow)}.cdsel small{font-size:11px;color:var(--muted);letter-spacing:.3px}.cdsel b{font-size:14px}.cdsel span{font-size:13px;color:var(--acc);font-weight:700}
   #updbar{position:fixed;left:12px;right:12px;top:10px;z-index:200;background:var(--acc);color:var(--ong);padding:13px 14px;border-radius:14px;text-align:center;font-size:15px;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+  #qmodal{display:none;position:fixed;inset:0;z-index:90;background:rgba(20,30,26,.6);align-items:center;justify-content:center;padding:20px}#qmodal.show{display:flex}
+  .qbx{background:var(--card);border-radius:22px;padding:22px 20px;width:100%;max-width:380px;max-height:88vh;overflow:auto;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+  .qbx>small{display:block;color:var(--gold);font-weight:700;letter-spacing:.8px;text-transform:uppercase;font-size:12px;margin-bottom:12px}
+  .qar{font-size:25px;line-height:2.1;color:var(--arab);margin:4px 0 10px}.qen{font-size:16px;line-height:1.55;color:var(--text);margin:6px 0}.qrf{font-size:13px;color:var(--gold);font-weight:600;margin-top:8px}
+  .qbt{display:flex;gap:10px;margin-top:16px}.qbt button{flex:1;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--inset2);color:var(--text);font-size:15px;font-weight:600}.qbt button.pri{background:var(--acc);color:var(--ong);border-color:var(--acc)}
+  .qcv{font-size:11px;color:var(--muted);margin-top:12px}
+  .qcard .qar{font-size:21px;line-height:2}.qcard .qen{font-size:14.5px}.qcard details.qset{margin-top:12px;border-top:1px solid var(--line);padding-top:10px;text-align:left}.qcard summary{font-size:14px;font-weight:600;color:var(--text)}
+  .qcard .set{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0}.qcard select{background:var(--inset2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px}
 </style>
 </head>
 <body>
@@ -280,6 +288,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
 <div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b></div></div>
 <div id="lock"><div class="lk"><div class="lkav" id="lkav"></div><h3 id="lkname"></h3><p id="lkmsg">Enter your 4-digit PIN</p><div class="dots" id="lkdots"><i></i><i></i><i></i><i></i></div><div class="pad" id="lkpad"></div><button class="lkalt" id="lkswitch">Not you? Switch person</button></div></div>
 <script>try{if(sessionStorage.getItem('unl')===(localStorage.getItem('dhikr_profile')||'k'))document.getElementById('lock').style.display='none'}catch(e){}</script>
+<div id="qmodal"></div>
 <div id="profov"><div class="bx"><h3>Who is reading?</h3><p>Each person has their own count, streak and history. Nothing is shared.</p><div id="proflist"></div><button class="cl" id="profcl">Close</button></div></div>
 <nav class="bottomnav">
   <button id="nav_h" class="act"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg><span>Today</span></button>
@@ -868,6 +877,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   function renderHome(){
     var v=$('v2'),h='<div class="hello">Assalamu alaikum, '+PROFS[PID].n+'</div><div class="hsub">What would you like to do today? Tap a section to begin.</div>';
     var np0=nextPrayer(new Date());h+='<div class="hcard" data-go="p"><div class="hrow"><span>🕌 Next prayer</span><small id="hnext">'+np0.n+' '+fm(np0.t)+' · in '+dur(np0.t-Date.now())+'</small></div></div>';
+    h+=qCard();
     ['i','t','m','e','s','b','d'].forEach(function(c){
       var d,t,p,lab;
       if(c==='i'){var n=cur().n;p=Math.min(1,n/tgt());lab=fmt(n)+' / '+fmt(tgt());var pe0=S.days[pdKey()];if(pe0&&pe0.n>0&&pe0.n<tgt())lab+=' · previous day pending '+fmt(tgt()-pe0.n)}
@@ -877,7 +887,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     });
     var have=DL.count>0;
     h+='<div class="hcard" style="cursor:default"><div class="hrow"><span>📥 Use without internet</span><small>'+(have?'✓ '+DL.count+' files · '+(DL.bytes/1048576).toFixed(1)+' MB':'Not downloaded')+'</small></div><div class="hs" style="margin:8px 0;line-height:1.5">The app itself already opens offline. Download the audio once (about 20 to 30 MB) to listen and learn offline. '+arabicVoiceInfo()+'. Counting by voice needs internet; offline it counts any sound.</div><div style="display:flex;gap:8px"><button class="aud big" data-act="dlall" style="flex:1">'+(DL.busy?'Downloading…':(have?'📥 Update download':'📥 Download audio'))+'</button>'+(have?'<button class="rst" data-act="dlclear" style="padding:0 14px;border:1px solid var(--line);background:none;color:#c9d9d2;border-radius:12px">Delete</button>':'')+'</div><div class="astat" id="dlstat" style="margin-top:8px">'+DL.msg+'</div></div>';
-    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v32</div><div style="text-align:center;margin:6px 0 14px"><button id="updbtn" style="background:none;border:1px solid var(--line);color:var(--acc);border-radius:16px;padding:8px 16px;font-size:13px">🔄 Update app</button></div>';
+    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v33</div><div style="text-align:center;margin:6px 0 14px"><button id="updbtn" style="background:none;border:1px solid var(--line);color:var(--acc);border-radius:16px;padding:8px 16px;font-size:13px">🔄 Update app</button></div>';
     v.innerHTML=h;
   }
   function aBar(){
@@ -1107,6 +1117,127 @@ function distKm(lat,lon){var R=6371,p1=pzR(lat),p2=pzR(KAABA.lat),dp=p2-p1,dl=pz
     if(id==='prlead'){pm.lead=parseInt(e.target.value,10)}else if(id==='prmeth'){pm.method=e.target.value}else if(id==='prasr'){pm.asr=parseInt(e.target.value,10)}else if(id==='prday'){S.dayMode=e.target.value}else return;
     save();PS.open=true;checkDay();renderPrayer()});
 
+var QUOTES=[
+['Q','فَإِنَّ مَعَ الْعُسْرِ يُسْرًا ۝ إِنَّ مَعَ الْعُسْرِ يُسْرًا','Indeed, with hardship comes ease. Indeed, with hardship comes ease.',"Qur'an 94:5–6"],
+['Q','لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا','Allah does not burden a soul beyond what it can bear.',"Qur'an 2:286"],
+['Q','أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ','Truly, in the remembrance of Allah do hearts find rest.',"Qur'an 13:28"],
+['Q','وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ مَخْرَجًا ۝ وَيَرْزُقْهُ مِنْ حَيْثُ لَا يَحْتَسِبُ','Whoever fears Allah, He makes a way out for him and provides for him from where he never expected.',"Qur'an 65:2–3"],
+['Q','وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ','Whoever relies on Allah, He is enough for him.',"Qur'an 65:3"],
+['Q','فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ','Remember Me and I will remember you. Be grateful to Me and do not be ungrateful.',"Qur'an 2:152"],
+['Q','لَئِن شَكَرْتُمْ لَأَزِيدَنَّكُمْ','If you are grateful, I will surely give you more.',"Qur'an 14:7"],
+['Q','قُلْ يَا عِبَادِيَ الَّذِينَ أَسْرَفُوا عَلَىٰ أَنفُسِهِمْ لَا تَقْنَطُوا مِن رَّحْمَةِ اللَّهِ ۚ إِنَّ اللَّهَ يَغْفِرُ الذُّنُوبَ جَمِيعًا','Say: O My servants who have wronged themselves, do not lose hope in the mercy of Allah. Allah forgives all sins.',"Qur'an 39:53"],
+['Q','وَلَا تَهِنُوا وَلَا تَحْزَنُوا وَأَنتُمُ الْأَعْلَوْنَ إِن كُنتُم مُّؤْمِنِينَ','Do not weaken and do not grieve, for you will be the higher if you are believers.',"Qur'an 3:139"],
+['Q','يَا أَيُّهَا الَّذِينَ آمَنُوا اسْتَعِينُوا بِالصَّبْرِ وَالصَّلَاةِ ۚ إِنَّ اللَّهَ مَعَ الصَّابِرِينَ','O you who believe, seek help through patience and prayer. Indeed, Allah is with the patient.',"Qur'an 2:153"],
+['Q','وَإِذَا سَأَلَكَ عِبَادِي عَنِّي فَإِنِّي قَرِيبٌ ۖ أُجِيبُ دَعْوَةَ الدَّاعِ إِذَا دَعَانِ','When My servants ask you about Me, I am near. I answer the call of the caller when he calls on Me.',"Qur'an 2:186"],
+['Q','وَقَالَ رَبُّكُمُ ادْعُونِي أَسْتَجِبْ لَكُمْ','Your Lord says: Call upon Me, I will respond to you.',"Qur'an 40:60"],
+['Q','فَمَن يَعْمَلْ مِثْقَالَ ذَرَّةٍ خَيْرًا يَرَهُ ۝ وَمَن يَعْمَلْ مِثْقَالَ ذَرَّةٍ شَرًّا يَرَهُ','Whoever does an atom’s weight of good will see it, and whoever does an atom’s weight of evil will see it.',"Qur'an 99:7–8"],
+['Q','إِنَّ أَكْرَمَكُمْ عِندَ اللَّهِ أَتْقَاكُمْ','The most honoured of you in the sight of Allah is the one with the most taqwa (God-consciousness).',"Qur'an 49:13"],
+['Q','فَإِذَا عَزَمْتَ فَتَوَكَّلْ عَلَى اللَّهِ ۚ إِنَّ اللَّهَ يُحِبُّ الْمُتَوَكِّلِينَ','When you have made a decision, put your trust in Allah. Allah loves those who trust in Him.',"Qur'an 3:159"],
+['Q','وَالَّذِينَ جَاهَدُوا فِينَا لَنَهْدِيَنَّهُمْ سُبُلَنَا ۚ وَإِنَّ اللَّهَ لَمَعَ الْمُحْسِنِينَ','Those who strive for Us, We will guide them to Our ways. Indeed, Allah is with the doers of good.',"Qur'an 29:69"],
+['Q','فَإِذَا فَرَغْتَ فَانصَبْ ۝ وَإِلَىٰ رَبِّكَ فَارْغَب','When you are free, strive on, and turn to your Lord with longing.',"Qur'an 94:7–8"],
+['Q','يَا أَيُّهَا الَّذِينَ آمَنُوا اذْكُرُوا اللَّهَ ذِكْرًا كَثِيرًا','O you who believe, remember Allah with much remembrance.',"Qur'an 33:41"],
+['Q','وَمَا خَلَقْتُ الْجِنَّ وَالْإِنسَ إِلَّا لِيَعْبُدُونِ','I did not create jinn and mankind except to worship Me.',"Qur'an 51:56"],
+['Q','وَعَسَىٰ أَن تَكْرَهُوا شَيْئًا وَهُوَ خَيْرٌ لَّكُمْ ۖ وَعَسَىٰ أَن تُحِبُّوا شَيْئًا وَهُوَ شَرٌّ لَّكُمْ ۗ وَاللَّهُ يَعْلَمُ وَأَنتُمْ لَا تَعْلَمُونَ','You may dislike something that is good for you, and love something that is bad for you. Allah knows and you do not know.',"Qur'an 2:216"],
+['Q','وَتَعَاوَنُوا عَلَى الْبِرِّ وَالتَّقْوَىٰ ۖ وَلَا تَعَاوَنُوا عَلَى الْإِثْمِ وَالْعُدْوَانِ','Help one another in righteousness and piety, and do not help one another in sin and aggression.',"Qur'an 5:2"],
+['Q','وَلَا تَسْتَوِي الْحَسَنَةُ وَلَا السَّيِّئَةُ ۚ ادْفَعْ بِالَّتِي هِيَ أَحْسَنُ فَإِذَا الَّذِي بَيْنَكَ وَبَيْنَهُ عَدَاوَةٌ كَأَنَّهُ وَلِيٌّ حَمِيمٌ','Good and evil are not equal. Repel evil with what is better, and the one you had enmity with may become like a close friend.',"Qur'an 41:34"],
+['Q','وَالْعَصْرِ ۝ إِنَّ الْإِنسَانَ لَفِي خُسْرٍ ۝ إِلَّا الَّذِينَ آمَنُوا وَعَمِلُوا الصَّالِحَاتِ وَتَوَاصَوْا بِالْحَقِّ وَتَوَاصَوْا بِالصَّبْرِ','By time, mankind is in loss, except those who believe, do good deeds, and advise each other to truth and to patience.',"Qur'an 103:1–3"],
+['Q','فَقُلْتُ اسْتَغْفِرُوا رَبَّكُمْ إِنَّهُ كَانَ غَفَّارًا','I said: Seek forgiveness from your Lord. Indeed, He is Ever-Forgiving.',"Qur'an 71:10"],
+['Q','وَمَن يَعْمَلْ سُوءًا أَوْ يَظْلِمْ نَفْسَهُ ثُمَّ يَسْتَغْفِرِ اللَّهَ يَجِدِ اللَّهَ غَفُورًا رَّحِيمًا','Whoever does wrong or wrongs himself, then asks Allah’s forgiveness, will find Allah Forgiving and Merciful.',"Qur'an 4:110"],
+['Q','وَهُوَ مَعَكُمْ أَيْنَ مَا كُنتُمْ','He is with you wherever you are.',"Qur'an 57:4"],
+['Q','إِنَّ اللَّهَ مَعَ الَّذِينَ اتَّقَوا وَّالَّذِينَ هُم مُّحْسِنُونَ','Indeed, Allah is with those who fear Him and those who do good.',"Qur'an 16:128"],
+['Q','حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ','Allah is enough for us, and He is the best disposer of affairs.',"Qur'an 3:173"],
+['Q','وَقُل رَّبِّ زِدْنِي عِلْمًا','And say: My Lord, increase me in knowledge.',"Qur'an 20:114"],
+['Q','رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ','Our Lord, give us good in this world and good in the hereafter, and protect us from the punishment of the Fire.',"Qur'an 2:201"],
+['Q','رَبَّنَا ظَلَمْنَا أَنفُسَنَا وَإِن لَّمْ تَغْفِرْ لَنَا وَتَرْحَمْنَا لَنَكُونَنَّ مِنَ الْخَاسِرِينَ','Our Lord, we have wronged ourselves. If You do not forgive us and have mercy on us, we will surely be among the losers.',"Qur'an 7:23"],
+['Q','لَا إِلَٰهَ إِلَّا أَنتَ سُبْحَانَكَ إِنِّي كُنتُ مِنَ الظَّالِمِينَ','There is no god but You, glory be to You. Indeed, I have been among the wrongdoers.',"Qur'an 21:87"],
+['H','إِنَّمَا الْأَعْمَالُ بِالنِّيَّاتِ، وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى','Actions are judged by intentions, and each person will have what they intended.','Sahih al-Bukhari 1; Sahih Muslim 1907'],
+['H','الدِّينُ النَّصِيحَةُ','The religion is sincere advice and well-wishing.','Sahih Muslim 55'],
+['H','لَا يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لِأَخِيهِ مَا يُحِبُّ لِنَفْسِهِ','None of you truly believes until he loves for his brother what he loves for himself.','Sahih al-Bukhari 13; Sahih Muslim 45'],
+['H','مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الْآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ','Whoever believes in Allah and the Last Day, let him speak good or keep silent.','Sahih al-Bukhari 6018; Sahih Muslim 47'],
+['H','','A Muslim is the one from whose tongue and hand other Muslims are safe.','Sahih al-Bukhari 10; Sahih Muslim 40'],
+['H','','Whoever treads a path seeking knowledge, Allah makes easy for him a path to Paradise.','Sahih Muslim 2699'],
+['H','','The strong believer is better and more beloved to Allah than the weak believer, though both are good. Strive for what benefits you, seek Allah’s help, and do not give up.','Sahih Muslim 2664'],
+['H','','How wonderful is the affair of the believer: all of it is good. If something good happens to him he is grateful, and if harm touches him he is patient, and that is good for him.','Sahih Muslim 2999'],
+['H','أَحَبُّ الْأَعْمَالِ إِلَى اللَّهِ أَدْوَمُهَا وَإِنْ قَلَّ','The most beloved deeds to Allah are the most consistent, even if small.','Sahih al-Bukhari 6464; Sahih Muslim 783'],
+['H','','Two blessings many people lose: health and free time.','Sahih al-Bukhari 6412'],
+['H','','Be in this world as if you were a stranger or a traveller.','Sahih al-Bukhari 6416'],
+['H','خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ','The best of you are those who learn the Qur’an and teach it.','Sahih al-Bukhari 5027'],
+['H','','Whoever says “SubhanAllahi wa bihamdihi” one hundred times in a day, his sins are forgiven even if they are like the foam of the sea.','Sahih al-Bukhari 6405; Sahih Muslim 2691'],
+['H','كَلِمَتَانِ خَفِيفَتَانِ عَلَى اللِّسَانِ، ثَقِيلَتَانِ فِي الْمِيزَانِ، حَبِيبَتَانِ إِلَى الرَّحْمَنِ: سُبْحَانَ اللَّهِ وَبِحَمْدِهِ، سُبْحَانَ اللَّهِ الْعَظِيمِ','Two words are light on the tongue, heavy on the scale, and beloved to the Most Merciful: SubhanAllahi wa bihamdihi, SubhanAllahil-Azim.','Sahih al-Bukhari 6406; Sahih Muslim 2694'],
+['H','','By Allah, I ask Allah’s forgiveness and turn to Him in repentance more than seventy times every day.','Sahih al-Bukhari 6307'],
+['H','','O people, turn in repentance to Allah, for I turn to Him a hundred times every day.','Sahih Muslim 2702'],
+['H','','Whoever prays Fajr is under the protection of Allah.','Sahih Muslim 657'],
+['H','','The two rak‘ahs of Fajr are better than this world and everything in it.','Sahih Muslim 725'],
+['H','','Whoever prays the two cool prayers (Fajr and Asr) will enter Paradise.','Sahih al-Bukhari 574; Sahih Muslim 635'],
+['H','الطُّهُورُ شَطْرُ الْإِيمَانِ','Purity is half of faith, and “Alhamdulillah” fills the scale.','Sahih Muslim 223'],
+['H','','Whoever guides to good will have a reward like the one who does it.','Sahih Muslim 1893'],
+['H','','Allah does not look at your appearance or your wealth, but He looks at your hearts and your deeds.','Sahih Muslim 2564'],
+['H','','Beware of suspicion, for suspicion is the most false of speech.','Sahih al-Bukhari 6064; Sahih Muslim 2563'],
+['H','','Make things easy and do not make them hard; give good news and do not drive people away.','Sahih al-Bukhari 69; Sahih Muslim 1734'],
+['H','مَنْ لَا يَرْحَمْ لَا يُرْحَمْ','He who does not show mercy will not be shown mercy.','Sahih al-Bukhari 6013; Sahih Muslim 2318'],
+['H','لَا تَغْضَبْ','A man asked for advice. The Prophet ﷺ said: “Do not get angry.” He repeated it several times.','Sahih al-Bukhari 6116'],
+['H','','The strong person is not the one who wrestles others, but the one who controls himself when angry.','Sahih al-Bukhari 6114; Sahih Muslim 2609'],
+['H','','Whoever says “La ilaha illallahu wahdahu la sharika lah, lahul-mulku wa lahul-hamd, wa huwa ala kulli shay’in qadir” one hundred times in a day gets the reward of freeing ten slaves, and one hundred good deeds are written for him.','Sahih al-Bukhari 3293; Sahih Muslim 2691'],
+['H','','Allah says: I am as My servant expects Me to be, and I am with him when he remembers Me.','Sahih al-Bukhari 7405; Sahih Muslim 2675 (Hadith Qudsi)'],
+['H','','Allah says: O son of Adam, as long as you call on Me and hope in Me, I forgive you whatever you have done, and I do not mind.','Tirmidhi 3540 (hasan, al-Albani) (Hadith Qudsi)'],
+['H','','Charity does not decrease wealth, and Allah increases a servant in honour when he forgives.','Sahih Muslim 2588'],
+['H','','Allah is pleased with a servant who eats a meal and praises Him for it, or drinks a drink and praises Him for it.','Sahih Muslim 2734'],
+['H','الْكَلِمَةُ الطَّيِّبَةُ صَدَقَةٌ','A good word is charity.','Sahih al-Bukhari 2989; Sahih Muslim 1009'],
+['H','','There is a piece of flesh in the body: if it is sound, the whole body is sound, and if it is corrupt, the whole body is corrupt. It is the heart.','Sahih al-Bukhari 52; Sahih Muslim 1599'],
+['H','','Leave what makes you doubt for what does not make you doubt.','Tirmidhi 2518 (sahih, al-Albani)'],
+['H','','Part of the excellence of a person’s Islam is leaving what does not concern him.','Tirmidhi 2317 (sahih, al-Albani)'],
+['H','','Do not belittle any good deed, even meeting your brother with a cheerful face.','Sahih Muslim 2626'],
+['H','','Whoever seeks to be independent, Allah makes him independent; whoever is patient, Allah grants him patience. No one is given a better or wider gift than patience.','Sahih al-Bukhari 1469; Sahih Muslim 1053'],
+['H','','No fatigue, illness, worry, sadness, harm or distress befalls a Muslim, not even a thorn prick, except that Allah forgives some of his sins through it.','Sahih al-Bukhari 5641; Sahih Muslim 2573'],
+['H','','Whoever calls to guidance will have a reward like the rewards of those who follow him, without that reducing their rewards at all.','Sahih Muslim 2674'],
+['H','','Whoever goes to the masjid morning or evening, Allah prepares for him a place in Paradise every time he goes.','Sahih al-Bukhari 662; Sahih Muslim 669'],
+['H','','The best of you are the best to their families, and I am the best of you to my family.','Tirmidhi 3895 (sahih, al-Albani)'],
+['H','','Whoever does not thank people does not thank Allah.','Abu Dawud 4811; Tirmidhi 1954 (sahih, al-Albani)'],
+['H','الدُّعَاءُ هُوَ الْعِبَادَةُ','Supplication (dua) is worship.','Abu Dawud 1479; Tirmidhi 3372 (sahih, al-Albani)'],
+['H','تَبَسُّمُكَ فِي وَجْهِ أَخِيكَ صَدَقَةٌ','Your smile in the face of your brother is charity.','Tirmidhi 1956 (sahih, al-Albani)'],
+['H','','Take advantage of five before five: your youth before old age, your health before illness, your wealth before poverty, your free time before you are busy, and your life before your death.','al-Hakim, al-Mustadrak (sahih, al-Albani)']
+];
+
+  // ---------- Daily reminder (Qur'an / hadith) ----------
+  function qDate(d){d=d||new Date();return key(d)}
+  function qIdx(d){d=d||new Date();var n=Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/864e5)+(PID==='h'?11:0)+((S.qs&&S.qs[qDate(d)])||0);return((n%QUOTES.length)+QUOTES.length)%QUOTES.length}
+  function qOf(d){return QUOTES[qIdx(d)]}
+  function qText(q){return(q[1]?q[1]+'\n':'')+q[2]+'\n— '+q[3]}
+  function qBody(q){return(q[1]?'<div class="qar">'+q[1]+'</div>':'')+'<div class="qen">'+q[2]+'</div><div class="qrf">'+(q[0]==='Q'?'📖 ':'📜 ')+q[3]+'</div>'}
+  function qShare(q){var t=qText(q)+'\n\nDhikr Daily';if(navigator.share){navigator.share({text:t}).catch(function(){})}else window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank')}
+  function qModal(){
+    var q=qOf(),m=$('qmodal');
+    m.innerHTML='<div class="qbx"><small>🌅 Today’s reminder</small>'+qBody(q)+'<div class="qbt"><button data-qa="share">Share</button><button data-qa="close" class="pri">Alhamdulillah ✓</button></div><div class="qcv">Please verify wording and references against a trusted printed source.</div></div>';
+    m.classList.add('show')}
+  function maybeQuote(){var k=qDate();if(S&&S.qseen!==k&&$('lock').style.display==='none'){S.qseen=k;save();qModal()}}
+  function qCard(){
+    var q=qOf(),on=S.qon;
+    return '<div class="hcard qcard"><div class="hrow"><span>💡 Today’s reminder</span></div>'+qBody(q)+'<div class="qbt"><button data-qa="share">Share</button><button data-qa="more">Show another</button></div>'
+      +'<details class="qset"><summary>🔔 Daily reminder notification</summary><div class="set"><span>Time</span><select id="qtsel">'+[['fajr','15 min after Fajr'],['6','6:00 AM'],['7','7:00 AM'],['8','8:00 AM']].map(function(o){return'<option value="'+o[0]+'"'+((S.qt||'fajr')===o[0]?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></div>'
+      +'<div class="set"><span>Notify while app is open</span><button class="tgl'+(on?' on':'')+'" data-qa="notif">'+(on?'ON':'OFF')+'</button></div>'
+      +'<div class="note">To get it even when the app is closed, add the next 60 days to your phone calendar. Each morning your phone shows that day’s reminder as a notification.</div>'
+      +'<button class="bigbtn" data-qa="ics">📅 Add daily reminders to calendar (60 days)</button></details></div>'}
+  function qTime(d){var t=S.qt||'fajr';if(t==='fajr')return PTd(d).fajr+15*6e4;return new Date(d.getFullYear(),d.getMonth(),d.getDate(),parseInt(t,10),0,0).getTime()}
+  function icsEsc(t){return String(t).replace(/\\/g,'\\\\').replace(/;/g,'\;').replace(/,/g,'\\,').replace(/\n/g,'\\n').replace(/[’‘]/g,"'").replace(/[“”]/g,'"').replace(/[–—]/g,'-').replace(/ﷺ/g,'(peace be upon him)').replace(/[^\x20-\x7E]/g,'')}
+  function icsFold(l){var o=[];while(l.length>70){o.push(l.slice(0,70));l=' '+l.slice(70)}o.push(l);return o.join('\r\n')}
+  function buildQuoteIcs(){
+    var now=new Date(),o=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Dhikr Daily//Reminders//EN','CALSCALE:GREGORIAN','X-WR-CALNAME:Daily reminder'];
+    function p2(n){return n<10?'0'+n:''+n}
+    function z(t){var d=new Date(t);return d.getUTCFullYear()+p2(d.getUTCMonth()+1)+p2(d.getUTCDate())+'T'+p2(d.getUTCHours())+p2(d.getUTCMinutes())+'00Z'}
+    for(var i=0;i<60;i++){var dd=new Date(now.getFullYear(),now.getMonth(),now.getDate()+i),q=qOf(dd),s=Math.round(qTime(dd)/6e4)*6e4;
+      [ 'BEGIN:VEVENT','UID:dhikr-q-'+key(dd)+'-'+PID+'@standtallrealty','DTSTAMP:'+z(Date.now()),'DTSTART:'+z(s),'DTEND:'+z(s+10*6e4),'SUMMARY:'+icsEsc('Daily reminder: '+q[3]),'DESCRIPTION:'+icsEsc(q[2]+'\n- '+q[3]),'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+icsEsc(q[2]),'TRIGGER:PT0M','END:VALARM','END:VEVENT'].forEach(function(l){o.push(icsFold(l))})}
+    o.push('END:VCALENDAR');return o.join('\r\n')}
+  setInterval(function(){if(!S||!S.qon)return;var n=new Date(),t=qTime(n),id='q'+key(n);if(n.getTime()>=t&&n.getTime()<t+120000&&!FIRED[id]){FIRED[id]=1;var q=qOf(n);notifyNow('💡 Today’s reminder',q[2]+' — '+q[3])}},15000);
+  document.addEventListener('click',function(e){
+    var b=e.target.closest&&e.target.closest('[data-qa]');if(!b)return;var a=b.dataset.qa;
+    if(a==='close'){$('qmodal').classList.remove('show');return}
+    if(a==='share'){qShare(qOf());return}
+    if(a==='more'){if(!S.qs)S.qs={};S.qs[qDate()]=(S.qs[qDate()]||0)+1;save();if($('qmodal').classList.contains('show'))qModal();else renderAd();return}
+    if(a==='notif'){if(S.qon){S.qon=false;save();renderAd()}else if(window.Notification){Notification.requestPermission().then(function(r){if(r==='granted'){S.qon=true;save();notifyNow('Daily reminder is on','You will get today’s reminder at the chosen time.')}renderAd()})}return}
+    if(a==='ics'){var bl=new Blob([buildQuoteIcs()],{type:'text/calendar'}),u=URL.createObjectURL(bl),k=document.createElement('a');k.href=u;k.download='daily-reminders.ics';document.body.appendChild(k);k.click();k.remove();setTimeout(function(){URL.revokeObjectURL(u)},4000)}
+  });
+  $('v2').addEventListener('change',function(e){if(e.target.id==='qtsel'){S.qt=e.target.value;save()}});
+
   // ---------- Voice counting (sound-burst detection, works offline) ----------
   var V={on:false,ctx:null,stream:null,an:null,buf:null,timer:null,env:0,floor:0.01,inWord:false,start:0,lastCount:0,t0:0,cal:0,calN:0};
   function sensFactor(){return (S.sens||5)/5}
@@ -1298,7 +1429,7 @@ function makeDet(){
     $('lkpad').innerHTML=pad;$('lkav').textContent=PROFS[PID].n.charAt(0);$('lkname').textContent=PROFS[PID].n;
     function dots(bad){var d=$('lkdots').children;for(var i=0;i<4;i++)d[i].className=i<buf.length?'f':'';if(bad){$('lkdots').classList.add('bad');setTimeout(function(){$('lkdots').classList.remove('bad')},320)}}
     function check(){
-      if(h53('dhikr|'+PID+'|'+buf,7)===PROFS[PID].ph){try{sessionStorage.setItem('unl',PID)}catch(e){}$('lock').style.display='none';buf='';dots();return}
+      if(h53('dhikr|'+PID+'|'+buf,7)===PROFS[PID].ph){try{sessionStorage.setItem('unl',PID)}catch(e){}$('lock').style.display='none';buf='';dots();setTimeout(maybeQuote,300);return}
       fails++;buf='';dots(true);
       if(fails>=5){until=Date.now()+30000;fails=0;$('lkmsg').textContent='Too many tries. Wait 30 seconds.'}else $('lkmsg').textContent='Wrong PIN, try again';
     }
@@ -1314,6 +1445,7 @@ function makeDet(){
   $('themeBtn').onclick=function(){S.theme=S.theme==='dark'?'light':'dark';save();applyTheme()};
   load();if(!S.vm2){S.vmode='any';S.vm2=1;save()}
   today=dayKey();
+  setTimeout(maybeQuote,700);
   if(PID==='k'&&!S.r3400){var d21=S.days['2026-11-21']||(S.days['2026-11-21']={n:0,t:10000});if(d21.n<3400)d21.n=3400;d21.t=10000;S.r3400=1;save()}
   if(!S.t10){if(S.target===20000)S.target=10000;Object.keys(S.days).forEach(function(k){if(S.days[k]&&S.days[k].t===20000)S.days[k].t=10000});S.t10=1;save()}
   try{if(navigator.permissions&&navigator.permissions.query)navigator.permissions.query({name:'geolocation'}).then(function(r){if(r.state==='granted')getLoc(true)}).catch(function(){})}catch(e){}

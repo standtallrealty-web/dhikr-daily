@@ -1,4 +1,4 @@
-var C='dhikr-v32',F='dhikr-fonts';
+var C='dhikr-v33',F='dhikr-fonts';
 self.addEventListener('install',function(e){
   self.skipWaiting();
   e.waitUntil(caches.open(C).then(function(c){
