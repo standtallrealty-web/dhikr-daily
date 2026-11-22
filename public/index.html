@@ -296,6 +296,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     <div class="set"><span>Daily target</span><input id="target" type="number" min="1" step="100"></div>
     <div class="set"><span>Vibrate on tap</span><input id="vib" type="checkbox"></div>
     <div class="set"><span>Keep screen on</span><input id="wake" type="checkbox"></div>
+    <div class="set" id="updrow" style="display:none"><span>App update<br><small style="color:var(--muted)">The app also checks by itself each time it opens</small></span><button id="updchk" style="padding:8px 12px">Check now</button></div>
     <div class="set"><span>Reader voice</span><select id="vsel" style="max-width:150px;background:#0f1f1a;color:#f3f1e7;border:1px solid var(--line);border-radius:8px;padding:6px"></select></div>
     <div class="set"><span>Test the voice</span><button id="vtest" style="padding:8px 12px">▶ Play sample</button></div>
     <div class="set"><span>Show English letters</span><input id="trtog" type="checkbox"></div>
@@ -933,7 +934,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     var have=DL.count>0;
     h+='<div class="hcard" style="cursor:default"><div class="hrow"><span>📥 Use without internet</span><small>'+(have?'✓ '+DL.count+' files · '+(DL.bytes/1048576).toFixed(1)+' MB':'Not downloaded')+'</small></div><div class="hs" style="margin:8px 0;line-height:1.5">The app itself already opens offline. Download the audio once (about 20 to 30 MB) to listen and learn offline. '+arabicVoiceInfo()+'. Counting by voice needs internet; offline it counts any sound.</div><div style="display:flex;gap:8px"><button class="aud big" data-act="dlall" style="flex:1">'+(DL.busy?'Downloading…':(have?'📥 Update download':'📥 Download audio'))+'</button>'+(have?'<button class="rst" data-act="dlclear" style="padding:0 14px;border:1px solid var(--line);background:none;color:#c9d9d2;border-radius:12px">Delete</button>':'')+'</div><div class="astat" id="dlstat" style="margin-top:8px">'+DL.msg+'</div></div>';
     h+='<div id="syncst" class="syncst">'+(SY&&SY.st?SY.st.replace(/</g,'&lt;'):'☁ Sync · tap to sync now')+'</div>';
-    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v47</div><div style="text-align:center;margin:6px 0 14px"><button id="updbtn" style="background:none;border:1px solid var(--line);color:var(--acc);border-radius:16px;padding:8px 16px;font-size:13px">🔄 Update app</button></div>';
+    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v48</div><div style="text-align:center;margin:6px 0 14px"><button id="updbtn" style="background:none;border:1px solid var(--line);color:var(--acc);border-radius:16px;padding:8px 16px;font-size:13px">🔄 Update app</button></div>';
     v.innerHTML=h;
   }
   function aBar(){
@@ -997,6 +998,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   $('goalrow').addEventListener('click',function(e){var b=e.target.closest('[data-goal]');if(b)setGoal(b.dataset.goal)});
   $('goalset').onclick=function(){var i=$('goalin');setGoal(i.value);i.value=''};
   $('abar1').addEventListener('click',function(e){var b=e.target.closest('[data-ta]');if(b)showTab(b.dataset.ta)});
+  if(window.AndroidAdhan){$('updrow').style.display='';$('updchk').onclick=function(){try{AndroidAdhan.checkUpdate()}catch(e){}}}
   var lastA='m';
   function showTab(t){
     stopPlay();tab=t;

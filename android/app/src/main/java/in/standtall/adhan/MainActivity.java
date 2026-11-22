@@ -32,6 +32,9 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.util.ArrayList;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.util.Date;
 import org.json.JSONObject;
 
@@ -155,6 +158,7 @@ public class MainActivity extends Activity {
             }
         });
         wv.loadUrl(URL);
+        checkUpdate(false);
     }
 
     @Override
@@ -183,6 +187,82 @@ public class MainActivity extends Activity {
         }
     }
 
+
+    // ---------- in-app update ----------
+    private long dlId = -1;
+    private android.content.BroadcastReceiver dlRx;
+
+    private void checkUpdate(final boolean manual) {
+        new Thread(new Runnable() { @Override public void run() {
+            try {
+                HttpURLConnection c = (HttpURLConnection) new java.net.URL(URL + "version.json?t=" + System.currentTimeMillis()).openConnection();
+                c.setConnectTimeout(8000); c.setReadTimeout(8000);
+                BufferedReader r = new BufferedReader(new InputStreamReader(c.getInputStream()));
+                StringBuilder sb = new StringBuilder(); String ln;
+                while ((ln = r.readLine()) != null) sb.append(ln);
+                r.close();
+                JSONObject o = new JSONObject(sb.toString());
+                final int code = o.getInt("code");
+                final String name = o.optString("name", "");
+                final String apk = o.getString("apk");
+                int mine = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
+                if (code > mine) {
+                    runOnUiThread(new Runnable() { @Override public void run() { askUpdate(name, apk); } });
+                } else if (manual) {
+                    runOnUiThread(new Runnable() { @Override public void run() { Toast.makeText(MainActivity.this, "You have the latest version (" + VERSION + ")", Toast.LENGTH_LONG).show(); } });
+                }
+            } catch (Exception e) {
+                if (manual) runOnUiThread(new Runnable() { @Override public void run() { Toast.makeText(MainActivity.this, "Could not check for updates. Check your internet.", Toast.LENGTH_LONG).show(); } });
+            }
+        }}).start();
+    }
+
+    private void askUpdate(String name, final String apk) {
+        if (isFinishing()) return;
+        new android.app.AlertDialog.Builder(this)
+            .setTitle("Update available")
+            .setMessage("A new version of Dhikr Daily (" + name + ") is ready. Your counts and settings are kept.")
+            .setPositiveButton("Update now", new android.content.DialogInterface.OnClickListener() { @Override public void onClick(android.content.DialogInterface d, int w) { startDownload(apk); } })
+            .setNegativeButton("Later", null).show();
+    }
+
+    private void startDownload(String apk) {
+        if (Build.VERSION.SDK_INT >= 26 && !getPackageManager().canRequestPackageInstalls()) {
+            Toast.makeText(this, "Allow \"Install unknown apps\" for Dhikr Daily, then come back and tap Update again.", Toast.LENGTH_LONG).show();
+            try { startActivity(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:" + getPackageName()))); } catch (Exception e) { }
+            return;
+        }
+        try {
+            android.app.DownloadManager dm = (android.app.DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+            android.app.DownloadManager.Request rq = new android.app.DownloadManager.Request(Uri.parse(URL + apk));
+            rq.setTitle("Dhikr Daily update");
+            rq.setMimeType("application/vnd.android.package-archive");
+            rq.setNotificationVisibility(android.app.DownloadManager.Request.VISIBILITY_VISIBLE);
+            rq.setDestinationInExternalFilesDir(this, null, "update.apk");
+            java.io.File old = new java.io.File(getExternalFilesDir(null), "update.apk");
+            if (old.exists()) old.delete();
+            dlId = dm.enqueue(rq);
+            Toast.makeText(this, "Downloading update…", Toast.LENGTH_LONG).show();
+            if (dlRx == null) {
+                dlRx = new android.content.BroadcastReceiver() { @Override public void onReceive(Context c, Intent i) {
+                    long id = i.getLongExtra(android.app.DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+                    if (id != dlId) return;
+                    try {
+                        android.app.DownloadManager m = (android.app.DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+                        Uri u = m.getUriForDownloadedFile(id);
+                        if (u == null) { Toast.makeText(MainActivity.this, "Update download failed. Try again.", Toast.LENGTH_LONG).show(); return; }
+                        Intent in = new Intent(Intent.ACTION_VIEW);
+                        in.setDataAndType(u, "application/vnd.android.package-archive");
+                        in.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(in);
+                    } catch (Exception e) { Toast.makeText(MainActivity.this, "Could not open the installer.", Toast.LENGTH_LONG).show(); }
+                }};
+                if (Build.VERSION.SDK_INT >= 33) registerReceiver(dlRx, new android.content.IntentFilter(android.app.DownloadManager.ACTION_DOWNLOAD_COMPLETE), Context.RECEIVER_EXPORTED);
+                else registerReceiver(dlRx, new android.content.IntentFilter(android.app.DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+            }
+        } catch (Exception e) { Toast.makeText(this, "Could not start the download.", Toast.LENGTH_LONG).show(); }
+    }
+
     @Override
     public void onBackPressed() {
         if (wv != null && wv.canGoBack()) wv.goBack(); else super.onBackPressed();
@@ -190,6 +270,7 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        try { if (dlRx != null) unregisterReceiver(dlRx); } catch (Exception e) { }
         destroySr();
         super.onDestroy();
     }
@@ -350,6 +431,9 @@ public class MainActivity extends Activity {
                 else v.vibrate(d);
             } catch (Exception e) { }
         }
+
+        @JavascriptInterface
+        public void checkUpdate() { runOnUiThread(new Runnable() { @Override public void run() { MainActivity.this.checkUpdate(true); } }); }
 
         @JavascriptInterface
         public void keepAwake(final boolean on) {
