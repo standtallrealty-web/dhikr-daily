@@ -41,7 +41,7 @@ import org.json.JSONObject;
 public class MainActivity extends Activity {
     static final String HOST = "dhikr-daily.standtallrealty.workers.dev";
     static final String URL = "https://" + HOST + "/";
-    static final String VERSION = "2.0";
+    static final String VERSION = "2.3";
 
     private WebView wv;
     private PermissionRequest pendingWebPerm;
