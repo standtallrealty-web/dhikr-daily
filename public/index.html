@@ -926,7 +926,7 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
   function renderHome(){
     var v=$('v2'),h='<div class="hello">Assalamu alaikum, '+PROFS[PID].n+'</div><div class="hsub">Your daily dhikr. Tap a card to begin.</div>';
     var np0=nextPrayer(new Date());h+='<div class="hcard" data-go="p"><div class="hrow"><span>🕌 Next prayer</span><small id="hnext">'+np0.n+' '+fm(np0.t)+' · in '+dur(np0.t-Date.now())+'</small></div></div>';
-    h+=qCard();
+    h+='<div class="hcard" data-qa="open"><div class="hrow"><span>💡 Daily reminder</span><small>Tap for a verse or hadith</small></div></div>';
     ['i','m','e','s','b'].forEach(function(c){
       var d,t,p,lab;
       if(c==='i'){var n=cur().n;p=Math.min(1,n/tgt());lab=fmt(n)+' / '+fmt(tgt());var pe0=S.days[pdKey()];if(pe0&&pe0.n>0&&pe0.n<tgt())lab+=' · previous day pending '+fmt(tgt()-pe0.n)}
@@ -946,11 +946,12 @@ window.onerror=function(m,u,l){try{var d=document.createElement('div');d.setAttr
     rescue();
     var v=$('v2'),h='<div class="hello">More</div><div class="hsub">Settings, progress and backup</div>';
     h+='<div class="hcard" style="cursor:default"><div class="hrow"><span>👤 '+PROFS[PID].n+'</span><small>This phone</small></div><button class="bigbtn" data-more="prof">Switch person</button></div>';
+    var qs0=qCard(),qi0=qs0.indexOf('<details class="qset">');h+='<div class="hcard" style="cursor:default">'+qs0.slice(qi0);
     h+='<div id="slot_prog"></div><div id="slot_set"></div>';
     var have=DL.count>0;
     h+='<div class="hcard" style="cursor:default"><div class="hrow"><span>📥 Use without internet</span><small>'+(have?'✓ '+DL.count+' files · '+(DL.bytes/1048576).toFixed(1)+' MB':'Not downloaded')+'</small></div><div class="hs" style="margin:8px 0;line-height:1.5">The app itself already opens offline. Download the audio once (about 20 to 30 MB) to listen and learn offline. '+arabicVoiceInfo()+'. Counting by voice needs internet; offline it counts any sound.</div><div style="display:flex;gap:8px"><button class="aud big" data-act="dlall" style="flex:1">'+(DL.busy?'Downloading…':(have?'📥 Update download':'📥 Download audio'))+'</button>'+(have?'<button class="rst" data-act="dlclear" style="padding:0 14px;border:1px solid var(--line);background:none;color:#c9d9d2;border-radius:12px">Delete</button>':'')+'</div><div class="astat" id="dlstat" style="margin-top:8px">'+DL.msg+'</div></div>';
     h+='<div id="syncst" class="syncst">'+(SY&&SY.st?SY.st.replace(/</g,'&lt;'):'☁ Sync · tap to sync now')+'</div>';
-    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v49</div><div style="text-align:center;margin:6px 0 14px"><button id="updbtn" style="background:none;border:1px solid var(--line);color:var(--acc);border-radius:16px;padding:8px 16px;font-size:13px">🔄 Refresh app</button></div>';
+    h+='<div class="powered" style="margin-top:14px">Powered by <b>Stand Tall Realty</b> · v50</div><div style="text-align:center;margin:6px 0 14px"><button id="updbtn" style="background:none;border:1px solid var(--line);color:var(--acc);border-radius:16px;padding:8px 16px;font-size:13px">🔄 Refresh app</button></div>';
     v.innerHTML=h;
     $('slot_prog').appendChild($('progpanel'));$('slot_prog').appendChild($('total'));$('slot_set').appendChild($('setpanel'));
     $('setpanel').querySelector('details').open=true;renderExtra();
@@ -1321,11 +1322,15 @@ var QUOTES=[
     return '<div class="qsay"><b>'+x.h+'</b>'+(x.ar?'<div class="qsar">'+x.ar+'</div>':'')+(x.tr?'<div class="qstr">'+x.tr+'</div>':'')+'<div class="qsen">'+x.en+'</div>'+(x.rf?'<div class="qsrf">'+x.rf+'</div>':'')+'</div>'
     +'<details class="qclose"><summary>When you finish reading (optional)</summary><div class="qsar">سُبْحَانَكَ اللَّهُمَّ وَبِحَمْدِكَ، أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا أَنْتَ، أَسْتَغْفِرُكَ وَأَتُوبُ إِلَيْكَ</div><div class="qstr">Subḥānaka Allāhumma wa bi-ḥamdika, ash-hadu an lā ilāha illā anta, astaghfiruka wa atūbu ilayk.</div><div class="qsen">Glory and praise to You, O Allah. I bear witness that none has the right to be worshipped but You. I seek Your forgiveness and turn to You in repentance.</div><div class="qsrf">Aisha (RA): the Prophet ﷺ ended a gathering, a Qur’an recitation or a prayer with these words. Nasa’i, ‘Amal al-Yawm wal-Layla 308; al-Albani, Silsila Sahiha 3164; also Tirmidhi 3433.</div></details>'}
   function qShare(q){var t=qText(q)+'\n\nDhikr Daily';if(navigator.share){navigator.share({text:t}).catch(function(){})}else window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank')}
+  var QI=null;
+  function qNext(){if(!Array.isArray(S.qrot)||S.qrot.length!==QUOTES.length||!(S.qpos>=0)||S.qpos>=QUOTES.length){var a=[],i,j,t;for(i=0;i<QUOTES.length;i++)a.push(i);for(i=a.length-1;i>0;i--){j=Math.floor(Math.random()*(i+1));t=a[i];a[i]=a[j];a[j]=t}if(a[0]===QI&&a.length>1){t=a[0];a[0]=a[1];a[1]=t}S.qrot=a;S.qpos=0}
+    QI=S.qrot[S.qpos];S.qpos++;save();return QI}
   function qModal(){
-    var q=qOf(),m=$('qmodal');
-    m.innerHTML='<div class="qbx"><small>🌅 Today’s reminder</small>'+qBody(q)+qSay(q)+'<div class="qbt"><button data-qa="share">Share</button><button data-qa="close" class="pri">Done ✓</button></div><div class="qcv">Please verify wording and references against a trusted printed source.</div></div>';
+    var q=QUOTES[qNext()],m=$('qmodal');
+    m.innerHTML='<div class="qbx"><small>💡 A reminder for you</small>'+qBody(q)+qSay(q)+'<div class="qbt"><button data-qa="share">Share</button><button data-qa="another">Another</button><button data-qa="close" class="pri">Done ✓</button></div><div class="qcv">Please verify wording and references against a trusted printed source.</div></div>';
     m.classList.add('show')}
-  function maybeQuote(){var k=qDate();if(S&&S.qseen!==k&&$('lock').style.display==='none'){S.qseen=k;save();qModal()}}
+  function maybeQuote(){if(S&&$('lock').style.display==='none'&&!$('profov').classList.contains('show')&&!$('qmodal').classList.contains('show'))qModal()}
+  var _qh=0;document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')_qh=Date.now();else if(_qh&&Date.now()-_qh>20*60000){_qh=0;setTimeout(maybeQuote,500)}});
   function qCard(){
     var q=qOf(),on=S.qon;
     return '<div class="hcard qcard"><div class="hrow"><span>💡 Today’s reminder</span></div>'+qBody(q)+qSay(q)+'<div class="qbt"><button data-qa="share">Share</button><button data-qa="more">Show another</button></div>'
@@ -1347,7 +1352,9 @@ var QUOTES=[
   document.addEventListener('click',function(e){
     var b=e.target.closest&&e.target.closest('[data-qa]');if(!b)return;var a=b.dataset.qa;
     if(a==='close'){$('qmodal').classList.remove('show');return}
-    if(a==='share'){qShare(qOf());return}
+    if(a==='share'){qShare(QI!=null?QUOTES[QI]:qOf());return}
+    if(a==='another'){qModal();return}
+    if(a==='open'){qModal();return}
     if(a==='more'){if(!S.qs)S.qs={};S.qs[qDate()]=(S.qs[qDate()]||0)+1;save();if($('qmodal').classList.contains('show'))qModal();else renderAd();return}
     if(a==='notif'){if(S.qon){S.qon=false;save();renderAd()}else if(window.Notification){Notification.requestPermission().then(function(r){if(r==='granted'){S.qon=true;save();notifyNow('Daily reminder is on','You will get today’s reminder at the chosen time.')}renderAd()})}return}
     if(a==='ics'){var bl=new Blob([buildQuoteIcs()],{type:'text/calendar'}),u=URL.createObjectURL(bl),k=document.createElement('a');k.href=u;k.download='daily-reminders.ics';document.body.appendChild(k);k.click();k.remove();setTimeout(function(){URL.revokeObjectURL(u)},4000)}
