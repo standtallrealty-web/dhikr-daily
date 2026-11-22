@@ -341,6 +341,17 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface
+        public void vibrate(final int ms) {
+            try {
+                android.os.Vibrator v = (android.os.Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                if (v == null) return;
+                int d = Math.max(10, Math.min(ms, 500));
+                if (Build.VERSION.SDK_INT >= 26) v.vibrate(android.os.VibrationEffect.createOneShot(d, android.os.VibrationEffect.DEFAULT_AMPLITUDE));
+                else v.vibrate(d);
+            } catch (Exception e) { }
+        }
+
+        @JavascriptInterface
         public void keepAwake(final boolean on) {
             runOnUiThread(new Runnable() { @Override public void run() {
                 if (on) getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
